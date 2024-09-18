@@ -1,0 +1,23 @@
+body {
+    font-family: Arial;
+}
+
+#searchTextArea {
+    width: 96%;
+    font-family: Arial;
+    resize: none;
+    background-color: #f5f5f5;
+    border-radius: 1em;
+    margin-bottom: 1em;
+    font-size: 1em;
+    padding-top: 1em;
+    padding-left: 1em;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.hoverableElement:hover {
+    background-color: #dbdbdb;
+}

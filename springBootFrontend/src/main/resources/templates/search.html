@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>User Search</title>
+    <link th:href="@{/images/favicon.ico}" rel="icon" type="image/x-icon">
+    <link th:href="@{/styles/search.css}" rel="stylesheet">
+</head>
+
+<body>
+
+    <div style="display: flex; flex-direction: column; padding: 0.5em 1em; border-style: solid; align-items: start;
+    border-top: none; border-left: none; border-right: none; border-color: gray; border-width: 0.01em; padding-bottom: 1.5em;
+    position: absolute; top: 0%; width: 100%;">
+        <h1>Search</h1>
+        <div style="position: relative; width: 100%;">
+            <textarea id="searchTextArea" placeholder="Search..."></textarea>
+            <img id="deleteSearchTextButton" th:src="@{/images/xIcon.png}" style="cursor: pointer; height: 1.5em; width: 1.5em; object-fit: contain;
+            position: absolute; top: 25%; left: 94%; display: hidden;" onclick="deleteSearchText()">
+        </div>
+    </div>
+
+    <div style="height: 71%; position: absolute; top: 25%; width: 100%; padding: 0.5em 1em;">
+
+        <!-- section for recent searches-->
+        <h2 id="recentHeader">Recent</h2>
+        
+        <div id="noRecentSearches" style="display: flex; justify-content: center; align-items: center; height: 90%; width: 98%; display: hidden;">
+            <p style="color:gray; font-weight: bold;">No recent searches.</p>
+        </div>
+
+
+        <div id="recentSearches" style="display: flex; flex-direction: column; align-items: start; height: 86%; width: 98%; display: hidden; gap: 0.35em; overflow-y: scroll;">
+        </div>
+
+        <!-- section for search-results-->
+
+    </div>
+
+    <p id="usernameInURL" style="display: none;" th:text="${username}"></p>
+
+
+    <script th:src="@{/scripts/search.js}"></script>
+</body>
+
+</html>
