@@ -36,6 +36,24 @@
 
         <!-- section for search-results-->
 
+        <h2 id="topicsHeader" class="hidden">Topics</h2>
+
+        <div id="topics" class="hidden" style="display: flex; flex-direction: column; align-items: start; height: 30%; width: 98%; display: hidden; gap: 0.35em; overflow-y: scroll;">
+
+        </div>
+
+        <h2 id="usersHeader" class="hidden">Users</h2>
+
+        <div id="noUsers" class="hidden" style="display: flex; flex-direction: column; justify-content: center;  align-items: center; height: 47%; width: 98%; display: hidden; gap: 0.35em; overflow-y: scroll;">
+            <p style="color:gray; font-weight: bold;">No results found.</p>
+        </div>
+
+        <div id="users" class="hidden" style="display: flex; flex-direction: column; align-items: start; width: 98%; display: hidden; gap: 0.35em;">
+
+        </div>
+
+        
+
     </div>
 
     <p id="usernameInURL" style="display: none;" th:text="${username}"></p>
