@@ -8,6 +8,8 @@ use App\Http\Controllers\BackendController;
 Route::get('/recentSearchesOfUser/{username}', [BackendController::class, 'getRecentSearchesOfUser']);
 Route::post('/addRecentSearch', [BackendController::class, 'addRecentSearch']);
 Route::patch('/editRecentSearch', [BackendController::class, 'editRecentSearch']);
-Route::get('/searchResults/{username}/{searchText}', [BackendController::class, 'getSearchResults']);
+Route::post('/searchResults/{username}/{searchText}', [BackendController::class, 'getSearchResults']);
+Route::delete('/deleteRecentSearch', [BackendController::class, 'deleteRecentSearch']);
+
 
 
