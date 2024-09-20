@@ -8,6 +8,7 @@ const topics = document.getElementById('topics');
 const usersHeader = document.getElementById('usersHeader');
 const noUsers = document.getElementById('noUsers');
 const users = document.getElementById('users');
+const clearAllRecentSearches = document.getElementById('clearAllRecentSearches');
 
 let displayDOMElementsForRecentSearches = true;
 let authenticatedUsername = "";
@@ -15,11 +16,19 @@ let recentSearchesOfUser = [];
 let DOMElementsForRecentSearches = [recentHeader];
 let DOMElementsForSearchResults = [topicsHeader, topics, usersHeader];
 let searchResults = [];
-
+let recentUserSearches = [];
+let recentTopicSearches = [];
+let usersFollowed = [];
+let userBlockings = [];
 
 async function authenticateUser() {
     const username = document.getElementById('usernameInURL').textContent;
     authenticatedUsername = username;
+    fetchRecentSearchesOfAuthenticatedUser();
+    //fetchUsersFollowedByAuthenticatedUser();
+    //fetchUserBlockingsInvolvingAuthenticatedUser();
+
+
     /*
     const response = await fetch('http://localhost:8003/cookies/authenticateUser/'+username, {
                 method: 'GET',
@@ -34,7 +43,7 @@ async function authenticateUser() {
     const isAuth = await response.json();
     if(isAuth) {
         authenticatedUsername = username;
-        await fetchRecentSearchesOfAuthenticatedUser();
+        `fetchRecentSearchesOfAuthenticatedUser();
         return;
     }
     else {
@@ -65,7 +74,7 @@ async function authenticateUser() {
             const isAuth = await response.json();
             if(isAuth) {
                 authenticatedUsername = username;
-                await fetchRecentSearchesOfAuthenticatedUser();
+                fetchRecentSearchesOfAuthenticatedUser();
                 return;
             }
         }
@@ -96,7 +105,7 @@ async function authenticateUser() {
                 const isAuth = await response.json();
                 if(isAuth) {
                     authenticatedUsername = username;
-                    await fetchRecentSearchesOfAuthenticatedUser();
+                    fetchRecentSearchesOfAuthenticatedUser();
                     return;
                 }
                 }
@@ -107,79 +116,30 @@ async function authenticateUser() {
 }
 
 async function fetchRecentSearchesOfAuthenticatedUser() {
-    //code to fetch the recent searches(last 10 searches made in the last week)
-    //the result will be a list of objects, ordered by how recent they are(DATE DESC)
-    /*
-    const response = await fetch('http://localhost:8020/recentSearchesOfUser/'+authenticatedUsername);
+    const response = await fetch('http://localhost:8020/api/recentSearchesOfUser/'+authenticatedUsername);
     if(!response.ok) {
         throw new Error('Network response not ok');
     }
-    const responseData = await response.json();
-    */
-    recentSearchesOfUser = [
-        {
-            date_time_of_search: new Date(),
-            type_of_search: 'text',
-            search: 'apples',
-            search_fullname: null,
-            search_isVerified: null
-        },
-        {
-            date_time_of_search: new Date(),
-            type_of_search: 'text',
-            search: 'How to fly a kite',
-            search_fullname: null,
-            search_isVerified: null
-        },
-        {
-            date_time_of_search: new Date(),
-            type_of_search: 'text',
-            search: 'Tesla Cybertrucks',
-            search_fullname: null,
-            search_isVerified: null
-        },
-        {
-            date_time_of_search: new Date(),
-            type_of_search: 'username',
-            search: 'jb',
-            search_fullname: 'Justin Bieber',
-            search_isVerified: true
-        },
-        {
-            date_time_of_search: new Date(),
-            type_of_search: 'username',
-            search: 'charlieputh',
-            search_fullname: 'Charlie Puth',
-            search_isVerified: true
-        },
-        {
-            date_time_of_search: new Date(),
-            type_of_search: 'username',
-            search: 'packerfan2014',
-            search_fullname: 'SB Soon',
-            search_isVerified: false
-        },
-        {
-            date_time_of_search: new Date(),
-            type_of_search: 'username',
-            search: 'pun_bible',
-            search_fullname: 'Puns 4 Life',
-            search_isVerified: false
-        },
+    recentSearchesOfUser = await response.json();
+    console.log(recentSearchesOfUser);
 
-    ];
     if(recentSearchesOfUser.length==0) {
         noRecentSearches.classList.remove('hidden');
         recentSearches.classList.add('hidden');
+        clearAllRecentSearches.classList.add('hidden');
         DOMElementsForRecentSearches.push(noRecentSearches);
     }
     else {
         noRecentSearches.classList.add('hidden');
         recentSearches.classList.remove('hidden');
+        clearAllRecentSearches.classList.remove('hidden');
         DOMElementsForRecentSearches.push(recentSearches);
+        DOMElementsForRecentSearches.push(clearAllRecentSearches);
 
-        for(let recentSearch of recentSearchesOfUser) {
-            if(recentSearch.type_of_search==='username') {
+        for(let i=0; i<recentSearchesOfUser.length; i++) {
+            const recentSearch = recentSearchesOfUser[i];
+            if(recentSearch.type_of_search==='user') {
+                recentUserSearches.push(recentSearch.search);
                 const newElementDiv = document.createElement('div');
                 newElementDiv.className = 'hoverableElement';
                 newElementDiv.style.width = '95%';
@@ -188,7 +148,8 @@ async function fetchRecentSearchesOfAuthenticatedUser() {
                 newElementDiv.style.display = 'flex';
                 newElementDiv.style.justifyContent = 'start';
                 newElementDiv.style.borderRadius = '1em';
-                newElementDiv.style.padding = '0.5em 1em';
+                newElementDiv.style.padding = '0.5em 1em'
+                newElementDiv.style.position = 'relative';
 
                 const img = document.createElement('img');
                 img.src = '/images/profilePhoto.png';
@@ -203,7 +164,7 @@ async function fetchRecentSearchesOfAuthenticatedUser() {
 
                 const b = document.createElement('b');
                 b.textContent = recentSearch.search;
-                if(recentSearch.search_isVerified) {
+                if(recentSearch.search_isverified) {
                     const verifiedCheckImgElement = document.createElement('img');
                     verifiedCheckImgElement.src = '/images/verifiedCheck.png';
                     verifiedCheckImgElement.style.height = '1.2em';
@@ -218,16 +179,71 @@ async function fetchRecentSearchesOfAuthenticatedUser() {
                 innerDiv.appendChild(b);
                 innerDiv.appendChild(p);
 
+                const deleteRecentSearchIcon = document.createElement('img');
+                deleteRecentSearchIcon.src = '/images/thinGrayXIcon.png';
+                deleteRecentSearchIcon.style.height = '30%';
+                deleteRecentSearchIcon.style.width = '30%';
+                deleteRecentSearchIcon.style.objectFit = 'contain';
+                deleteRecentSearchIcon.style.position = 'absolute';
+                deleteRecentSearchIcon.style.left = '70%';
+                deleteRecentSearchIcon.style.top = '40%';
+                deleteRecentSearchIcon.style.display = 'none';
+                deleteRecentSearchIcon.addEventListener('click', async function(event) {
+                    event.stopPropagation();
+                    const response = await fetch('http://localhost:8020/api/deleteRecentSearch', {
+                        method: 'DELETE',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            username: authenticatedUsername,
+                            type_of_search: 'user',
+                            search: recentSearch.search
+                        })
+                    });
+                    if(!response.ok) {
+                        throw new Error('Network response not ok');
+                    }
+                    recentSearchesOfUser.splice(i,1);
+                    DOMElementsForRecentSearches = [recentHeader];
+                    recentUserSearches = [];
+                    recentTopicSearches = [];
+                    updateUIAfterRemovingRecentSearches();
+                    
+                });
+
+
                 newElementDiv.appendChild(img);
                 newElementDiv.appendChild(innerDiv);
+                newElementDiv.appendChild(deleteRecentSearchIcon);
 
-                newElementDiv.addEventListener('click', function() {
+                newElementDiv.addEventListener('click', async function() {
+                    const response = await fetch('http://localhost:8020/api/editRecentSearch', {
+                        method: 'PATCH',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            username: authenticatedUsername,
+                            type_of_search: 'user',
+                            search: recentSearch.search,
+                            date_time_of_search: new Date()
+                        })
+                    });
+                    if(!response.ok) {
+                        throw new Error('Network response not ok');
+                    }
                     window.location.href = "http://localhost:8019/profilePage/" + authenticatedUsername+"/" + recentSearch.search;
+                });
+
+                newElementDiv.addEventListener('mouseenter', function() {
+                    deleteRecentSearchIcon.style.display = 'inline-block';
+                });
+
+                newElementDiv.addEventListener('mouseleave', function() {
+                    deleteRecentSearchIcon.style.display = 'none';
                 });
 
                 recentSearches.appendChild(newElementDiv);
             }
             else {
+                recentTopicSearches.push(recentSearch.search);
                 const newElementDiv = document.createElement('div');
                 newElementDiv.className = 'hoverableElement';
                 newElementDiv.style.width = '95%';
@@ -238,6 +254,7 @@ async function fetchRecentSearchesOfAuthenticatedUser() {
                 newElementDiv.style.alignItems = 'center';
                 newElementDiv.style.borderRadius = '1em';
                 newElementDiv.style.padding = '0.5em 1em';
+                newElementDiv.style.position = 'relative';
 
                 const img = document.createElement('img');
                 img.src = '/images/searchIcon.png';
@@ -248,11 +265,64 @@ async function fetchRecentSearchesOfAuthenticatedUser() {
                 const p = document.createElement('p');
                 p.textContent = recentSearch.search;
 
+                const deleteRecentSearchIcon = document.createElement('img');
+                deleteRecentSearchIcon.src = '/images/thinGrayXIcon.png';
+                deleteRecentSearchIcon.style.height = '30%';
+                deleteRecentSearchIcon.style.width = '30%';
+                deleteRecentSearchIcon.style.objectFit = 'contain';
+                deleteRecentSearchIcon.style.position = 'absolute';
+                deleteRecentSearchIcon.style.left = '70%';
+                deleteRecentSearchIcon.style.top = '40%';
+                deleteRecentSearchIcon.style.display = 'none';
+                deleteRecentSearchIcon.addEventListener('click', async function(event) {
+                    event.stopPropagation();
+                    const response = await fetch('http://localhost:8020/api/deleteRecentSearch', {
+                        method: 'DELETE',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            username: authenticatedUsername,
+                            type_of_search: 'topic',
+                            search: recentSearch.search
+                        })
+                    });
+                    if(!response.ok) {
+                        throw new Error('Network response not ok');
+                    }
+                    recentSearchesOfUser.splice(i,1);
+                    DOMElementsForRecentSearches = [recentHeader];
+                    recentUserSearches = [];
+                    recentTopicSearches = [];
+                    updateUIAfterRemovingRecentSearches();
+                    
+                });
+
                 newElementDiv.appendChild(img);
                 newElementDiv.appendChild(p);
+                newElementDiv.appendChild(deleteRecentSearchIcon);
 
-                newElementDiv.addEventListener('click', function() {
+                newElementDiv.addEventListener('click', async function() {
+                    const response = await fetch('http://localhost:8020/api/editRecentSearch', {
+                        method: 'PATCH',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            username: authenticatedUsername,
+                            type_of_search: 'topic',
+                            search: recentSearch.search,
+                            date_time_of_search: new Date()
+                        })
+                    });
+                    if(!response.ok) {
+                        throw new Error('Network response not ok');
+                    }
                     window.location.href = "http://localhost:8019/postsMatchingTopic/"+authenticatedUsername+"/" + recentSearch.search;
+                });
+
+                newElementDiv.addEventListener('mouseenter', function() {
+                    deleteRecentSearchIcon.style.display = 'inline-block';
+                });
+
+                newElementDiv.addEventListener('mouseleave', function() {
+                    deleteRecentSearchIcon.style.display = 'none';
                 });
 
                 recentSearches.appendChild(newElementDiv);
@@ -271,7 +341,30 @@ function deleteSearchText() {
         element.classList.add('hidden');
     }
     deleteSearchTextButton.classList.add('hidden');
+
     displayDOMElementsForRecentSearches = true;
+}
+
+async function deleteAllRecentSearches() {
+    const response = await fetch('http://localhost:8020/api/clearAllRecentSearches/'+authenticatedUsername, {
+        method: 'DELETE'
+    });
+    if(!response.ok) {
+        throw new Error('Network response not ok');
+    }
+    DOMElementsForRecentSearches = [recentHeader];
+    recentSearchesOfUser = [];
+    recentUserSearches = [];
+    recentTopicSearches = [];
+    while(recentSearches.firstChild) {
+        recentSearches.removeChild(recentSearches.firstChild);
+    }
+    clearAllRecentSearches.classList.add('hidden');
+    DOMElementsForRecentSearches.push(noRecentSearches);
+    noRecentSearches.classList.remove('hidden');
+    recentSearches.classList.add('hidden');
+
+
 }
 
 
@@ -296,40 +389,48 @@ async function handleInputChange(event) {
             users.removeChild(users.firstChild);
         }
 
-        await fetchSearchResults(value);
+        /*
+        const response = await fetch('http://localhost:8020/api/searchResults/'+authenticatedUsername+'/'+value, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                userBlockings: userBlockings,
+                usersFollowed: usersFollowed,
+                recentUserSearches: recentUserSearches,
+                recentTopicSearches: recentTopicSearches
+            })
+        });
+        if(!response.ok) {
+            throw new Error('Network response not ok');
+        }
+        searchResults = await response.json();
+        if(value in searchResults) {
+            searchResults = searchResults[value];
+        }
+        else {
+            return;
+        }
+        */
+        
+        searchResults = [
+            {
+                search: value,
+                type_of_search: 'user',
+                search_fullname: "FULL NAME",
+                search_isverified: true
+            },
+            {
+                search: value,
+                type_of_search: 'topic',
+                search_fullname: null,
+                search_isverified: null
+            }
+        ];
+
         let displayUsersDiv = false;
 
-        const newElement = document.createElement('div');
-        newElement.className = 'hoverableElement';
-        newElement.style.width = '95%';
-        newElement.style.cursor = 'pointer';
-        newElement.style.height = '5em';
-        newElement.style.display = 'flex';
-        newElement.style.justifyContent = 'start';
-        newElement.style.alignItems = 'center';
-        newElement.style.borderRadius = '1em';
-        newElement.style.padding = '0.5em 1em';
-
-        const newImg = document.createElement('img');
-        newImg.src = '/images/searchIcon.png';
-        newImg.style.height = '85%';
-        newImg.style.width = '7%';
-        newImg.style.objectFit = 'contain';
-
-        const newP = document.createElement('p');
-        newP.textContent = value;
-
-        newElement.appendChild(newImg);
-        newElement.appendChild(newP);
-
-        newElement.addEventListener('click', function() {
-            window.location.href = "http://localhost:8019/postsMatchingTopic/"+authenticatedUsername+"/"+value;
-        });
-
-        topics.appendChild(newElement);
-
         for(let searchResult of searchResults) {
-            if(searchResult.type_of_search==='username') {
+            if(searchResult.type_of_search==='user') {
                 const newElementDiv = document.createElement('div');
                 newElementDiv.className = 'hoverableElement';
                 newElementDiv.style.width = '95%';
@@ -353,7 +454,7 @@ async function handleInputChange(event) {
 
                 const b = document.createElement('b');
                 b.textContent = searchResult.search;
-                if(searchResult.search_isVerified) {
+                if(searchResult.search_isverified) {
                     const verifiedCheckImgElement = document.createElement('img');
                     verifiedCheckImgElement.src = '/images/verifiedCheck.png';
                     verifiedCheckImgElement.style.height = '1.2em';
@@ -371,7 +472,39 @@ async function handleInputChange(event) {
                 newElementDiv.appendChild(img);
                 newElementDiv.appendChild(innerDiv);
 
-                newElementDiv.addEventListener('click', function() {
+                newElementDiv.addEventListener('click', async function() {
+                    if(searchResult.search in recentUserSearches) {
+                        const response = await fetch('http://localhost:8020/api/editRecentSearch', {
+                            method: 'PATCH',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                username: authenticatedUsername,
+                                type_of_search: 'user',
+                                search: searchResult.search,
+                                date_time_of_search: new Date()
+                            })
+                        });
+                        if(!response.ok) {
+                            throw new Error('Network response not ok');
+                        }
+                    }
+                    else {
+                        const response = await fetch('http://localhost:8020/api/addRecentSearch', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                username: authenticatedUsername,
+                                type_of_search: 'user',
+                                search: searchResult.search,
+                                date_time_of_search: new Date(),
+                                search_isverified: searchResult.search_isverified,
+                                search_fullname: searchResult.search_fullname
+                            })
+                        });
+                        if(!response.ok) {
+                            throw new Error('Network response not ok');
+                        }
+                    }
                     window.location.href = "http://localhost:8019/profilePage/"+authenticatedUsername+"/"+searchResult.search;
                 });
 
@@ -402,7 +535,39 @@ async function handleInputChange(event) {
                 newElementDiv.appendChild(img);
                 newElementDiv.appendChild(p);
 
-                newElementDiv.addEventListener('click', function() {
+                newElementDiv.addEventListener('click', async function() {
+                    if(searchResult.search in recentUserSearches) {
+                        const response = await fetch('http://localhost:8020/api/editRecentSearch', {
+                            method: 'PATCH',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                username: authenticatedUsername,
+                                type_of_search: 'topic',
+                                search: searchResult.search,
+                                date_time_of_search: new Date()
+                            })
+                        });
+                        if(!response.ok) {
+                            throw new Error('Network response not ok');
+                        }
+                    }
+                    else {
+                        const response = await fetch('http://localhost:8020/api/addRecentSearch', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({
+                                username: authenticatedUsername,
+                                type_of_search: 'topic',
+                                search: searchResult.search,
+                                date_time_of_search: new Date(),
+                                search_isverified: null,
+                                search_fullname: null
+                            })
+                        });
+                        if(!response.ok) {
+                            throw new Error('Network response not ok');
+                        }
+                    }
                     window.location.href = "http://localhost:8019/postsMatchingTopic/"+authenticatedUsername+"/" + searchResult.search;
                 });
 
@@ -430,47 +595,217 @@ async function handleInputChange(event) {
     }
 }
 
-async function fetchSearchResults(searchText) {
-    /*
-    const response = await fetch('http://localhost:8020/searchResults/'+authenticatedUsername+'/'+searchText);
-    if(!response.ok) {
-        throw new Error('Network response not ok');
+function updateUIAfterRemovingRecentSearches() {
+    while(recentSearches.firstChild) {
+        recentSearches.removeChild(recentSearches.firstChild);
     }
-    searchResults = await response.json();
-    */
-    searchResults = [
-        {
-            date_time_of_search: new Date(),
-            type_of_search: 'text',
-            search: 'How to fly a kite',
-            search_fullname: null,
-            search_isVerified: null
-        },
-        {
-            date_time_of_search: new Date(),
-            type_of_search: 'text',
-            search: 'Tesla Cybertrucks',
-            search_fullname: null,
-            search_isVerified: null
-        },
-        {
-            date_time_of_search: new Date(),
-            type_of_search: 'username',
-            search: 'jb',
-            search_fullname: 'Justin Bieber',
-            search_isVerified: true
-        },
-        {
-            date_time_of_search: new Date(),
-            type_of_search: 'username',
-            search: 'charlieputh',
-            search_fullname: 'Charlie Puth',
-            search_isVerified: true
+    if(recentSearchesOfUser.length==0) {
+        noRecentSearches.classList.remove('hidden');
+        recentSearches.classList.add('hidden');
+        clearAllRecentSearches.classList.add('hidden');
+        DOMElementsForRecentSearches.push(noRecentSearches);
+    }
+    else {
+        noRecentSearches.classList.add('hidden');
+        recentSearches.classList.remove('hidden');
+        clearAllRecentSearches.classList.remove('hidden');
+        DOMElementsForRecentSearches.push(recentSearches);
+        DOMElementsForRecentSearches.push(clearAllRecentSearches);
+
+        for(let i=0; i<recentSearchesOfUser.length; i++) {
+            const recentSearch = recentSearchesOfUser[i];
+            if(recentSearch.type_of_search==='user') {
+                recentUserSearches.push(recentSearch.search);
+                const newElementDiv = document.createElement('div');
+                newElementDiv.className = 'hoverableElement';
+                newElementDiv.style.width = '95%';
+                newElementDiv.style.cursor = 'pointer';
+                newElementDiv.style.height = '5em';
+                newElementDiv.style.display = 'flex';
+                newElementDiv.style.justifyContent = 'start';
+                newElementDiv.style.borderRadius = '1em';
+                newElementDiv.style.padding = '0.5em 1em'
+                newElementDiv.style.position = 'relative';
+
+                const img = document.createElement('img');
+                img.src = '/images/profilePhoto.png';
+                img.style.height = '85%';
+                img.style.width = '7%';
+                img.style.objectFit = 'contain';
+
+                const innerDiv = document.createElement('div');
+                innerDiv.style.display = 'flex';
+                innerDiv.style.flexDirection = 'column';
+                innerDiv.style.alignItems = 'start';
+
+                const b = document.createElement('b');
+                b.textContent = recentSearch.search;
+                if(recentSearch.search_isverified) {
+                    const verifiedCheckImgElement = document.createElement('img');
+                    verifiedCheckImgElement.src = '/images/verifiedCheck.png';
+                    verifiedCheckImgElement.style.height = '1.2em';
+                    verifiedCheckImgElement.style.width = '1.2em';
+                    verifiedCheckImgElement.style.objectFit = 'contain';
+                    b.appendChild(verifiedCheckImgElement);
+                }
+                const p = document.createElement('p');
+                p.style.color = 'gray';
+                p.textContent = recentSearch.search_fullname;
+        
+                innerDiv.appendChild(b);
+                innerDiv.appendChild(p);
+
+                const deleteRecentSearchIcon = document.createElement('img');
+                deleteRecentSearchIcon.src = '/images/thinGrayXIcon.png';
+                deleteRecentSearchIcon.style.height = '30%';
+                deleteRecentSearchIcon.style.width = '30%';
+                deleteRecentSearchIcon.style.objectFit = 'contain';
+                deleteRecentSearchIcon.style.position = 'absolute';
+                deleteRecentSearchIcon.style.left = '70%';
+                deleteRecentSearchIcon.style.top = '40%';
+                deleteRecentSearchIcon.style.display = 'none';
+                deleteRecentSearchIcon.addEventListener('click', async function(event) {
+                    event.stopPropagation();
+                    const response = await fetch('http://localhost:8020/api/deleteRecentSearch', {
+                        method: 'DELETE',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            username: authenticatedUsername,
+                            type_of_search: 'user',
+                            search: recentSearch.search
+                        })
+                    });
+                    if(!response.ok) {
+                        throw new Error('Network response not ok');
+                    }
+                    recentSearchesOfUser.splice(i,1);
+                    DOMElementsForRecentSearches = [recentHeader];
+                    recentUserSearches = [];
+                    recentTopicSearches = [];
+                    updateUIAfterRemovingRecentSearches();
+                    
+                });
+
+
+                newElementDiv.appendChild(img);
+                newElementDiv.appendChild(innerDiv);
+                newElementDiv.appendChild(deleteRecentSearchIcon);
+
+                newElementDiv.addEventListener('click', async function() {
+                    const response = await fetch('http://localhost:8020/api/editRecentSearch', {
+                        method: 'PATCH',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            username: authenticatedUsername,
+                            type_of_search: 'user',
+                            search: recentSearch.search,
+                            date_time_of_search: new Date()
+                        })
+                    });
+                    if(!response.ok) {
+                        throw new Error('Network response not ok');
+                    }
+                    window.location.href = "http://localhost:8019/profilePage/" + authenticatedUsername+"/" + recentSearch.search;
+                });
+
+                newElementDiv.addEventListener('mouseenter', function() {
+                    deleteRecentSearchIcon.style.display = 'inline-block';
+                });
+
+                newElementDiv.addEventListener('mouseleave', function() {
+                    deleteRecentSearchIcon.style.display = 'none';
+                });
+
+                recentSearches.appendChild(newElementDiv);
+            }
+            else {
+                recentTopicSearches.push(recentSearch.search);
+                const newElementDiv = document.createElement('div');
+                newElementDiv.className = 'hoverableElement';
+                newElementDiv.style.width = '95%';
+                newElementDiv.style.cursor = 'pointer';
+                newElementDiv.style.height = '5em';
+                newElementDiv.style.display = 'flex';
+                newElementDiv.style.justifyContent = 'start';
+                newElementDiv.style.alignItems = 'center';
+                newElementDiv.style.borderRadius = '1em';
+                newElementDiv.style.padding = '0.5em 1em';
+                newElementDiv.style.position = 'relative';
+
+                const img = document.createElement('img');
+                img.src = '/images/searchIcon.png';
+                img.style.height = '85%';
+                img.style.width = '7%';
+                img.style.objectFit = 'contain';
+
+                const p = document.createElement('p');
+                p.textContent = recentSearch.search;
+
+                const deleteRecentSearchIcon = document.createElement('img');
+                deleteRecentSearchIcon.src = '/images/thinGrayXIcon.png';
+                deleteRecentSearchIcon.style.height = '30%';
+                deleteRecentSearchIcon.style.width = '30%';
+                deleteRecentSearchIcon.style.objectFit = 'contain';
+                deleteRecentSearchIcon.style.position = 'absolute';
+                deleteRecentSearchIcon.style.left = '70%';
+                deleteRecentSearchIcon.style.top = '40%';
+                deleteRecentSearchIcon.style.display = 'none';
+                deleteRecentSearchIcon.addEventListener('click', async function(event) {
+                    event.stopPropagation();
+                    const response = await fetch('http://localhost:8020/api/deleteRecentSearch', {
+                        method: 'DELETE',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            username: authenticatedUsername,
+                            type_of_search: 'topic',
+                            search: recentSearch.search
+                        })
+                    });
+                    if(!response.ok) {
+                        throw new Error('Network response not ok');
+                    }
+                    recentSearchesOfUser.splice(i,1);
+                    DOMElementsForRecentSearches = [recentHeader];
+                    recentUserSearches = [];
+                    recentTopicSearches = [];
+                    updateUIAfterRemovingRecentSearches();
+                    
+                });
+
+                newElementDiv.appendChild(img);
+                newElementDiv.appendChild(p);
+                newElementDiv.appendChild(deleteRecentSearchIcon);
+
+                newElementDiv.addEventListener('click', async function() {
+                    const response = await fetch('http://localhost:8020/api/editRecentSearch', {
+                        method: 'PATCH',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({
+                            username: authenticatedUsername,
+                            type_of_search: 'topic',
+                            search: recentSearch.search,
+                            date_time_of_search: new Date()
+                        })
+                    });
+                    if(!response.ok) {
+                        throw new Error('Network response not ok');
+                    }
+                    window.location.href = "http://localhost:8019/postsMatchingTopic/"+authenticatedUsername+"/" + recentSearch.search;
+                });
+
+                newElementDiv.addEventListener('mouseenter', function() {
+                    deleteRecentSearchIcon.style.display = 'inline-block';
+                });
+
+                newElementDiv.addEventListener('mouseleave', function() {
+                    deleteRecentSearchIcon.style.display = 'none';
+                });
+
+                recentSearches.appendChild(newElementDiv);
+            }
         }
-    ];
-
+    }
 }
-
 
 textarea.addEventListener('input', handleInputChange);
 authenticateUser();

@@ -17,7 +17,7 @@ class BackendController extends Controller {
 
         $recentSearchesOfUser = RecentSearch::where('username', $username)
         ->orderBy('date_time_of_search', 'desc')
-        ->get();
+        ->get(['type_of_search', 'search', 'search_fullname', 'search_isverified']);
         return response()->json($recentSearchesOfUser, 200);
     }
 
@@ -63,10 +63,6 @@ class BackendController extends Controller {
         
     }
 
-    public function getAllUsers() {
-        return response()->json(MyAppUser::all(), 200);
-    }
-
     public function getSearchResults(Request $request, string $username, string $searchText) {
         $output = [];
 
@@ -105,10 +101,10 @@ class BackendController extends Controller {
                     'search' => $recentSearchesAndTheirCounts[$i]->search,
                     'type_of_search' => 'topic',
                     'search_fullname' => null,
-                    'search_isVerified' => null
+                    'search_isverified' => null
                 ];
             }
-            else {
+            else if(str_starts_with($recentSearchesAndTheirCounts[$i]->search, searchText)) {
                 $searchPopularityMappings[$recentSearchesAndTheirCounts[$i]->type_of_search][$recentSearchesAndTheirCounts[$i]->search] = $i+1;
             }
         }
@@ -122,7 +118,7 @@ class BackendController extends Controller {
                 'search' => $potentialResult->username,
                 'type_of_search' => 'user',
                 'search_fullname' => $potentialResult->fullName,
-                'search_isVerified' => $potentialResult->isVerified,
+                'search_isverified' => $potentialResult->isVerified,
             ];
             if($potentialResult->username==$username) {
                 $exactUserMatch = $userToBeInserted;
@@ -180,10 +176,10 @@ class BackendController extends Controller {
 
 
         $exactTopicMatch = (object) [
-            'search' => $recentTopicSearchesByUser[$i],
+            'search' => searchText,
             'type_of_search' => 'topic',
             'search_fullname' => null,
-            'search_isVerified' => null,
+            'search_isverified' => null,
         ];
 
         $recentlySearchedTopicMatches = [];
@@ -194,7 +190,7 @@ class BackendController extends Controller {
                 'search' => $recentTopicSearchesByUser[$i],
                 'type_of_search' => 'topic',
                 'search_fullname' => null,
-                'search_isVerified' => null,
+                'search_isverified' => null,
             ];
 
             if($recentTopicSearchesByUser[$i]!==searchText && str_starts_with($recentTopicSearchesByUser[$i], searchText)) {
@@ -242,6 +238,17 @@ class BackendController extends Controller {
         ->delete();
         
         return response()->json(['output' => 'successfully deleted!'], 201);
+    }
+
+    public function clearAllRecentSearchesOfUser(Request $request, String $username) {
+        $oneWeekAgo = Carbon::now()->subWeek();
+        RecentSearch::where('date_time_of_search', '<=', $oneWeekAgo)
+        ->delete();
+
+        RecentSearch::where('username', $username)
+        ->delete();
+
+        return response()->json(['output' => 'success!'], 201);
     }
 
 }

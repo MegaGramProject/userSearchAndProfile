@@ -2,7 +2,7 @@
 
 return [
 
-    'paths' => ['/recentSearchesOfUser/*', '/addRecentSearch', '/editRecentSearch', '/searchResults/*/*'],
+    'paths' => ['/api/recentSearchesOfUser/*', '/api/addRecentSearch', '/api/editRecentSearch', '/api/searchResults/*/*', '/api/deleteRecentSearch', '/api/clearAllRecentSearches/*'],
 
     'allowed_methods' => ['*'],
 
