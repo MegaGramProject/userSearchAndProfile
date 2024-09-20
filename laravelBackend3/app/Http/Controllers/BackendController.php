@@ -219,7 +219,7 @@ class BackendController extends Controller {
             $output = [...$recentlySearchedMatches, ...$usersFollowedMatches, ...$usersWithMutualFollowersMatches, ...$top5MostSearchedUserMatches, $exactTopicMatch, ...$recentlySearchedTopicMatches, ...$popularTopics];
         }
 
-        return response()->json($output, 200);
+        return response()->json([$searchText => $output], 200);
     }
 
 
