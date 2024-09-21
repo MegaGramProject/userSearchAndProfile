@@ -5,7 +5,9 @@ use Illuminate\Http\Request;
 use App\Models\RecentSearch;
 use App\Models\MyAppUser;
 use Carbon\Carbon;
-use App\Models\UserFollowings;
+use App\Models\UserFollowing;
+use Illuminate\Support\Facades\DB;
+
 
 class BackendController extends Controller {
 
@@ -88,15 +90,15 @@ class BackendController extends Controller {
         $top5MostSearchedUserMatches = [];
         $mutualFollowerMappings = []; //key: username, value: number of mutual followers with $username
 
-        $recentSearchesAndTheirCounts = RecentSearch::select('type_of_search', 'search')
+        $recentSearchesAndTheirCounts = RecentSearch::select('type_of_search', 'search', DB::raw('COUNT(*) as count'))
         ->groupBy('type_of_search', 'search')
         ->orderBy('count', 'DESC')
         ->get();
-        $searchPopularityMappings = ['user'=> [], 'topic'=>[]];
+        $searchPopularityMappings = ['user'=> []];
         $popularTopics = [];
 
         for($i=0; $i<count($recentSearchesAndTheirCounts); $i++) {
-            if(str_starts_with($recentSearchesAndTheirCounts[$i]->search, searchText) && $recentSearchesAndTheirCounts[$i]->type_of_search=='topic') {
+            if(str_starts_with($recentSearchesAndTheirCounts[$i]->search, $searchText) && $recentSearchesAndTheirCounts[$i]->type_of_search=='topic') {
                 $popularTopics[] = (object) [
                     'search' => $recentSearchesAndTheirCounts[$i]->search,
                     'type_of_search' => 'topic',
@@ -104,8 +106,8 @@ class BackendController extends Controller {
                     'search_isverified' => null
                 ];
             }
-            else if(str_starts_with($recentSearchesAndTheirCounts[$i]->search, searchText)) {
-                $searchPopularityMappings[$recentSearchesAndTheirCounts[$i]->type_of_search][$recentSearchesAndTheirCounts[$i]->search] = $i+1;
+            else if(str_starts_with($recentSearchesAndTheirCounts[$i]->search, $searchText)) {
+                $searchPopularityMappings['user'][$recentSearchesAndTheirCounts[$i]->search] = $i+1;
             }
         }
 
@@ -140,7 +142,7 @@ class BackendController extends Controller {
                 $usersFollowedMatches[] = $userToBeInserted;
             }
             else {
-                $numberOfMutualFollowers = getNumberOfMutualFollowers($usersFollowed, $potentialResult->username);
+                $numberOfMutualFollowers = $this->getNumberOfMutualFollowers($usersFollowed, $potentialResult->username);
                 if($numberOfMutualFollowers>0) {
                     $mutualFollowerMappings[$potentialResult->username] = $numberOfMutualFollowers;
                     $hasUserBeenPlacedYet = false;
@@ -176,7 +178,7 @@ class BackendController extends Controller {
 
 
         $exactTopicMatch = (object) [
-            'search' => searchText,
+            'search' => $searchText,
             'type_of_search' => 'topic',
             'search_fullname' => null,
             'search_isverified' => null,
@@ -193,7 +195,7 @@ class BackendController extends Controller {
                 'search_isverified' => null,
             ];
 
-            if($recentTopicSearchesByUser[$i]!==searchText && str_starts_with($recentTopicSearchesByUser[$i], searchText)) {
+            if($recentTopicSearchesByUser[$i]!==$searchText && str_starts_with($recentTopicSearchesByUser[$i], $searchText)) {
                 $recentlySearchedTopicMatches[] = $topicToBeInserted;
                 $recentlySearchedTopicMatchesJustTheTopics[] = $recentTopicSearchesByUser[$i];
             }
@@ -201,7 +203,7 @@ class BackendController extends Controller {
 
 
         $popularTopics = array_filter($popularTopics, function($popularTopic) {
-            if($popularTopic->search==searchText || in_array($popularTopic, $recentlySearchedTopicMatchesJustTheTopics)) {
+            if($popularTopic->search==$searchText || in_array($popularTopic, $recentlySearchedTopicMatchesJustTheTopics)) {
                 return false;
             }
             return true;
@@ -221,7 +223,7 @@ class BackendController extends Controller {
 
     // Gets number of followers that $username2 has that $username1 follows
     private function getNumberOfMutualFollowers(array $usersFollowedByUsername1, string $username2) {
-        return UserFollowings::where('followee', $username2)
+        return UserFollowing::where('followee', $username2)
             ->whereIn('follower', $usersFollowedByUsername1)
             ->count();
     }

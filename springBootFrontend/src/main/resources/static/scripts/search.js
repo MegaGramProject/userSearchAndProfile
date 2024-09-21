@@ -18,8 +18,8 @@ let DOMElementsForSearchResults = [topicsHeader, topics, usersHeader];
 let searchResults = [];
 let recentUserSearches = [];
 let recentTopicSearches = [];
-let usersFollowed = [];
-let userBlockings = [];
+let usersFollowed = ['rishavry4', 'rishavry5', 'rishavry7', 'rishavry2'];
+let userBlockings = ['rishavry7'];
 
 async function authenticateUser() {
     const username = document.getElementById('usernameInURL').textContent;
@@ -115,13 +115,64 @@ async function authenticateUser() {
             */
 }
 
+async function fetchUsersFollowedByAuthenticatedUser() {
+    const response = await fetch('http://localhost:8013/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            query: `
+            query {
+                getAllUserFollowings(filter: { username: "${authenticatedUsername}" }) {
+                    followee
+                }
+            }
+            `
+            })
+        });
+    if(!response.ok) {
+        throw new Error('Network response not ok');
+    }
+    usersFollowed = await response2.json();
+    usersFollowed = usersFollowed['data']['getAllUserFollowings'];
+    usersFollowed = usersFollowed.filter(userFollowed => userFollowed['followee']!==authenticatedUsername);
+}
+
+async function fetchUserBlockingsInvolvingAuthenticatedUser() {
+    const response = await ('http://localhost:8013/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            query: `
+            query {
+                getAllUserBlockings(filter: { username: "${authenticatedUsername}" }) {
+                    blocker
+                    blockee
+                }
+            }
+            `
+            })
+        });
+    if(!response.ok) {
+        throw new Error('Network response not ok');
+    }
+    userBlockings = await response.json();
+    userBlockings = userBlockings['data']['getAllUserBlockings'];
+    for(let i=0; i<userBlockings.length; i++) {
+        if(userBlockings[i]['blocker']===authenticatedUsername) {
+            userBlockings[i] = userBlockings[i]['blockee'];
+        }
+        else {
+            userBlockings[i] = userBlockings[i]['blocker'];
+        }
+    }
+}
+
 async function fetchRecentSearchesOfAuthenticatedUser() {
     const response = await fetch('http://localhost:8020/api/recentSearchesOfUser/'+authenticatedUsername);
     if(!response.ok) {
         throw new Error('Network response not ok');
     }
     recentSearchesOfUser = await response.json();
-    console.log(recentSearchesOfUser);
 
     if(recentSearchesOfUser.length==0) {
         noRecentSearches.classList.remove('hidden');
@@ -389,7 +440,7 @@ async function handleInputChange(event) {
             users.removeChild(users.firstChild);
         }
 
-        /*
+        
         const response = await fetch('http://localhost:8020/api/searchResults/'+authenticatedUsername+'/'+value, {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -410,22 +461,6 @@ async function handleInputChange(event) {
         else {
             return;
         }
-        */
-        
-        searchResults = [
-            {
-                search: value,
-                type_of_search: 'user',
-                search_fullname: "FULL NAME",
-                search_isverified: true
-            },
-            {
-                search: value,
-                type_of_search: 'topic',
-                search_fullname: null,
-                search_isverified: null
-            }
-        ];
 
         let displayUsersDiv = false;
 
