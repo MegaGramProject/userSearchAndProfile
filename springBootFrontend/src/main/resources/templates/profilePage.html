@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${profileUsername} + '\'s page'"></title>
+    <link th:href="@{/images/favicon.ico}" rel="icon" type="image/x-icon">
+    <link th:href="@{/styles/profilePage.css}" rel="stylesheet">
+</head>
+<body>
+
+    <!--Left sidebar-->
+    <div style="height: 100%; width: 12%; border-style: solid; position: fixed; overflow-y: scroll; border-top: none;
+    border-left: none; border-bottom: none; border-width: 0.01em; border-color: gray; display: flex; flex-direction: column;
+    align-items: start; padding: 0.5em 1em;">
+        <h1 style="font-family: Billabong; font-size:2.4em;">Megagram</h1>
+
+        <div onclick="takeUserHome()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/homeIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Home</p>
+        </div>
+
+        <div onclick="takeUserToSearch()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/searchIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Search</p>
+        </div>
+
+        <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/exploreIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Explore</p>
+        </div>
+
+        <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/reelsIcon.png}" style="object-fit: contain; height: 2.1em; width: 2.1em;">
+            <p>Reels</p>
+        </div>
+
+        <div onclick="takeUserToMessages()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/messagesIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Messages</p>
+        </div>
+
+        <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/blankHeart.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Notifications</p>
+        </div>
+
+        <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/createIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Create</p>
+        </div>
+
+        <div onclick="takeUserToOwnProfile()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/homeIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Profile</p>
+        </div>
+
+        <br></br>
+        <br></br>
+        <br></br>
+        <br></br>
+
+        <div onclick="toggleLeftSidebarPopup()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; height: 7.25em; border-radius: 0.85em; position: relative;">
+            <img th:src="@{/images/moreIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>More</p>
+
+            <div class="hidden" id="leftSidebarPopup" style="background-color: white; border-style: solid; position: absolute;
+            top: -200%; left: -6%; width: 85%; padding: 0.5em 1em; border-radius: 0.85em; overflow-y: scroll">
+                <p style="border-style: solid; border-color: lightgray; border-top: none; border-left: none; border-right: none;">Settings</p>
+                <p style="border-style: solid; border-color: lightgray; border-top: none; border-left: none; border-right: none;">Your Activity</p>
+                <p style="border-style: solid; border-color: lightgray; border-top: none; border-left: none; border-right: none;">Saved</p>
+                <p onclick="takeUserToLogin()" style="border-style: solid; border-color: lightgray; border-top: none; border-left: none; border-right: none;">Switch accounts</p>
+                <p style="border-style: solid; border-color: lightgray; border-top: none; border-left: none; border-right: none;">Log out</p>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!--Main Section-->
+    <div style="margin-left: 14.5%; height: 52em; overflow-y: scroll; background-color: darkgreen; padding: 0.5em 1em;">
+
+    </div>
+
+
+    <p id="authenticatedUsername" style="display: none;" th:text="${authenticatedUsername}"></p>
+    <p id="profileUsername" style="display: none;" th:text="${profileUsername}"></p>
+
+    <script th:src="@{/scripts/profilePage.js}"></script>
+</body>
+
+</html>

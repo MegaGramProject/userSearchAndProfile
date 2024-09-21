@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\DB;
 
 class BackendController extends Controller {
 
-
     public function getRecentSearchesOfUser(string $username) {
         $oneWeekAgo = Carbon::now()->subWeek();
         RecentSearch::where('date_time_of_search', '<=', $oneWeekAgo)
@@ -24,10 +23,6 @@ class BackendController extends Controller {
     }
 
     public function addRecentSearch(Request $request) {
-        $oneWeekAgo = Carbon::now()->subWeek();
-        RecentSearch::where('date_time_of_search', '<=', $oneWeekAgo)
-        ->delete();
-        
         $recentSearchesOfUser = RecentSearch::where('username', $request->input('username'))
         ->orderBy('date_time_of_search', 'asc')
         ->get();
@@ -42,10 +37,6 @@ class BackendController extends Controller {
     }
 
     public function editRecentSearch(Request $request) {
-        $oneWeekAgo = Carbon::now()->subWeek();
-        RecentSearch::where('date_time_of_search', '<=', $oneWeekAgo)
-        ->delete();
-
         $username = $request->input('username');
         $type_of_search = $request->input('type_of_search');
         $search = $request->input('search');
@@ -230,10 +221,6 @@ class BackendController extends Controller {
 
 
     public function deleteRecentSearch(Request $request) {
-        $oneWeekAgo = Carbon::now()->subWeek();
-        RecentSearch::where('date_time_of_search', '<=', $oneWeekAgo)
-        ->delete();
-        
         $recentSearchesOfUser = RecentSearch::where('username', $request->input('username'))
         ->where('type_of_search', $request->input('type_of_search'))
         ->where('search', $request->input('search'))
@@ -243,10 +230,6 @@ class BackendController extends Controller {
     }
 
     public function clearAllRecentSearchesOfUser(Request $request, String $username) {
-        $oneWeekAgo = Carbon::now()->subWeek();
-        RecentSearch::where('date_time_of_search', '<=', $oneWeekAgo)
-        ->delete();
-
         RecentSearch::where('username', $username)
         ->delete();
 

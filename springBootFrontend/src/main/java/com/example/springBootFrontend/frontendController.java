@@ -13,4 +13,11 @@ public class frontendController {
         return "search";
     }
 
+    @GetMapping("/profilePage/{authenticatedUsername}/{profileUsername}")
+    public String profilePage(@PathVariable String authenticatedUsername, @PathVariable String profileUsername, Model model) {
+        model.addAttribute("authenticatedUsername", authenticatedUsername);
+        model.addAttribute("profileUsername", profileUsername);
+        return "profilePage";
+    }
+
 }

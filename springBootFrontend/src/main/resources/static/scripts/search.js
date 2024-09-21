@@ -415,7 +415,10 @@ async function deleteAllRecentSearches() {
     noRecentSearches.classList.remove('hidden');
     recentSearches.classList.add('hidden');
 
+}
 
+function takeUserHome() {
+    window.location.href = "http://localhost:3100/"+authenticatedUsername;
 }
 
 
