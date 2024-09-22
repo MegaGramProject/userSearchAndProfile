@@ -34,7 +34,7 @@
 
         <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/reelsIcon.png}" style="object-fit: contain; height: 2.1em; width: 2.1em;">
+            <img th:src="@{/images/reelsIcon2.png}" style="object-fit: contain; height: 2.1em; width: 2.1em;">
             <p>Reels</p>
         </div>
 
@@ -62,12 +62,9 @@
             <p>Profile</p>
         </div>
 
-        <br></br>
-        <br></br>
-        <br></br>
-        <br></br>
 
-        <div onclick="toggleLeftSidebarPopup()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        <div style="position: relative; height: 90%;">
+            <div onclick="toggleLeftSidebarPopup()" class="hoverableElement" style="position: absolute; top: 90%; display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; height: 7.25em; border-radius: 0.85em; position: relative;">
             <img th:src="@{/images/moreIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
             <p>More</p>
@@ -82,13 +79,441 @@
             </div>
 
         </div>
+        </div>
 
     </div>
 
     <!--Main Section-->
-    <div style="margin-left: 14.5%; height: 52em; overflow-y: scroll; background-color: darkgreen; padding: 0.5em 1em;">
+    <div id="mainSection" style="margin-left: 14.5%; padding: 0.5em 1em; position: relative;
+    display: flex; flex-direction: column; align-items: start; padding-left: 15%;">
+
+        <div style="display: flex; justify-content: center; align-items: center; padding-right: 16%;">
+            <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 9em; width: 9em;">
+            <div style="display: flex; flex-direction: column; align-items: start;">
+                <div style="display: flex; align-items: center;">
+                    <p style="font-size:1.3em;">therock</p>
+                    <img th:src="@{/images/verifiedCheck.png}" style="object-fit: contain; height: 1.7em; width: 1.7em;">
+
+                    <button onclick="toggleFollow()" id="followButton" class="blueButton" type="button" style="margin-left: 2.5em;">Follow</button>
+
+                    <button onclick="toggleFollow()" id="followingButton" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
+                    margin-left: 1.2em; border-radius: 0.4em; font-weight:bold;">Following</button>
+
+                    <button onclick="messageUser()" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
+                    margin-left: 1.2em; border-radius: 0.4em; font-weight:bold;">Message</button>
+
+                    <button id="showSimilarAccountsIcon" onclick="toggleSimilarAccounts()" type="button" style="border-radius: 0.4em; cursor: pointer; margin-left: 1.2em; border-style: none;"> <img th:src="@{/images/showSimilarAccountsIcon.png}" style="object-fit: contain; height: 1.7em; width: 1.7em;"></button>
+                    <button id="showSimilarAccountsIcon2" onclick="toggleSimilarAccounts()" type="button" class="hidden" style="border-radius: 0.4em; cursor: pointer; margin-left: 1.2em; border-style: none;"> <img th:src="@{/images/showSimilarAccountsIcon2.png}" style="object-fit: contain; height: 1.7em; width: 1.7em;"></button>
+                    <img th:src="@{/images/optionsDots.png}" onclick="showOptionsPopup()" style="object-fit: contain; height: 1.7em; width: 1.7em; cursor: pointer; margin-left: 1.2em; border-style: none;">
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 4em;">
+                    <p> <b>7,888</b> posts</p>
+                    <p onclick="showListOfFollowersPopup()" style="cursor: pointer;"> <b>395M</b> followers</p>
+                    <p onclick="showListOfFollowingsPopup()" style="cursor: pointer;"> <b>0</b> following</p>
+                </div>
+
+                <br>
+                <br>
+                
+                <b style="font-size: 0.84em; margin-top: -1em;">Dwayne Johnson</b>
+                <p style="font-size: 0.86em; max-width: 22em;">builder of stuff
+                    cheat meal crusher
+                    tequila sipper
+                    💕og girl dad 💕</p>
+
+                <div style="display: flex; align-items: center; gap: 0.2em;">
+                    <img th:src="@{/images/linkIcon.png}" style="height: 1.2em; width: 1.2em; object-fit: contain;">
+                    <a href="https://therock.komi.io/" style="font-size: 0.85em; font-weight: bold; color: #3a53a6; text-decoration: none;">
+                        therock.komi.io
+                    </a>
+                </div>
+        
+
+                <p onclick="showListOfMutualFollowersPopup()" style="color: #979899; font-size: 0.76em; cursor: pointer;">Followed by <span style="color: black;">ayush_raavi1122</span>, <span style="color: black;">shaunakd7</span> + 55 more</p>
+
+            </div>
+        </div>
+
+        <div id="suggestedAccounts" class="hidden" style="display: flex; flex-direction: column; align-items: start; margin-top: 1.5em; width: 50%;">
+            <div style="display: flex; width: 100%; gap: 28em;">
+                <b>Suggested for you</b>
+                <b style="font-size:0.85em; color:#2789f2; cursor: pointer;">See all</b>
+            </div>
+
+            <br>
+
+            <div style="display: flex; align-items: center; width: 100%; overflow-x: scroll; height: 12em;
+            gap: 1.2em;">
+
+                <div id="suggestedAccountchrishemsworth" style="display: flex; flex-direction: column; justify-content: center; align-items: center; border-style: solid;
+                border-width: 0.01em; border-color: gray; padding: 2.1em 2.4em; font-size: 0.73em; height: 70%; border-radius: 0.3em;
+                position: relative;">
+                    <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 5em; width: 5em; cursor: pointer;">
+                    <div style="display: flex; align-items: center; justify-content: center;">
+                        <b>chrishemsworth</b>
+                        <img th:src="@{/images/verifiedCheck.png}" style="object-fit: contain; height: 1.3em; width: 1.3em;">
+                    </div>
+                    <p>Chris Hemsworth</p>
+                    <button onclick="toggleFollowInPopup('suggestedAccounts', 'chrishemsworth')" id="suggestedAccountsFollowchrishemsworth"
+                    class="blueButton" type="button" style="padding: 0.2em 1em; font-size: 0.96em;">Follow</button>
+                    <button onclick="toggleFollowInPopup('suggestedAccounts', 'chrishemsworth')" id="suggestedAccountsFollowingchrishemsworth" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
+                    border-radius: 0.4em; font-weight:bold;">Following</button>
+                    <img onclick="removeSuggestedAccount('chrishemsworth')" th:src="@{/images/thinGrayXIcon.png}" style="object-fit: contain; height: 1.6em; width: 1.6em; cursor: pointer;
+                    position: absolute; top: 8%; left: 85%;">
+                </div>
+
+                <div id="suggestedAccountjohncena" style="display: flex; flex-direction: column; justify-content: center; align-items: center; border-style: solid;
+                border-width: 0.01em; border-color: gray; padding: 2.1em 2.4em; font-size: 0.73em; height: 70%; border-radius: 0.3em;
+                position: relative;">
+                    <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 5em; width: 5em; cursor: pointer;">
+                    <div style="display: flex; align-items: center; justify-content: center;">
+                        <b>johncena</b>
+                        <img th:src="@{/images/verifiedCheck.png}" style="object-fit: contain; height: 1.3em; width: 1.3em;">
+                    </div>
+                    <p>John Cena</p>
+                    <button onclick="toggleFollowInPopup('suggestedAccounts', 'johncena')" id="suggestedAccountsFollowjohncena"
+                    class="blueButton" type="button" style="padding: 0.2em 1em; font-size: 0.96em;">Follow</button>
+                    <button onclick="toggleFollowInPopup('suggestedAccounts', 'johncena')" id="suggestedAccountsFollowingjohncena" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
+                    border-radius: 0.4em; font-weight:bold;">Following</button>
+                    <img onclick="removeSuggestedAccount('johncena')" th:src="@{/images/thinGrayXIcon.png}" style="object-fit: contain; height: 1.6em; width: 1.6em; cursor: pointer;
+                    position: absolute; top: 8%; left: 85%;">
+                </div>
+
+                <div id="suggestedAccountkevinhart4real" style="display: flex; flex-direction: column; justify-content: center; align-items: center; border-style: solid;
+                border-width: 0.01em; border-color: gray; padding: 2.1em 2.4em; font-size: 0.73em; height: 70%; border-radius: 0.3em;
+                position: relative;">
+                    <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 5em; width: 5em; cursor: pointer;">
+                    <div style="display: flex; align-items: center; justify-content: center;">
+                        <b>kevinhart4real</b>
+                        <img th:src="@{/images/verifiedCheck.png}" style="object-fit: contain; height: 1.3em; width: 1.3em;">
+                    </div>
+                    <p>Kevin Hart</p>
+                    <button onclick="toggleFollowInPopup('suggestedAccounts', 'kevinhart4real')" id="suggestedAccountsFollowkevinhart4real"
+                    class="blueButton" type="button" style="padding: 0.2em 1em; font-size: 0.96em;">Follow</button>
+                    <button onclick="toggleFollowInPopup('suggestedAccounts', 'kevinhart4real')" id="suggestedAccountsFollowingkevinhart4real" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
+                    border-radius: 0.4em; font-weight:bold;">Following</button>
+                    <img onclick="removeSuggestedAccount('kevinhart4real')" th:src="@{/images/thinGrayXIcon.png}" style="object-fit: contain; height: 1.6em; width: 1.6em; cursor: pointer;
+                    position: absolute; top: 8%; left: 85%;">
+                </div>
+
+                <div id="suggestedAccountmarvelstudios" style="display: flex; flex-direction: column; justify-content: center; align-items: center; border-style: solid;
+                border-width: 0.01em; border-color: gray; padding: 2.1em 2.4em; font-size: 0.73em; height: 70%; border-radius: 0.3em;
+                position: relative;">
+                    <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 5em; width: 5em; cursor: pointer;">
+                    <b>marvelstudios</b>
+                    <p>Marvel Studios</p>
+                    <button onclick="toggleFollowInPopup('suggestedAccounts', 'marvelstudios')" id="suggestedAccountsFollowmarvelstudios"
+                    class="blueButton" type="button" style="padding: 0.2em 1em; font-size: 0.96em;">Follow</button>
+                    <button onclick="toggleFollowInPopup('suggestedAccounts', 'marvelstudios')" id="suggestedAccountsFollowingmarvelstudios" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
+                    border-radius: 0.4em; font-weight:bold;">Following</button>
+                    <img onclick="removeSuggestedAccount('marvelstudios')" th:src="@{/images/thinGrayXIcon.png}" style="object-fit: contain; height: 1.6em; width: 1.6em; cursor: pointer;
+                    position: absolute; top: 8%; left: 85%;">
+                </div>
+
+            </div>
+
+        </div>
+
+        <div style="display: flex; align-items: center; justify-content: start; margin-top: 1.5em; overflow-x: scroll;
+        width: 40%;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 0.5em;">
+                <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 6.2em; width: 6.2em; cursor: pointer;">
+                <b style="font-size: 0.7em; margin-top: 0.3em;">TIKTOK</b>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 6.2em; width: 6.2em;  cursor: pointer;">
+                <b style="font-size: 0.7em; margin-top: 0.3em;">TWITTER</b>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 6.2em; width: 6.2em;  cursor: pointer;">
+                <b style="font-size: 0.7em; margin-top: 0.3em;">FACEBOOK</b>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 6.2em; width: 6.2em;  cursor: pointer;">
+                <b style="font-size: 0.7em; margin-top: 0.3em;">YOUTUBE</b>
+            </div>
+            <div style="display: flex; flex-direction: column; align-items: center;">
+                <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 6.2em; width: 6.2em;  cursor: pointer;">
+                <b style="font-size: 0.7em; margin-top: 0.3em;">YOUTUBE</b>
+            </div>
+        </div>
+
+        <!--Posts/Reels/Tagged section-->
+        <div style="border-style: solid; border-bottom: none; border-left: none; border-right: none; border-color: lightgray;
+        border-width: 0.08em; width: 75%; margin-top: 4em;">
+
+            <div style="display: flex; gap: 5em; justify-content: center; color: gray; font-size: 0.8em; padding-top: 1.6em;">
+
+                <div onclick="showPosts()" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
+                    <img id="postsGridIcon2" th:src="@{/images/postsGridIcon2.png}" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
+                    <img id="postsGridIcon" th:src="@{/images/postsGridIcon.png}" class="hidden" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
+                    <b id="postsText" style="color: black; font-size: 1.15em;">POSTS</b>
+                </div>
+
+                <div onclick="showReels()" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
+                    <img id="reelsIcon" th:src="@{/images/reelsIcon.png}" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
+                    <img id="reelsIcon2" th:src="@{/images/reelsIcon2.png}" class="hidden" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
+                    <b id="reelsText">REELS</b>
+                </div>
+
+                <div onclick="showTaggedPosts()" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
+                    <img id="taggedPostsIcon" th:src="@{/images/taggedPostsIcon.png}" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
+                    <img id="taggedPostsIcon2" th:src="@{/images/taggedPostsIcon2.png}" class="hidden" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
+                    <b id="taggedText">TAGGED</b>
+                </div>
+            </div>
+
+            <div id="imageGrid" style="margin-top: 1.4em; display: flex; flex-direction: column; align-items: start; gap: 0.5em;">
+
+                <div style="display: flex; justify-content: start; align-items: center; width: 100%; gap: 0.4em;">
+                    <div style="position: relative; width: 37%;">
+                        <img id="post1" onmouseenter="showNumLikesAndCommentsOfPost('post1')" onmouseleave="hideNumLikesAndCommentsOfPost('post1')"  th:src="@{/images/sampleImage.jpg}"
+                        style="cursor: pointer; height: 20em; width: 100%;">
+                        <img th:src="@{/images/whiteReelsIcon.png}" style="position: absolute; left: 87%; top: 3%; height: 1.9em; width: 1.9em; object-fit: contain;">
+                        <img id="post1WhiteHeartIcon" class="hidden" th:src="@{/images/whiteHeartIcon.png}" style="object-fit: contain; height: 2em; width: 2em; position: absolute;
+                        left: 20%; top: 45%;">
+                        <b id="post1NumLikes" class="hidden" style="color: white; position: absolute; left: 33%; top: 47%;">251K</b>
+                        <img id="post1WhiteCommentIcon" class="hidden" th:src="@{/images/whiteCommentIcon.png}" style="object-fit: contain; height: 2em; width: 2em; position: absolute;
+                        left: 53%; top: 45%;">
+                        <b id="post1NumComments" class="hidden" style="color: white; position: absolute; left: 65%; top: 47%;">1,821</b>
+                    </div>
+                    <div style="position: relative; width: 37%;">
+                        <img id="post2" onmouseenter="showNumLikesAndCommentsOfPost('post2')" onmouseleave="hideNumLikesAndCommentsOfPost('post2')"  th:src="@{/images/sampleImage2.webp}"
+                        style="cursor: pointer; height: 20em; width: 100%;">
+                        <img th:src="@{/images/multipleSlidesIcon.png}" style="position: absolute; left: 87%; top: 3%; height: 1.9em; width: 1.9em; object-fit: contain;">
+                        <img id="post2WhiteHeartIcon" class="hidden" th:src="@{/images/whiteHeartIcon.png}" style="object-fit: contain; height: 2em; width: 2em; position: absolute;
+                        left: 20%; top: 45%;">
+                        <b id="post2NumLikes" class="hidden" style="color: white; position: absolute; left: 33%; top: 47%;">251K</b>
+                        <img id="post2WhiteCommentIcon" class="hidden" th:src="@{/images/whiteCommentIcon.png}" style="object-fit: contain; height: 2em; width: 2em; position: absolute;
+                        left: 53%; top: 45%;">
+                        <b id="post2NumComments" class="hidden" style="color: white; position: absolute; left: 65%; top: 47%;">1,821</b>
+                    </div>
+
+                    <div style="position: relative; width: 37%;">
+                        <img id="post3" onmouseenter="showNumLikesAndCommentsOfPost('post3')" onmouseleave="hideNumLikesAndCommentsOfPost('post3')"  th:src="@{/images/sampleImage3.jpg}"
+                        style="cursor: pointer; height: 20em; width: 100%;">
+                        <img id="post3WhiteHeartIcon" class="hidden" th:src="@{/images/whiteHeartIcon.png}" style="object-fit: contain; height: 2em; width: 2em; position: absolute;
+                        left: 20%; top: 45%;">
+                        <b id="post3NumLikes" class="hidden" style="color: white; position: absolute; left: 33%; top: 47%;">251K</b>
+                        <img id="post3WhiteCommentIcon" class="hidden" th:src="@{/images/whiteCommentIcon.png}" style="object-fit: contain; height: 2em; width: 2em; position: absolute;
+                        left: 53%; top: 45%;">
+                        <b id="post3NumComments" class="hidden" style="color: white; position: absolute; left: 65%; top: 47%;">1,821</b>
+                    </div>
+                
+                </div>
+
+                <div style="display: flex; justify-content: start; align-items: center; width: 100%; gap: 0.4em;">
+                    <div style="position: relative; width: 37%;">
+                        <img id="post4" onmouseenter="showNumLikesAndCommentsOfPost('post4')" onmouseleave="hideNumLikesAndCommentsOfPost('post4')"  th:src="@{/images/sampleImage4.jpg}"
+                        style="cursor: pointer; height: 20em; width: 100%;">
+                        <img id="post4WhiteHeartIcon" class="hidden" th:src="@{/images/whiteHeartIcon.png}" style="object-fit: contain; height: 2em; width: 2em; position: absolute;
+                        left: 20%; top: 45%;">
+                        <b id="post4NumLikes" class="hidden" style="color: white; position: absolute; left: 33%; top: 47%;">251K</b>
+                        <img id="post4WhiteCommentIcon" class="hidden" th:src="@{/images/whiteCommentIcon.png}" style="object-fit: contain; height: 2em; width: 2em; position: absolute;
+                        left: 53%; top: 45%;">
+                        <b id="post4NumComments" class="hidden" style="color: white; position: absolute; left: 65%; top: 47%;">1,821</b>
+                    </div>
+                    
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!--POPUPS-->
+        <!--List of Followers Popup-->
+        <div id="listOfFollowersPopup" class="hidden" style="position: absolute; left: 28%; top: 18%; z-index: 10; background-color: white; width: 27%; height: 40%; border-style: solid;
+        display: flex; flex-direction: column; align-items: start; border-radius: 0.7em; overflow-y: scroll;">
+
+            <div style="display: flex; justify-content: center; width: 100%; padding-top: 0.4em;">
+                <b>Followers</b>
+                <img onclick="closeListOfFollowersPopup()" th:src="@{/images/thinGrayXIcon.png}" style="position: absolute; object-fit: contain; height: 1.2em; width: 1.2em;
+                cursor: pointer; left: 94%; top: 2%;">
+            </div>
+
+            <hr style="color: lightgray; width: 100%;">
+
+            <div style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
+                <div onclick="takeToUsersProfile('username1')" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
+                    <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 2.6em; width: 2.6em;">
+                    <div style="display: flex; flex-direction: column; font-size: 0.7em; gap: 0.1em;  margin-top: 1em;">
+                        <b>username1</b>
+                        <p style="margin-top:0.8em;">full name1</p>
+                    </div>
+                </div>
+
+                <button onclick="toggleFollowInPopup('listOfFollowers', 'username1')" id="listOfFollowersFollowusername1" class="blueButton" type="button" style="font-size: 0.8em; padding: 0.4em 0.8em; margin-right: 1.5em;">Follow</button>
+                <button onclick="toggleFollowInPopup('listOfFollowers', 'username1')" id="listOfFollowersFollowingusername1" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
+                border-radius: 0.4em; font-weight:bold;">Following</button>
+            </div>
+
+            <div style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
+                <div onclick="takeToUsersProfile('username2')" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
+                    <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 2.6em; width: 2.6em;">
+                    <div style="display: flex; flex-direction: column; font-size: 0.7em; gap: 0.1em;  margin-top: 1em;">
+                        <b>username2</b>
+                        <p style="margin-top:0.8em;">full name2</p>
+                    </div>
+                </div>
+
+                <button onclick="toggleFollowInPopup('listOfFollowers', 'username2')" id="listOfFollowersFollowusername2" class="blueButton" type="button" style="font-size: 0.8em; padding: 0.4em 0.8em; margin-right: 1.5em;">Follow</button>
+                <button onclick="toggleFollowInPopup('listOfFollowers', 'username2')" id="listOfFollowersFollowingusername2" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
+                border-radius: 0.4em; font-weight:bold;">Following</button>
+            </div>
+
+            <div style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
+                <div onclick="takeToUsersProfile('username3')" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
+                    <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 2.6em; width: 2.6em;">
+                    <div style="display: flex; flex-direction: column; font-size: 0.7em; gap: 0.1em;  margin-top: 1em;">
+                        <b>username3</b>
+                        <p style="margin-top:0.8em;">full name3</p>
+                    </div>
+                </div>
+
+                <button onclick="toggleFollowInPopup('listOfFollowers', 'username3')" id="listOfFollowersFollowusername3" class="blueButton" type="button" style="font-size: 0.8em; padding: 0.4em 0.8em; margin-right: 1.5em;">Follow</button>
+                <button onclick="toggleFollowInPopup('listOfFollowers', 'username3')" id="listOfFollowersFollowingusername3" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
+                border-radius: 0.4em; font-weight:bold;">Following</button>
+            </div>
+
+        </div>
+
+        <!--List of Followings Popup-->
+        <div id="listOfFollowingsPopup" class="hidden" style="position: absolute; left: 28%; top: 18%; z-index: 10; background-color: white; width: 27%; height: 40%; border-style: solid;
+        display: flex; flex-direction: column; align-items: start; border-radius: 0.7em; overflow-y: scroll;">
+
+            <div style="display: flex; justify-content: center; width: 100%; padding-top: 0.4em;">
+                <b style="text-align: center;">Followings</b>
+                <img onclick="closeListOfFollowingsPopup()" th:src="@{/images/thinGrayXIcon.png}" style="position: absolute; object-fit: contain; height: 1.2em; width: 1.2em;
+                cursor: pointer; left: 94%; top: 2%;">
+            </div>
+
+            <hr style="color: lightgray; width: 100%;">
+
+            <div style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
+                <div onclick="takeToUsersProfile('username1')" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
+                    <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 2.6em; width: 2.6em;">
+                    <div style="display: flex; flex-direction: column; font-size: 0.7em; gap: 0.1em;  margin-top: 1em;">
+                        <b>username1</b>
+                        <p style="margin-top:0.8em;">full name1</p>
+                    </div>
+                </div>
+
+                <button onclick="toggleFollowInPopup('listOfFollowings', 'username1')" id="listOfFollowingsFollowusername1" class="blueButton" type="button" style="font-size: 0.8em; padding: 0.4em 0.8em; margin-right: 1.5em;">Follow</button>
+                <button onclick="toggleFollowInPopup('listOfFollowings', 'username1')" id="listOfFollowingsFollowingusername1" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
+                border-radius: 0.4em; font-weight:bold;">Following</button>
+            </div>
+
+            <div style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
+                <div onclick="takeToUsersProfile('username2')" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
+                    <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 2.6em; width: 2.6em;">
+                    <div style="display: flex; flex-direction: column; font-size: 0.7em; gap: 0.1em;  margin-top: 1em;">
+                        <b>username2</b>
+                        <p style="margin-top:0.8em;">full name2</p>
+                    </div>
+                </div>
+
+                <button onclick="toggleFollowInPopup('listOfFollowings', 'username2')" id="listOfFollowingsFollowusername2" class="blueButton" type="button" style="font-size: 0.8em; padding: 0.4em 0.8em; margin-right: 1.5em;">Follow</button>
+                <button onclick="toggleFollowInPopup('listOfFollowings', 'username2')" id="listOfFollowingsFollowingusername2" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
+                border-radius: 0.4em; font-weight:bold;">Following</button>
+            </div>
+
+            <div style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
+                <div onclick="takeToUsersProfile('username3')" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
+                    <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 2.6em; width: 2.6em;">
+                    <div style="display: flex; flex-direction: column; font-size: 0.7em; gap: 0.1em;  margin-top: 1em;">
+                        <b>username3</b>
+                        <p style="margin-top:0.8em;">full name3</p>
+                    </div>
+                </div>
+
+                <button onclick="toggleFollowInPopup('listOfFollowings', 'username3')" id="listOfFollowingsFollowusername3" class="blueButton" type="button" style="font-size: 0.8em; padding: 0.4em 0.8em; margin-right: 1.5em;">Follow</button>
+                <button onclick="toggleFollowInPopup('listOfFollowings', 'username3')" id="listOfFollowingsFollowingusername3" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
+                border-radius: 0.4em; font-weight:bold;">Following</button>
+            </div>
+
+        </div>
+
+        <!--List of Mutual Followers Popup-->
+        <div id="listOfMutualFollowersPopup" class="hidden" style="position: absolute; left: 28%; top: 18%; z-index: 10; background-color: white; width: 27%; height: 40%; border-style: solid;
+        display: flex; flex-direction: column; align-items: start; border-radius: 0.7em;">
+
+            <div style="display: flex; justify-content: center; width: 100%; padding-top: 0.4em;">
+                <b style="text-align: center;">Mutual Followers</b>
+                <img onclick="closeListOfMutualFollowersPopup()" th:src="@{/images/thinGrayXIcon.png}" style="position: absolute; object-fit: contain; height: 1.2em; width: 1.2em;
+                cursor: pointer; left: 94%; top: 2%;">
+            </div>
+
+            <hr style="color: lightgray; width: 100%;">
+
+            <div style="display: flex; flex-direction: column; align-items: start; overflow-y: scroll; height: 85%; width: 100%;">
+                <div style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
+                    <div onclick="takeToUsersProfile('username1')" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
+                        <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 2.6em; width: 2.6em;">
+                        <div style="display: flex; flex-direction: column; font-size: 0.7em; gap: 0.1em;  margin-top: 1em;">
+                            <b>username1</b>
+                            <p style="margin-top:0.8em;">full name1</p>
+                        </div>
+                    </div>
+    
+                    <button onclick="toggleFollowInPopup('listOfMutualFollowers', 'username1')" id="listOfMutualFollowersFollowusername1" class="blueButton" type="button" style="font-size: 0.8em; padding: 0.4em 0.8em; margin-right: 1.5em;">Follow</button>
+                    <button onclick="toggleFollowInPopup('listOfMutualFollowers', 'username1')" id="listOfMutualFollowersFollowingusername1" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
+                    border-radius: 0.4em; font-weight:bold;">Following</button>
+                </div>
+    
+                <div style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
+                    <div onclick="takeToUsersProfile('username2')" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
+                        <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 2.6em; width: 2.6em;">
+                        <div style="display: flex; flex-direction: column; font-size: 0.7em; gap: 0.1em;  margin-top: 1em;">
+                            <b>username2</b>
+                            <p style="margin-top:0.8em;">full name2</p>
+                        </div>
+                    </div>
+    
+                    <button onclick="toggleFollowInPopup('listOfMutualFollowers', 'username2')" id="listOfMutualFollowersFollowusername2" class="blueButton" type="button" style="font-size: 0.8em; padding: 0.4em 0.8em; margin-right: 1.5em;">Follow</button>
+                    <button onclick="toggleFollowInPopup('listOfMutualFollowers', 'username2')" id="listOfMutualFollowersFollowingusername2" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
+                    border-radius: 0.4em; font-weight:bold;">Following</button>
+                </div>
+    
+                <div style="display: flex; width: 100%; justify-content: space-between; align-items: center;">
+                    <div onclick="takeToUsersProfile('username3')" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
+                        <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 2.6em; width: 2.6em;">
+                        <div style="display: flex; flex-direction: column; font-size: 0.7em; gap: 0.1em;  margin-top: 1em;">
+                            <b>username3</b>
+                            <p style="margin-top:0.8em;">full name3</p>
+                        </div>
+                    </div>
+    
+                    <button onclick="toggleFollowInPopup('listOfMutualFollowers', 'username3')" id="listOfMutualFollowersFollowusername3" class="blueButton" type="button" style="font-size: 0.8em; padding: 0.4em 0.8em; margin-right: 1.5em;">Follow</button>
+                    <button onclick="toggleFollowInPopup('listOfMutualFollowers', 'username3')" id="listOfMutualFollowersFollowingusername3" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
+                    border-radius: 0.4em; font-weight:bold;">Following</button>
+                </div>
+    
+            </div>
+
+            <p style="color: gray; font-size: 0.8em; margin-left: 0.7em;">And <b>55 others</b></p>
+            
+        </div>
+
+        <!--Options Popup-->
+        <div id="optionsPopup" class="hidden" style="position: absolute; left: 28%; top: 18%; z-index: 10; background-color: white; width: 27%; height: 18%; border-style: solid;
+        border-radius: 0.7em; overflow-y: scroll; padding-top: 0.4em; font-size: 0.83em;">
+            <p style="color: red; text-align: center; cursor: pointer; font-weight: bold;">Block</p>
+            <hr style="color: #f5f5f5; width: 100%;">
+            <p style="text-align: center; cursor: pointer;">Share to...</p>
+            <hr style="color: #f5f5f5; width: 100%;">
+            <p style="text-align: center; cursor: pointer;">Embed</p>
+            <hr style="color: #f5f5f5; width: 100%;">
+            <p style="text-align: center; cursor: pointer;">About this account</p>
+            <hr style="color: #f5f5f5; width: 100%;">
+            <p onclick="cancelOptionsPopup()" style="text-align: center; cursor: pointer;">Cancel</p>
+        </div>
+
 
     </div>
+
+
 
 
     <p id="authenticatedUsername" style="display: none;" th:text="${authenticatedUsername}"></p>

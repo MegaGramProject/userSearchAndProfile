@@ -16,3 +16,17 @@ body {
 .hidden {
     display: none !important;
 }
+
+.blueButton {
+    font-weight: bold;
+    color: white;
+    border-radius: 0.4em;
+    background-color: #2789f2;
+    border-style: none;
+    padding: 0.5em 1em;
+    cursor: pointer;
+}
+
+.blueButton:hover {
+    opacity: 0.45;
+}
