@@ -22,6 +22,17 @@ const profileUsername = document.getElementById('profileUsername').textContent;
 const leftSidebar = document.getElementById('leftSidebar');
 const accountNotFoundOrBlocksYou = document.getElementById('accountNotFoundOrBlocksYou');
 const postsReelsTaggedSection = document.getElementById('postsReelsTaggedSection');
+const profileUsernameAtTop = document.getElementById('profileUsernameAtTop');
+const profileUsernameVerifiedCheck = document.getElementById('profileUsernameVerifiedCheck');
+const profileFullName = document.getElementById('profileFullName');
+const profileUserNumFollowers = document.getElementById('profileUserNumFollowers');
+const profileUserNumFollowings = document.getElementById('profileUserNumFollowings');
+const unblockButton = document.getElementById('unblockButton');
+const unrequestButton = document.getElementById('unrequestButton');
+const profileUserNumPosts = document.getElementById('profileUserNumPosts');
+const optionToBlockOrUnblock = document.getElementById('optionToBlockOrUnblock');
+const followedByText = document.getElementById('followedByText');
+
 
 let authenticatedUsername = "";
 let displayLeftSidebarPopup = false;
@@ -32,6 +43,13 @@ let displayListOfFollowersPopup = false;
 let displayListOfFollowingsPopup = false;
 let displayListOfMutualFollowersPopup = false;
 let isUserBlocked = false;
+let authenticatedUserFollowing = [];
+let profileUserFollowers = [];
+let profileUserFollowing = [];
+let relevantProfileUserInfo;
+let isRequestingFollow;
+let mutualFollowers = []; //followers of profileUser that authenticatedUser follows
+let relevantUserInfo = {}; //key: username(for all users in authenticatedUserFollowing, profileUserFollowers, and profileUserFollowing); value: relevantUserInfo
 
 
 async function authenticateUser() {
@@ -136,8 +154,18 @@ async function authenticateUser() {
             }
             */
 
+    const response = await fetch('http://localhost:8001/getRelevantUserInfoFromUsername/'+profileUsername);
+    if(!response.ok) {
+        //user probably doesn't exist
+        leftSidebar.classList.add('hidden');
+        mainSection.classList.add('hidden');
+        accountNotFoundOrBlocksYou.classList.remove('hidden');
+        return;
+    }
+    relevantProfileUserInfo = await response.json();
 
-    const response = await fetch('http://localhost:8013/graphql', {
+
+    const response2 = await fetch('http://localhost:8013/graphql', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -151,20 +179,21 @@ async function authenticateUser() {
         `
         })
     });
-    if(!response.ok) {
+    if(!response2.ok) {
         throw new Error('Network response not ok');
     }
-    let userBlockings = await response.json();
+    let userBlockings = await response2.json();
     userBlockings = userBlockings['data']['getAllUserBlockings'];
-    console.log(userBlockings);
     for(let i=0; i<userBlockings.length; i++) {
-        if(userBlockings[i]['blocker']===authenticatedUsername) {
+        if(userBlockings[i]['blocker']===authenticatedUsername && userBlockings[i]['blockee']===profileUsername) {
             isUserBlocked = true;
-            followButton.textContent = "Unblock";
+            unblockButton.classList.remove('hidden');
             postsReelsTaggedSection.classList.add('hidden');
+            optionToBlockOrUnblock.textContent = 'Unblock';
+            optionToBlockOrUnblock.onclick= unblockUser;
             break;
         }
-        else if(userBlockings[i]['blocker']===profileUsername){
+        else if(userBlockings[i]['blocker']===profileUsername && userBlockings[i]['blockee']===authenticatedUsername){
             leftSidebar.classList.add('hidden');
             mainSection.classList.add('hidden');
             accountNotFoundOrBlocksYou.classList.remove('hidden');
@@ -173,17 +202,80 @@ async function authenticateUser() {
     }
 
 
+    profileUsernameAtTop.classList.remove('hidden');
+    if(relevantProfileUserInfo['isVerified']) {
+        profileUsernameVerifiedCheck.classList.remove('hidden');
+    }
+    profileFullName.textContent = relevantProfileUserInfo['fullName'];
 
-    const response2 = await fetch('http://localhost:8001/getRelevantUserInfoFromUsername/'+profileUsername);
-    if(!response2.ok) {
+    //get bio and link
+
+    if(isUserBlocked) {
+        return;
+    }
+
+
+    //get my following list, their followers, and their following list
+    const response3 = await fetch('http://localhost:8013/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        query: `
+        query {
+            getUserFollowingsForTwoUsers(users: { user1: "${authenticatedUsername}", user2: "${profileUsername}" })
+        }
+        `
+        })
+    });
+    if(!response3.ok) {
         throw new Error('Network response not ok');
     }
-    const relevantUserInfo = await response2.json();
-    console.log(relevantUserInfo);
 
-    //get my following list, his followers, and his following list
-    // const response3 = await fetch('http://localhost:')
+    let followingsData = await response3.json();
 
+    followingsData = followingsData['data']['getUserFollowingsForTwoUsers'];
+
+    authenticatedUserFollowing = followingsData[0];
+    profileUserFollowers = followingsData[1];
+    profileUserFollowing = followingsData[2];
+    profileUserNumFollowers.textContent = profileUserFollowers.length;
+    profileUserNumFollowings.textContent = profileUserFollowing.length;
+    if(authenticatedUserFollowing.includes(profileUsername)) {
+        followingButton.classList.remove('hidden')
+        isFollowingUser = true;
+    }
+    else {
+        //check if isRequestingUser
+        followButton.classList.remove('hidden');
+    }
+    mutualFollowers = authenticatedUserFollowing.filter(x=>profileUserFollowers.includes(x));
+    if(mutualFollowers.length==1) {
+        followedByText.getElementsByTagName('span')[0].textContent = mutualFollowers[0];
+        followedByText.getElementsByTagName('span')[0].classList.remove('hidden');
+        followedByText.classList.remove('hidden');
+    }
+    else if(mutualFollowers.length==2) {
+        followedByText.getElementsByTagName('span')[0].textContent = mutualFollowers[0] + ", " + "& " + mutualFollowers[1];
+        followedByText.getElementsByTagName('span')[0].classList.remove('hidden');
+        followedByText.classList.remove('hidden');
+    }
+    else if(mutualFollowers.length>2) {
+        followedByText.getElementsByTagName('span')[0].textContent = mutualFollowers[0]+ ", " +  mutualFollowers[1] + ", + " + (mutualFollowers.length-2) + " more";
+        followedByText.getElementsByTagName('span')[0].classList.remove('hidden');
+        followedByText.classList.remove('hidden');
+    }
+
+    const response4 = await fetch('http://localhost:8001/getRelevantUserInfoOfMultipleUsers', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            listOfUsers: [authenticatedUserFollowing, profileUserFollowers, profileUserFollowing].flat()
+        })
+    });
+    if(!response4.ok) {
+        throw new Error('Network response not ok');
+    }
+    relevantUserInfo = await response4.json();
 
 }
 
@@ -232,16 +324,144 @@ function toggleSimilarAccounts() {
     }
 }
 
-function toggleFollow() {
-    isFollowingUser = !isFollowingUser;
-    if(isFollowingUser) {
-        followButton.classList.add('hidden');
-        followingButton.classList.remove('hidden');
+async function toggleFollow() {
+    if(!isFollowingUser) {
+        if(relevantProfileUserInfo['isPrivate']) {
+            //add follow-request via API-call
+            followButton.classList.add('hidden');
+            unrequestButton.classList.remove('hidden');
+            isRequestingFollow = true;
+        }
+        else {
+            const response = await fetch('http://localhost:8013/graphql', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    query: `
+                    mutation {
+                        addUserFollowing(newUserFollowing: { follower: "${authenticatedUsername}", followee: "${profileUsername}" })
+                    }
+                    `
+                    })
+            });
+            if(!response.ok) {
+                throw new Error('Network response not ok');
+            }
+            followButton.classList.add('hidden');
+            followingButton.classList.remove('hidden');
+            profileUserFollowers.push(authenticatedUsername);
+            profileUserNumFollowers.textContent = profileUserFollowers.length;
+            isFollowingUser = true;
+        }
     }
     else {
+        const response = await fetch('http://localhost:8013/graphql', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    query: `
+                    mutation {
+                        removeUserFollowing(userFollowingToRemove: { follower: "${authenticatedUsername}", followee: "${profileUsername}" })
+                    }
+                    `
+                    })
+            });
+        if(!response.ok) {
+            throw new Error('Network response not ok');
+        }
         followButton.classList.remove('hidden');
         followingButton.classList.add('hidden');
+        profileUserFollowers = profileUserFollowers.filter(x=>x!==authenticatedUsername);
+        profileUserNumFollowers.textContent = profileUserFollowers.length;
+        isFollowingUser = false;
     }
+}
+
+async function unblockUser() {
+    const response = await fetch('http://localhost:8013/graphql', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            query: `
+            mutation {
+                removeUserBlocking(userBlockingToRemove: { blocker: "${authenticatedUsername}", blockee: "${profileUsername}" })
+            }
+            `
+            })
+    });
+    if(!response.ok) {
+        throw new Error('Network response not ok');
+    }
+
+    isUserBlocked = false;
+    unblockButton.classList.add('hidden');
+    postsReelsTaggedSection.classList.remove('hidden');
+    followButton.classList.remove('hidden');
+    optionToBlockOrUnblock.textContent = 'Block';
+    optionToBlockOrUnblock.onclick= blockUser;
+
+    if(authenticatedUserFollowing.length==0 && profileUserFollowers.length==0 && profileUserFollowing.length==0) {
+        const response = await fetch('http://localhost:8013/graphql', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                query: `
+                query {
+                    getUserFollowingsForTwoUsers(users: { user1: "${authenticatedUsername}", user2: "${profileUsername}" })
+                }
+                `
+                })
+            });
+            if(!response.ok) {
+                throw new Error('Network response not ok');
+            }
+        
+            let followingsData = await response.json();
+        
+            followingsData = followingsData['data']['getUserFollowingsForTwoUsers'];
+        
+            authenticatedUserFollowing = followingsData[0];
+            profileUserFollowers = followingsData[1];
+            profileUserFollowing = followingsData[2];
+            mutualFollowers = authenticatedUserFollowing.filter(x=>profileUserFollowers.includes(x));
+            if(mutualFollowers.length==1) {
+                followedByText.getElementsByTagName('span')[0].textContent = mutualFollowers[0];
+                followedByText.getElementsByTagName('span')[0].classList.remove('hidden');
+                followedByText.classList.remove('hidden');
+            }
+            else if(mutualFollowers.length==2) {
+                followedByText.getElementsByTagName('span')[0].textContent = mutualFollowers[0] + ", " + "& " + mutualFollowers[1];
+                followedByText.getElementsByTagName('span')[0].classList.remove('hidden');
+                followedByText.classList.remove('hidden');
+            }
+            else if(mutualFollowers.length>2) {
+                followedByText.getElementsByTagName('span')[0].textContent = mutualFollowers[0]+ ", " +  mutualFollowers[1] + ", + " + (mutualFollowers.length-2) + " more";
+                followedByText.getElementsByTagName('span')[0].classList.remove('hidden');
+                followedByText.classList.remove('hidden');
+            }
+
+        const response2 = await fetch('http://localhost:8001/getRelevantUserInfoOfMultipleUsers', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            listOfUsers: [authenticatedUserFollowing, profileUserFollowers, profileUserFollowing].flat()
+            })
+        });
+        if(!response2.ok) {
+            throw new Error('Network response not ok');
+        }
+        relevantUserInfo = await response2.json();
+        
+    }
+    profileUserNumFollowers.textContent = profileUserFollowers.length;
+    profileUserNumFollowings.textContent = profileUserFollowing.length;
+    cancelOptionsPopup();
+}
+
+async function cancelFollowRequest() {
+    unrequestButton.classList.add('hidden');
+    followButton.classList.remove('hidden');
+    isRequestingFollow = false;
 }
 
 function showReels() {
@@ -440,6 +660,43 @@ function hideNumLikesAndCommentsOfPost(postId) {
     }
     let postImage = document.getElementById(postId);
     postImage.style['opacity'] = '1';
+}
+
+async function blockUser() {
+    const response = await fetch('http://localhost:8013/graphql', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            query: `
+            mutation {
+                addUserBlocking(newUserBlocking: { blocker: "${authenticatedUsername}", blockee: "${profileUsername}" })
+            }
+            `
+            })
+    });
+    if(!response.ok) {
+        throw new Error('Network response not ok');
+    }
+
+    isUserBlocked = true;
+    followButton.classList.add('hidden');
+    followingButton.classList.add('hidden');
+    unrequestButton.classList.add('hidden');
+    unblockButton.classList.remove('hidden');
+    postsReelsTaggedSection.classList.add('hidden');
+
+    if(isFollowingUser) {
+        profileUserFollowers = profileUserFollowers.filter(x=>x!==authenticatedUsername);
+    }
+    profileUserFollowing = profileUserFollowing.filter(x=>x!==authenticatedUsername);
+    isFollowingUser = false;
+    profileUserNumFollowers.textContent = "";
+    profileUserNumFollowings.textContent = "";
+    optionToBlockOrUnblock.textContent = 'Unblock';
+    optionToBlockOrUnblock.onclick= unblockUser;
+    followedByText.classList.add('hidden');
+    cancelOptionsPopup();
+
 }
 
 

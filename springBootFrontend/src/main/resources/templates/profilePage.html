@@ -91,10 +91,15 @@
             <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 9em; width: 9em;">
             <div style="display: flex; flex-direction: column; align-items: start;">
                 <div style="display: flex; align-items: center;">
-                    <p style="font-size:1.3em;">therock</p>
-                    <img th:src="@{/images/verifiedCheck.png}" style="object-fit: contain; height: 1.7em; width: 1.7em; pointer-events: none;">
+                    <p id="profileUsernameAtTop" th:text="${profileUsername}" class="hidden" style="font-size:1.3em;"></p>
+                    <img id="profileUsernameVerifiedCheck" th:src="@{/images/verifiedCheck.png}" class="hidden" style="object-fit: contain; height: 1.7em; width: 1.7em; pointer-events: none;">
 
-                    <button onclick="toggleFollow()" id="followButton" class="blueButton" type="button" style="margin-left: 2.5em;">Follow</button>
+                    <button onclick="toggleFollow()" id="followButton" class="blueButton hidden" type="button" style="margin-left: 2.5em;">Follow</button>
+
+                    <button onclick="unblockUser()" id="unblockButton" class="blueButton hidden" type="button" style="margin-left: 2.5em;">Unblock</button>
+
+                    <button onclick="cancelFollowRequest()" id="unrequestButton" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
+                    margin-left: 1.2em; border-radius: 0.4em; font-weight:bold;">Requested</button>
 
                     <button onclick="toggleFollow()" id="followingButton" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
                     margin-left: 1.2em; border-radius: 0.4em; font-weight:bold;">Following</button>
@@ -108,15 +113,15 @@
                 </div>
 
                 <div style="display: flex; align-items: center; gap: 4em;">
-                    <p> <b>7,888</b> posts</p>
-                    <p onclick="showListOfFollowersPopup()" style="cursor: pointer;"> <b>395M</b> followers</p>
-                    <p onclick="showListOfFollowingsPopup()" style="cursor: pointer;"> <b>0</b> following</p>
+                    <p> <b id="profileUserNumPosts"></b> posts</p>
+                    <p onclick="showListOfFollowersPopup()" style="cursor: pointer;"> <b id="profileUserNumFollowers"></b> followers</p>
+                    <p onclick="showListOfFollowingsPopup()" style="cursor: pointer;"> <b id="profileUserNumFollowings"></b> following</p>
                 </div>
 
                 <br>
                 <br>
                 
-                <b style="font-size: 0.84em; margin-top: -1em;">Dwayne Johnson</b>
+                <b id="profileFullName" style="font-size: 0.84em; margin-top: -1em;"></b>
                 <p style="font-size: 0.86em; max-width: 22em;">builder of stuff
                     cheat meal crusher
                     tequila sipper
@@ -130,7 +135,7 @@
                 </div>
         
 
-                <p onclick="showListOfMutualFollowersPopup()" style="color: #979899; font-size: 0.76em; cursor: pointer;">Followed by <span style="color: black;">ayush_raavi1122</span>, <span style="color: black;">shaunakd7</span> + 55 more</p>
+                <p id="followedByText" onclick="showListOfMutualFollowersPopup()" class="hidden" style="color: #979899; font-size: 0.76em; cursor: pointer;">Followed by <span class="hidden" style="color: black;"></span></p>
 
             </div>
         </div>
@@ -502,15 +507,13 @@
                 </div>
     
             </div>
-
-            <p style="color: gray; font-size: 0.8em; margin-left: 0.7em;">And <b>55 others</b></p>
             
         </div>
 
         <!--Options Popup-->
         <div id="optionsPopup" class="hidden" style="position: absolute; left: 28%; top: 18%; z-index: 10; background-color: white; width: 27%; height: 18%; border-style: solid;
         border-radius: 0.7em; overflow-y: scroll; padding-top: 0.4em; font-size: 0.83em;">
-            <p style="color: red; text-align: center; cursor: pointer; font-weight: bold;">Block</p>
+            <p id="optionToBlockOrUnblock" onclick="blockUser()" style="color: red; text-align: center; cursor: pointer; font-weight: bold;">Block</p>
             <hr style="color: #f5f5f5; width: 100%;">
             <p style="text-align: center; cursor: pointer;">Share to...</p>
             <hr style="color: #f5f5f5; width: 100%;">
