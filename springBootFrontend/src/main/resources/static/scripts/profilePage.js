@@ -18,6 +18,10 @@ const mainSection = document.getElementById('mainSection');
 const listOfFollowingsPopup = document.getElementById('listOfFollowingsPopup');
 const listOfMutualFollowersPopup = document.getElementById('listOfMutualFollowersPopup');
 const optionsPopup = document.getElementById('optionsPopup');
+const profileUsername = document.getElementById('profileUsername').textContent;
+const leftSidebar = document.getElementById('leftSidebar');
+const accountNotFoundOrBlocksYou = document.getElementById('accountNotFoundOrBlocksYou');
+const postsReelsTaggedSection = document.getElementById('postsReelsTaggedSection');
 
 let authenticatedUsername = "";
 let displayLeftSidebarPopup = false;
@@ -27,13 +31,26 @@ let currentlyShownSection = "POSTS";
 let displayListOfFollowersPopup = false;
 let displayListOfFollowingsPopup = false;
 let displayListOfMutualFollowersPopup = false;
+let isUserBlocked = false;
 
 
 async function authenticateUser() {
     const username = document.getElementById('authenticatedUsername').textContent;
-    authenticatedUsername = username;
-
-
+    if(username.length==0) {
+        if(localStorage.getItem('authenticatedUsername')) {
+            authenticatedUsername = localStorage.getItem('authenticatedUsername')
+        }
+        else {
+            leftSidebar.classList.add('hidden');
+            mainSection.classList.add('hidden');
+            accountNotFoundOrBlocksYou.classList.remove('hidden');
+            return;
+        }
+    }
+    else {
+        authenticatedUsername = username;
+        localStorage.setItem('authenticatedUsername', authenticatedUsername);
+    }
     /*
     const response = await fetch('http://localhost:8003/cookies/authenticateUser/'+username, {
                 method: 'GET',
@@ -118,6 +135,56 @@ async function authenticateUser() {
             window.location.href = "http://localhost:8000/login";
             }
             */
+
+
+    const response = await fetch('http://localhost:8013/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        query: `
+        query {
+            getAllUserBlockings(filter: { username: "${authenticatedUsername}" }) {
+                blocker
+                blockee
+            }
+        }
+        `
+        })
+    });
+    if(!response.ok) {
+        throw new Error('Network response not ok');
+    }
+    let userBlockings = await response.json();
+    userBlockings = userBlockings['data']['getAllUserBlockings'];
+    console.log(userBlockings);
+    for(let i=0; i<userBlockings.length; i++) {
+        if(userBlockings[i]['blocker']===authenticatedUsername) {
+            isUserBlocked = true;
+            followButton.textContent = "Unblock";
+            postsReelsTaggedSection.classList.add('hidden');
+            break;
+        }
+        else if(userBlockings[i]['blocker']===profileUsername){
+            leftSidebar.classList.add('hidden');
+            mainSection.classList.add('hidden');
+            accountNotFoundOrBlocksYou.classList.remove('hidden');
+            return;
+        }
+    }
+
+
+
+    const response2 = await fetch('http://localhost:8001/getRelevantUserInfoFromUsername/'+profileUsername);
+    if(!response2.ok) {
+        throw new Error('Network response not ok');
+    }
+    const relevantUserInfo = await response2.json();
+    console.log(relevantUserInfo);
+
+    //get my following list, his followers, and his following list
+    // const response3 = await fetch('http://localhost:')
+
+
 }
 
 function takeUserHome() {

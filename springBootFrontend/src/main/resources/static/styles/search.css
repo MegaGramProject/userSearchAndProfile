@@ -18,6 +18,16 @@ body {
     display: none !important;
 }
 
-.hoverableElement:hover {
-    background-color: #dbdbdb;
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #232324 !important;
+        color: white !important;
+    }
+
+    
+    .iconsToBeAdjustedForDarkMode {
+        filter: brightness(5) contrast(0) !important;
+    }
+
 }

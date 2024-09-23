@@ -20,6 +20,8 @@ let recentUserSearches = [];
 let recentTopicSearches = [];
 let usersFollowed = ['rishavry4', 'rishavry5', 'rishavry7', 'rishavry2'];
 let userBlockings = ['rishavry7'];
+let currentlyHoveredSearchId = "";
+let currentlyHoveredSearchIdBeforeMouseEnter = "";
 
 async function authenticateUser() {
     const username = document.getElementById('usernameInURL').textContent;
@@ -192,7 +194,7 @@ async function fetchRecentSearchesOfAuthenticatedUser() {
             if(recentSearch.type_of_search==='user') {
                 recentUserSearches.push(recentSearch.search);
                 const newElementDiv = document.createElement('div');
-                newElementDiv.className = 'hoverableElement';
+                newElementDiv.id = "recentSearch"+i;
                 newElementDiv.style.width = '95%';
                 newElementDiv.style.cursor = 'pointer';
                 newElementDiv.style.height = '5em';
@@ -257,6 +259,7 @@ async function fetchRecentSearchesOfAuthenticatedUser() {
                     DOMElementsForRecentSearches = [recentHeader];
                     recentUserSearches = [];
                     recentTopicSearches = [];
+                    currentlyHoveredSearchId = "";
                     updateUIAfterRemovingRecentSearches();
                     
                 });
@@ -285,10 +288,17 @@ async function fetchRecentSearchesOfAuthenticatedUser() {
 
                 newElementDiv.addEventListener('mouseenter', function() {
                     deleteRecentSearchIcon.style.display = 'inline-block';
+                    currentlyHoveredSearchIdBeforeMouseEnter = currentlyHoveredSearchId;
+                    if(currentlyHoveredSearchIdBeforeMouseEnter!=='recentSearch'+i) {
+                        updateCurrentlyHoveredSearchId("recentSearch"+i);
+                    }
                 });
 
                 newElementDiv.addEventListener('mouseleave', function() {
                     deleteRecentSearchIcon.style.display = 'none';
+                    if(currentlyHoveredSearchIdBeforeMouseEnter!==currentlyHoveredSearchId) {
+                        updateCurrentlyHoveredSearchId('');
+                    }
                 });
 
                 recentSearches.appendChild(newElementDiv);
@@ -296,7 +306,7 @@ async function fetchRecentSearchesOfAuthenticatedUser() {
             else {
                 recentTopicSearches.push(recentSearch.search);
                 const newElementDiv = document.createElement('div');
-                newElementDiv.className = 'hoverableElement';
+                newElementDiv.id = "recentSearch"+i;
                 newElementDiv.style.width = '95%';
                 newElementDiv.style.cursor = 'pointer';
                 newElementDiv.style.height = '5em';
@@ -343,6 +353,7 @@ async function fetchRecentSearchesOfAuthenticatedUser() {
                     DOMElementsForRecentSearches = [recentHeader];
                     recentUserSearches = [];
                     recentTopicSearches = [];
+                    currentlyHoveredSearchId = "";
                     updateUIAfterRemovingRecentSearches();
                     
                 });
@@ -370,10 +381,17 @@ async function fetchRecentSearchesOfAuthenticatedUser() {
 
                 newElementDiv.addEventListener('mouseenter', function() {
                     deleteRecentSearchIcon.style.display = 'inline-block';
+                    currentlyHoveredSearchIdBeforeMouseEnter = currentlyHoveredSearchId;
+                    if(currentlyHoveredSearchIdBeforeMouseEnter!=='recentSearch'+i) {
+                        updateCurrentlyHoveredSearchId("recentSearch"+i);
+                    }
                 });
 
                 newElementDiv.addEventListener('mouseleave', function() {
                     deleteRecentSearchIcon.style.display = 'none';
+                    if(currentlyHoveredSearchIdBeforeMouseEnter!==currentlyHoveredSearchId) {
+                        updateCurrentlyHoveredSearchId('');
+                    }
                 });
 
                 recentSearches.appendChild(newElementDiv);
@@ -391,8 +409,9 @@ function deleteSearchText() {
     for(let element of DOMElementsForSearchResults) {
         element.classList.add('hidden');
     }
+    noUsers.classList.add('hidden');
+    users.classList.add('hidden');
     deleteSearchTextButton.classList.add('hidden');
-
     displayDOMElementsForRecentSearches = true;
 }
 
@@ -424,6 +443,10 @@ function takeUserHome() {
 
 async function handleInputChange(event) {
     const value = event.target.value;
+    if (value.includes('\n') || value[0]===" ") {
+        return;
+    }
+    updateCurrentlyHoveredSearchId("");
 
     if(value.length==0) {
         for(let element of DOMElementsForRecentSearches) {
@@ -432,6 +455,8 @@ async function handleInputChange(event) {
         for(let element of DOMElementsForSearchResults) {
             element.classList.add('hidden');
         }
+        noUsers.classList.add('hidden');
+        users.classList.add('hidden');
         deleteSearchTextButton.classList.add('hidden');
         displayDOMElementsForRecentSearches = true;
     }
@@ -467,10 +492,11 @@ async function handleInputChange(event) {
 
         let displayUsersDiv = false;
 
-        for(let searchResult of searchResults) {
+        for(let i=0; i<searchResults.length; i++) {
+            const searchResult = searchResults[i];
             if(searchResult.type_of_search==='user') {
                 const newElementDiv = document.createElement('div');
-                newElementDiv.className = 'hoverableElement';
+                newElementDiv.id = "searchResult"+i;
                 newElementDiv.style.width = '95%';
                 newElementDiv.style.cursor = 'pointer';
                 newElementDiv.style.height = '5em';
@@ -511,7 +537,7 @@ async function handleInputChange(event) {
                 newElementDiv.appendChild(innerDiv);
 
                 newElementDiv.addEventListener('click', async function() {
-                    if(searchResult.search in recentUserSearches) {
+                    if(recentUserSearches.includes(searchResult.search)) {
                         const response = await fetch('http://localhost:8020/api/editRecentSearch', {
                             method: 'PATCH',
                             headers: {'Content-Type': 'application/json'},
@@ -546,12 +572,25 @@ async function handleInputChange(event) {
                     window.location.href = "http://localhost:8019/profilePage/"+authenticatedUsername+"/"+searchResult.search;
                 });
 
+                newElementDiv.addEventListener('mouseenter', function() {
+                    currentlyHoveredSearchIdBeforeMouseEnter = currentlyHoveredSearchId;
+                    if(currentlyHoveredSearchIdBeforeMouseEnter!=="searchResult"+i) {
+                        updateCurrentlyHoveredSearchId("searchResult"+i);
+                    }
+                });
+
+                newElementDiv.addEventListener('mouseleave', function() {
+                    if(currentlyHoveredSearchIdBeforeMouseEnter!==currentlyHoveredSearchId) {
+                        updateCurrentlyHoveredSearchId('');
+                    }
+                });
+
                 users.appendChild(newElementDiv);
                 displayUsersDiv = true;
             }
             else {
                 const newElementDiv = document.createElement('div');
-                newElementDiv.className = 'hoverableElement';
+                newElementDiv.id = "searchResult"+i;
                 newElementDiv.style.width = '95%';
                 newElementDiv.style.cursor = 'pointer';
                 newElementDiv.style.height = '5em';
@@ -574,7 +613,7 @@ async function handleInputChange(event) {
                 newElementDiv.appendChild(p);
 
                 newElementDiv.addEventListener('click', async function() {
-                    if(searchResult.search in recentUserSearches) {
+                    if(recentUserSearches.includes(searchResult.search)) {
                         const response = await fetch('http://localhost:8020/api/editRecentSearch', {
                             method: 'PATCH',
                             headers: {'Content-Type': 'application/json'},
@@ -607,6 +646,19 @@ async function handleInputChange(event) {
                         }
                     }
                     window.location.href = "http://localhost:8019/postsMatchingTopic/"+authenticatedUsername+"/" + searchResult.search;
+                });
+
+                newElementDiv.addEventListener('mouseenter', function() {
+                    currentlyHoveredSearchIdBeforeMouseEnter = currentlyHoveredSearchId;
+                    if(currentlyHoveredSearchIdBeforeMouseEnter!=="searchResult"+i) {
+                        updateCurrentlyHoveredSearchId("searchResult"+i);
+                    }
+                });
+
+                newElementDiv.addEventListener('mouseleave', function() {
+                    if(currentlyHoveredSearchIdBeforeMouseEnter!==currentlyHoveredSearchId) {
+                        updateCurrentlyHoveredSearchId('');
+                    }
                 });
 
                 topics.appendChild(newElementDiv);
@@ -655,7 +707,7 @@ function updateUIAfterRemovingRecentSearches() {
             if(recentSearch.type_of_search==='user') {
                 recentUserSearches.push(recentSearch.search);
                 const newElementDiv = document.createElement('div');
-                newElementDiv.className = 'hoverableElement';
+                newElementDiv.id = "recentSearch"+i;
                 newElementDiv.style.width = '95%';
                 newElementDiv.style.cursor = 'pointer';
                 newElementDiv.style.height = '5em';
@@ -720,6 +772,7 @@ function updateUIAfterRemovingRecentSearches() {
                     DOMElementsForRecentSearches = [recentHeader];
                     recentUserSearches = [];
                     recentTopicSearches = [];
+                    currentlyHoveredSearchId = "";
                     updateUIAfterRemovingRecentSearches();
                     
                 });
@@ -748,10 +801,17 @@ function updateUIAfterRemovingRecentSearches() {
 
                 newElementDiv.addEventListener('mouseenter', function() {
                     deleteRecentSearchIcon.style.display = 'inline-block';
+                    currentlyHoveredSearchIdBeforeMouseEnter = currentlyHoveredSearchId;
+                    if(currentlyHoveredSearchIdBeforeMouseEnter!=='recentSearch'+i) {
+                        updateCurrentlyHoveredSearchId("recentSearch"+i);
+                    }
                 });
 
                 newElementDiv.addEventListener('mouseleave', function() {
                     deleteRecentSearchIcon.style.display = 'none';
+                    if(currentlyHoveredSearchIdBeforeMouseEnter!==currentlyHoveredSearchId) {
+                        updateCurrentlyHoveredSearchId('');
+                    }
                 });
 
                 recentSearches.appendChild(newElementDiv);
@@ -759,7 +819,7 @@ function updateUIAfterRemovingRecentSearches() {
             else {
                 recentTopicSearches.push(recentSearch.search);
                 const newElementDiv = document.createElement('div');
-                newElementDiv.className = 'hoverableElement';
+                newElementDiv.id = "recentSearch"+i;
                 newElementDiv.style.width = '95%';
                 newElementDiv.style.cursor = 'pointer';
                 newElementDiv.style.height = '5em';
@@ -806,6 +866,7 @@ function updateUIAfterRemovingRecentSearches() {
                     DOMElementsForRecentSearches = [recentHeader];
                     recentUserSearches = [];
                     recentTopicSearches = [];
+                    currentlyHoveredSearchId = "";
                     updateUIAfterRemovingRecentSearches();
                     
                 });
@@ -833,17 +894,126 @@ function updateUIAfterRemovingRecentSearches() {
 
                 newElementDiv.addEventListener('mouseenter', function() {
                     deleteRecentSearchIcon.style.display = 'inline-block';
+                    updateCurrentlyHoveredSearchId('recentSearch'+i);
                 });
 
                 newElementDiv.addEventListener('mouseleave', function() {
                     deleteRecentSearchIcon.style.display = 'none';
+                    updateCurrentlyHoveredSearchId('');
                 });
 
                 recentSearches.appendChild(newElementDiv);
             }
         }
     }
+
+}
+
+function updateCurrentlyHoveredSearchId(searchId) {
+    const isDarkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+    if(currentlyHoveredSearchId.length>0) {
+        if(isDarkMode) {
+            document.getElementById(currentlyHoveredSearchId).style['background-color'] = '#232324';
+        }
+        else {
+            document.getElementById(currentlyHoveredSearchId).style['background-color'] = 'white';
+        }
+    }
+    if(searchId.length>0) {
+        if(isDarkMode) {
+            document.getElementById(searchId).style['background-color'] = 'rgba(0,0,0,0.1)';
+        }
+        else {
+            document.getElementById(searchId).style['background-color'] = '#dbdbdb';
+        }
+    }
+    currentlyHoveredSearchId = searchId;
 }
 
 textarea.addEventListener('input', handleInputChange);
+textarea.addEventListener('click', function() {
+    updateCurrentlyHoveredSearchId("");
+});
+
+
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'ArrowDown') {
+        if(currentlyHoveredSearchId.startsWith('recentSearch')) {
+            let idNumber = parseInt(currentlyHoveredSearchId.substring(12));
+            if(idNumber+1==recentSearchesOfUser.length) {
+                updateCurrentlyHoveredSearchId('recentSearch0');
+            }
+            else {
+                idNumber++;
+                updateCurrentlyHoveredSearchId('recentSearch'+idNumber);
+            }
+        }
+        else if(currentlyHoveredSearchId.startsWith('searchResult')) {
+            let idNumber = parseInt(currentlyHoveredSearchId.substring(12));
+            if(idNumber+1==searchResults.length) {
+                updateCurrentlyHoveredSearchId('searchResult0');
+            }
+            else {
+                idNumber++;
+                updateCurrentlyHoveredSearchId('searchResult'+idNumber);
+            }
+        }
+        else if(currentlyHoveredSearchId==="") {
+            if(displayDOMElementsForRecentSearches) {
+                if(recentSearchesOfUser.length>0) {
+                    updateCurrentlyHoveredSearchId('recentSearch0');
+                }
+            }
+            else {
+                updateCurrentlyHoveredSearchId('searchResult0');
+            }
+        }
+
+    } else if (event.key === 'ArrowUp') {
+        if(currentlyHoveredSearchId.startsWith('recentSearch')) {
+            let idNumber = parseInt(currentlyHoveredSearchId.substring(12));
+            if(idNumber==0) {
+                idNumber = recentSearchesOfUser.length - 1;
+                updateCurrentlyHoveredSearchId('recentSearch'+idNumber);
+            }
+            else {
+                idNumber--;
+                updateCurrentlyHoveredSearchId('recentSearch'+idNumber);
+            }
+        }
+        else if(currentlyHoveredSearchId.startsWith('searchResult')) {
+            let idNumber = parseInt(currentlyHoveredSearchId.substring(12));
+            if(idNumber==0) {
+                idNumber = searchResults.length-1;
+                updateCurrentlyHoveredSearchId('searchResult'+idNumber);
+            }
+            else {
+                idNumber--;
+                updateCurrentlyHoveredSearchId('searchResult'+idNumber);
+            }
+        }
+        else if(currentlyHoveredSearchId==="") {
+            if(displayDOMElementsForRecentSearches) {
+                idNumber = recentSearchesOfUser.length - 1;
+                updateCurrentlyHoveredSearchId('recentSearch'+idNumber);
+            }
+            else {
+                idNumber = searchResults.length-1;
+                updateCurrentlyHoveredSearchId('searchResult'+idNumber);
+            }
+        }
+        
+    }
+    else if(event.key === 'Enter') {
+        if(currentlyHoveredSearchId!=="") {
+            document.getElementById(currentlyHoveredSearchId).click();
+        }
+    }
+});
+
+
+
+
+
 authenticateUser();

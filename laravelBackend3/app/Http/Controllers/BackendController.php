@@ -202,10 +202,10 @@ class BackendController extends Controller {
 
 
         if (!is_null($exactUserMatch)) {
-            $output = [$exactUserMatch, ...$recentlySearchedMatches, ...$usersFollowedMatches, ...$usersWithMutualFollowersMatches, ...$top5MostSearchedUserMatches, $exactTopicMatch, ...$recentlySearchedTopicMatches, ...$popularTopics];
+            $output = [$exactTopicMatch, ...$recentlySearchedTopicMatches, ...$popularTopics, $exactUserMatch, ...$recentlySearchedMatches, ...$usersFollowedMatches, ...$usersWithMutualFollowersMatches, ...$top5MostSearchedUserMatches];
         }
         else {
-            $output = [...$recentlySearchedMatches, ...$usersFollowedMatches, ...$usersWithMutualFollowersMatches, ...$top5MostSearchedUserMatches, $exactTopicMatch, ...$recentlySearchedTopicMatches, ...$popularTopics];
+            $output = [$exactTopicMatch, ...$recentlySearchedTopicMatches, ...$popularTopics, ...$recentlySearchedMatches, ...$usersFollowedMatches, ...$usersWithMutualFollowersMatches, ...$top5MostSearchedUserMatches];
         }
 
         return response()->json([$searchText => $output], 200);

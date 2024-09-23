@@ -20,4 +20,10 @@ public class frontendController {
         return "profilePage";
     }
 
+    @GetMapping("/profilePage/{profileUsername}")
+    public String profilePageRoute2(@PathVariable String profileUsername, Model model) {
+        model.addAttribute("authenticatedUsername", "");
+        model.addAttribute("profileUsername", profileUsername);
+        return "profilePage";
+    }
 }
