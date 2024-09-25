@@ -368,14 +368,16 @@ async function authenticateUserAndFetchData() {
         }
     }
 
-
+    listOfPostIds = [];
     for(let i=0; i<imagePosts.length; i++) {
         let post = imagePosts[i];
         let postId = post['id'];
+        listOfPostIds.push(postId);
         let postMappings = {}; //key: slideNumber; value: infoOnSlide
         postMappings['dateTimeOfPost'] = post['dateTimeOfPost']; //same for all slides of post
         postMappings['locationOfPost'] = post['locationOfPost']; //same for all slides of post
         postMappings['usernames'] = post['usernames']; //same for all slides of post
+        postMappings['postId'] = post['id']; //same for all slides of post
         let videosOfThisPost = [];
         if(postId in postIdToVideoMappings) {
             videosOfThisPost = postIdToVideoMappings[postId];
@@ -409,7 +411,10 @@ async function authenticateUserAndFetchData() {
     //some videos posted by the user may not associated with an image-post
     for(let postId of Object.keys(postIdToVideoMappings)) {
         let postMappings = {};
+        let vidInCurrPost;
+        listOfPostIds.push(postId);
         for(let video of postIdToVideoMappings[postId]) {
+            vidInCurrPost = video;
             const response = await fetch('http://localhost:8004/getVideo/'+video['videoId']);
             if(!response.ok) {
                 throw new Error('Network response not ok');
@@ -424,9 +429,10 @@ async function authenticateUserAndFetchData() {
                 videoURL: videoURL
             };
         }
-        postMappings['dateTimeOfPost'] = post['dateTimeOfPost']; //same for all slides of post
-        postMappings['locationOfPost'] = post['locationOfPost']; //same for all slides of post
-        postMappings['usernames'] = post['usernames']; //same for all slides of post
+        postMappings['dateTimeOfPost'] = vidInCurrPost['dateTimeOfPost']; //same for all slides of post
+        postMappings['locationOfPost'] = vidInCurrPost['locationOfPost']; //same for all slides of post
+        postMappings['usernames'] = vidInCurrPost['usernames']; //same for all slides of post
+        postMappings['postId'] = vidInCurrPost['overallPostId']; //same for all slides of post
         profileUserPosts.push(postMappings);
         delete postIdToVideoMappings[postId];
     }
@@ -438,9 +444,47 @@ async function authenticateUserAndFetchData() {
     else {
         postOrPostsText.textContent = 'post';
     }
+    if(profileUserPosts.length==0) {
+        postsReelsTaggedSection.classList.add('hidden');
+        accountIsPrivateOrHasNoPosts.classList.remove('hidden');
+        accountIsPrivateOrHasNoPosts.getElementsByTagName('img')[1].classList.remove('hidden');
+        accountIsPrivateOrHasNoPosts.getElementsByTagName('h2')[0].classList.remove('hidden');
+    }
+
     //then fetch reels
-    //then order profileUserPosts by dateTimeOfPost DESC
-    createDOMElementsForProfileUserPosts();
+
+    if(listOfPostIds.length>0) {
+        const response8 = await fetch('http://localhost:8004/getNumLikesAndCommentsOfMultiplePosts', { //numComments also includes replies
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            listOfPostIds: listOfPostIds
+        })
+        });
+        if(!response8.ok) {
+            throw new Error('Network response not ok');
+        }
+        let postIdToNumLikesMappings = await response8.json(); //key: postId, value: [numLikesOfPost, numCommentsOfPost]
+        for(let post of profileUserPosts) {
+            if(post['postId'] in postIdToNumLikesMappings) {
+                post['numLikes'] = postIdToNumLikesMappings[post['postId']][0];
+                if(postIdToNumLikesMappings[post['postId']].length==2) {
+                    post['numComments'] = postIdToNumLikesMappings[post['postId']][1];
+                }
+                else {
+                    postIdToNumLikesMappings[post['postId']].push(0);
+                    post['numComments'] = 0;
+                }
+            }
+            else {
+                postIdToNumLikesMappings[post['postId']] = [0,0];
+                post['numLikes'] = 0;
+                post['numComments'] = 0;
+            }
+        }
+        profileUserPosts.sort((a, b) => new Date(b['dateTimeOfPost']) - new Date(a['dateTimeOfPost']));
+        createDOMElementsForProfileUserPosts();
+    }
     
 }
 
@@ -476,6 +520,7 @@ function toggleLeftSidebarPopup() {
 
 function createDOMElementsForProfileUserPosts() {
     let counter = 0;
+    let index=0;
     let newRowDiv = document.createElement('div');
     newRowDiv.style.display = 'flex';
     newRowDiv.style.justifyContent = 'start';
@@ -485,6 +530,7 @@ function createDOMElementsForProfileUserPosts() {
 
     for(let post of profileUserPosts) {
         counter++;
+        index++;
         if(counter>3) {
             imageGrid.appendChild(newRowDiv);
             counter=1;
@@ -501,13 +547,49 @@ function createDOMElementsForProfileUserPosts() {
         postDiv.style.width = '37%';
 
         const imgOfFirstSlideOfPost = document.createElement('img');
-        imgOfFirstSlideOfPost.id = 'post'+counter;
+        imgOfFirstSlideOfPost.id = 'post'+index;
         imgOfFirstSlideOfPost.style.cursor = 'pointer';
         imgOfFirstSlideOfPost.style.height = '20em';
         imgOfFirstSlideOfPost.style.width = '100%';
-        imgOfFirstSlideOfPost.src = post[0]['post']; //[0] because it refers to the first slide
-        imgOfFirstSlideOfPost.onmouseenter = () => showNumLikesAndCommentsOfPost('post'+counter);
-        imgOfFirstSlideOfPost.onmouseleave = () => hideNumLikesAndCommentsOfPost('post'+counter);
+
+        if('post' in post[0]) {
+            //first slide is an image
+            imgOfFirstSlideOfPost.src = post[0]['post'];
+        }
+        else {
+            //first slide is a video
+            const video = document.createElement('video');
+            video.src = post[0]['videoURL'];
+
+            video.muted = true;
+
+            video.addEventListener('loadeddata', () => {
+                video.currentTime = 5;
+            });
+
+            video.addEventListener('seeked', () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                const imageDataUrl = canvas.toDataURL('image/png');
+
+                imgOfFirstSlideOfPost.src = imageDataUrl;
+            });
+        }
+
+        imgOfFirstSlideOfPost.onmouseenter = (() => {
+            const currentIndex = index;
+            return () => showNumLikesAndCommentsOfPost('post' + currentIndex);
+        })();
+        
+        imgOfFirstSlideOfPost.onmouseleave = (() => {
+            const currentIndex = index;
+            return () => hideNumLikesAndCommentsOfPost('post' + currentIndex);
+        })();
         
         postDiv.appendChild(imgOfFirstSlideOfPost);
 
@@ -526,7 +608,7 @@ function createDOMElementsForProfileUserPosts() {
         }
 
         const heartIcon = document.createElement('img');
-        heartIcon.id = 'post'+counter+'WhiteHeartIcon';
+        heartIcon.id = 'post'+index+'WhiteHeartIcon';
         heartIcon.classList.add('hidden');
         heartIcon.src = '/images/whiteHeartIcon.png';
         heartIcon.style.objectFit = 'contain';
@@ -539,18 +621,18 @@ function createDOMElementsForProfileUserPosts() {
         postDiv.appendChild(heartIcon);
 
         const numLikesElement = document.createElement('b');
-        numLikesElement.id = 'post'+counter+'NumLikes';
+        numLikesElement.id = 'post'+index+'NumLikes';
         numLikesElement.classList.add('hidden');
         numLikesElement.style.color = 'white';
         numLikesElement.style.position = 'absolute';
         numLikesElement.style.left = '33%';
         numLikesElement.style.top = '47%';
-        numLikesElement.textContent = 22;
+        numLikesElement.textContent =  post['numLikes'];
         
         postDiv.appendChild(numLikesElement);
 
         const commentIcon = document.createElement('img');
-        commentIcon.id = 'post'+counter+'WhiteCommentIcon';
+        commentIcon.id = 'post'+index+'WhiteCommentIcon';
         commentIcon.classList.add('hidden');
         commentIcon.src = '/images/whiteCommentIcon.png';
         commentIcon.style.objectFit = 'contain';
@@ -563,13 +645,13 @@ function createDOMElementsForProfileUserPosts() {
         postDiv.appendChild(commentIcon);
 
         const numCommentsElement = document.createElement('b');
-        numCommentsElement.id = 'post'+counter+'NumComments'
+        numCommentsElement.id = 'post'+index+'NumComments'
         numCommentsElement.classList.add('hidden');
         numCommentsElement.style.color = 'white';
         numCommentsElement.style.position = 'absolute';
         numCommentsElement.style.left = '65%';
         numCommentsElement.style.top = '47%';
-        numCommentsElement.textContent = 4;
+        numCommentsElement.textContent = post['numComments'];
         
         postDiv.appendChild(numCommentsElement);
 
