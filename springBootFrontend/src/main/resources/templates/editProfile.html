@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit profile</title>
+    <link th:href="@{/images/favicon.ico}" rel="icon" type="image/x-icon">
+    <link th:href="@{/styles/editProfile.css}" rel="stylesheet">
+</head>
+
+<body>
+    <!--Left sidebar-->
+    <div id="leftSidebar" style="height: 100%; width: 12%; border-style: solid; position: fixed; overflow-y: scroll; border-top: none;
+    border-left: none; border-bottom: none; border-width: 0.01em; border-color: gray; display: flex; flex-direction: column;
+    align-items: start; padding: 0.5em 1em;">
+        <h1 style="font-family: Billabong; font-size:2.4em;">Megagram</h1>
+
+        <div onclick="takeUserHome()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/homeIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Home</p>
+        </div>
+
+        <div onclick="takeUserToSearch()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/searchIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Search</p>
+        </div>
+
+        <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/exploreIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Explore</p>
+        </div>
+
+        <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/reelsIcon2.png}" style="object-fit: contain; height: 2.1em; width: 2.1em;">
+            <p>Reels</p>
+        </div>
+
+        <div onclick="takeUserToMessages()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/messagesIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Messages</p>
+        </div>
+
+        <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/blankHeart.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Notifications</p>
+        </div>
+
+        <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/createIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Create</p>
+        </div>
+
+        <div onclick="takeUserToOwnProfile()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img id="profileIconInLeftSidebar" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Profile</p>
+        </div>
+
+
+        <div style="position: relative; height: 90%;">
+            <div class="hoverableElement" style="position: absolute; top: 90%; display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; height: 7.25em; border-radius: 0.85em; position: relative;">
+                <img th:src="@{/images/moreIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+                <p id="toggleLeftSidebarPopupMoreOrLessText" onclick="toggleLeftSidebarPopup()">More</p>
+
+                <div class="hidden" id="leftSidebarPopup" style="background-color: white; border-style: solid; position: absolute;
+                top: -200%; left: -6%; width: 85%; padding: 0.5em 1em; border-radius: 0.85em; overflow-y: scroll">
+                    <p style="border-style: solid; border-color: lightgray; border-top: none; border-left: none; border-right: none;">Settings</p>
+                    <p style="border-style: solid; border-color: lightgray; border-top: none; border-left: none; border-right: none;">Your Activity</p>
+                    <p style="border-style: solid; border-color: lightgray; border-top: none; border-left: none; border-right: none;">Saved</p>
+                    <p onclick="takeUserToLogin()" style="border-style: solid; border-color: lightgray; border-top: none; border-left: none; border-right: none;">Switch accounts</p>
+                    <p style="border-style: solid; border-color: lightgray; border-top: none; border-left: none; border-right: none;">Log out</p>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!--Main Section-->
+    <div id="mainSection" style="display: flex; flex-direction: column; margin-left: 20%; height: 75em; width: 80%;">
+        <h2>Edit profile</h2>
+
+        <br>
+
+        <div style="display: flex; align-items: center; justify-content: space-between; background-color: #f7f7f7; border-radius: 0.87em;
+        width: 80%; padding: 1em 1.8em; cursor: pointer;">
+
+            <div style="display: flex; align-items: center; gap: 1em;">
+                <img id="authUserProfilePhoto" th:src="@{/images/profilePhoto.png}" style="height: 3em; width: 3em; object-fit: contain;">
+                <div style="display: flex; flex-direction: column; margin-top: 0.7em;">
+                    <p th:text="${authenticatedUsername}" style="font-weight: bold"></p>
+                    <p id="fullNameInTopDiv" style="color: gray; margin-top: 0.2em;">rishav ray</p>
+                </div>
+            </div>
+
+            <button type="button" class="blueButton">Change photo</button>
+
+        </div>
+
+        <br>
+
+        <h3>Full-Name</h3>
+        <textarea id="fullNameTextarea" style="font-family: Arial; resize: none; padding-top: 1em; padding-right: 1em;
+        padding-left: 1em; width: 82%; background-color: #f7f7f7; border-radius: 0.87em; font-size: 1em;"></textarea>
+
+        <br>
+        <br>
+
+        <h3>Website</h3>
+        <textarea id="websiteTextarea" placeholder="https://therock.komi.io/" style="font-family: Arial; resize: none; padding-top: 1em; padding-right: 1em;
+        padding-left: 1em; width: 82%; background-color: #f7f7f7; border-radius: 0.87em; font-size: 1em;"></textarea>
+
+        <br>
+        <br>
+
+        <h3>Bio</h3>
+        <textarea id="bioTextarea" placeholder="its about drive its about power we stay hungry we devour" style="font-family: Arial; resize: none; padding-top: 1em; padding-right: 1em;
+        padding-left: 1em; width: 82%; height: 12%; background-color: #f7f7f7; border-radius: 0.87em; font-size: 1em;" maxlength="250"></textarea>
+        <div style="width: 86%; display: flex; justify-content: flex-end;">
+            <p style="font-size: 0.9em; color: gray;"><span id="numCharactersInBio">0</span>/250</p>
+        </div>
+
+        <h3>Account Based-In</h3>
+        <textarea id="accountBasedInTextarea" style="font-family: Arial; resize: none; padding-top: 1em; padding-right: 1em;
+        padding-left: 1em; width: 82%; background-color: #f7f7f7; border-radius: 0.87em; font-size: 1em;"></textarea>
+
+        <br>
+        <br>
+        
+        <h3>Account-Visibility</h3>
+        <select id="accountVisibilitySelection" name="visibility" style="width: 12%; padding: 0.5em 1em; background-color: #f7f7f7;">
+        </select>
+
+        <br>
+        <br>
+
+        <b style="color: red; font-size: 0.9em; cursor: pointer;">Delete account</b>
+
+        <br>
+        <br>
+
+        <div style="width: 80%; display: flex; justify-content: center;">
+            <p id="userAlreadyExists" class="hidden" style="color: white; background-color: black; width: 17%; text-align: center;">Error: username already taken.</p>
+            <p id="submissionErrorMessage1" class="hidden" style="color: white; background-color: black; width: 17%; text-align: center;">You didn't change anything!</p>
+            <p id="submissionErrorMessage2" class="hidden" style="color: white; background-color: black; width: 17%; text-align: center;">Error saving changes</p>
+            <p id="submissionSuccessMessage" class="hidden" style="color: white; background-color: black; width: 17%; text-align: center;">Changes successfully made</p>
+            <button id="submitButton" onclick="onSubmit()" type="button" class="blueButton" style="width: 32%;">Submit</button>
+        </div>
+
+
+    </div>
+
+    <div id="accountNotFoundOrBlocksYou" class="hidden">
+        <h1>404 - Page Not Found</h1>
+        <p>Sorry, but the page you are looking for does not exist.</p>
+        <a href="http://localhost:3100">Go Back Home</a>
+    </div>
+
+
+    <p id="authenticatedUsername" class="hidden" th:text="${authenticatedUsername}"></p>
+    <script th:src="@{/scripts/editProfile.js}"></script>
+</body>
+
+</html>

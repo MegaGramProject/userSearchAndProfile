@@ -34,7 +34,7 @@ const optionToBlockOrUnblock = document.getElementById('optionToBlockOrUnblock')
 const followedByText = document.getElementById('followedByText');
 const blackScreenForLeftSidebar = document.getElementById('blackScreenForLeftSidebar');
 const blackScreenForMainSection = document.getElementById('blackScreenForMainSection');
-const accountIsPrivateOrHasNoPosts = document.getElementById('accountIsPrivateOrHasNoPosts');
+const accountIsPrivate = document.getElementById('accountIsPrivate');
 const aboutAccountPopup = document.getElementById('aboutAccountPopup');
 const aboutAccountProfilePhoto = document.getElementById('aboutAccountProfilePhoto');
 const aboutAccountUsername = document.getElementById('aboutAccountUsername');
@@ -44,7 +44,18 @@ const aboutAccountBasedIn = document.getElementById('aboutAccountBasedIn');
 const aboutAccountShowIfVerifiedDiv = document.getElementById('aboutAccountShowIfVerifiedDiv');
 const profilePhotoAtTop = document.getElementById('profilePhotoAtTop');
 const postOrPostsText = document.getElementById('postOrPostsText');
-const imageGrid = document.getElementById('imageGrid');
+const imageGridForProfileUserPosts = document.getElementById('imageGridForProfileUserPosts');
+const imageGridForReels = document.getElementById('imageGridForReels');
+const imageGridForTaggedPosts = document.getElementById('imageGridForTaggedPosts');
+const noProfileUserPosts = document.getElementById('noProfileUserPosts');
+const noProfileUserReels = document.getElementById('noProfileUserReels');
+const noProfileUserTaggedPosts = document.getElementById('noProfileUserTaggedPosts');
+const editProfileButton = document.getElementById('editProfileButton');
+const messageProfileUserButton = document.getElementById('messageProfileUserButton');
+const optionsDot = document.getElementById('optionsDot');
+const seeOwnSavedPosts = document.getElementById('seeOwnSavedPosts');
+const toggleLeftSidebarPopupMoreOrLessText = document.getElementById('toggleLeftSidebarPopupMoreOrLessText');
+const profileIconInLeftSidebar = document.getElementById('profileIconInLeftSidebar');
 
 let authenticatedUsername = "";
 let displayLeftSidebarPopup = false;
@@ -71,6 +82,8 @@ let flattenedListOfFollowingsAndFollowers = [];
 let profileUserPosts = [];
 let profileUserReels = [];
 let profileUserTaggedPosts = [];
+let haveReelDOMElementsBeenCreated = false;
+let haveTaggedPostDOMElementsBeenCreated = false;
 
 
 async function authenticateUserAndFetchData() {
@@ -104,8 +117,6 @@ async function authenticateUserAndFetchData() {
     const isAuth = await response.json();
     if(isAuth) {
         authenticatedUsername = username;
-        `fetchRecentSearchesOfAuthenticatedUser();
-        return;
     }
     else {
         const data = {'username':username};
@@ -135,8 +146,6 @@ async function authenticateUserAndFetchData() {
             const isAuth = await response.json();
             if(isAuth) {
                 authenticatedUsername = username;
-                fetchRecentSearchesOfAuthenticatedUser();
-                return;
             }
         }
         else if(response2Data === "Invalid refresh token for username") {
@@ -166,8 +175,6 @@ async function authenticateUserAndFetchData() {
                 const isAuth = await response.json();
                 if(isAuth) {
                     authenticatedUsername = username;
-                    fetchRecentSearchesOfAuthenticatedUser();
-                    return;
                 }
                 }
             }
@@ -190,9 +197,8 @@ async function authenticateUserAndFetchData() {
         throw new Error('Network response not ok');
     }
     let profilePhotoBlob = await response1.blob();
-    relevantProfileUserInfo['profilePhotoString'] = URL.createObjectURL(profilePhotoBlob);;
+    relevantProfileUserInfo['profilePhotoString'] = URL.createObjectURL(profilePhotoBlob);
     
-
 
     const response2 = await fetch('http://localhost:8013/graphql', {
     method: 'POST',
@@ -246,6 +252,7 @@ async function authenticateUserAndFetchData() {
     profileFullName.textContent = relevantProfileUserInfo['fullName'];
     profilePhotoAtTop.src = relevantProfileUserInfo['profilePhotoString'];
     aboutAccountProfilePhoto.src = relevantProfileUserInfo['profilePhotoString'];
+    profileIconInLeftSidebar.src = relevantProfileUserInfo['profilePhotoString'];
     if(relevantProfileUserInfo['isVerified']) {
         aboutAccountVerifiedIcon.classList.remove('hidden');
         aboutAccountShowIfVerifiedDiv.classList.remove('hidden');
@@ -285,7 +292,14 @@ async function authenticateUserAndFetchData() {
     profileUserFollowing = followingsData[2];
     profileUserNumFollowers.textContent = formatNumber(profileUserFollowers.length);
     profileUserNumFollowings.textContent = formatNumber(profileUserFollowing.length);
-    if(authenticatedUserFollowing.includes(profileUsername)) {
+
+    if(authenticatedUsername===profileUsername) {
+        editProfileButton.classList.remove('hidden');
+        messageProfileUserButton.classList.add('hidden');
+        seeOwnSavedPosts.classList.remove('hidden');
+        optionsDot.classList.add('hidden');
+    }
+    else if(authenticatedUserFollowing.includes(profileUsername)) {
         followingButton.classList.remove('hidden')
         isFollowingUser = true;
     }
@@ -294,12 +308,13 @@ async function authenticateUserAndFetchData() {
         followButton.classList.remove('hidden');
         if(relevantProfileUserInfo['isPrivate']) {
             postsReelsTaggedSection.classList.add('hidden');
-            accountIsPrivateOrHasNoPosts.classList.remove('hidden');
-            accountIsPrivateOrHasNoPosts.getElementsByTagName('img')[0].classList.remove('hidden');
-            accountIsPrivateOrHasNoPosts.getElementsByTagName('b')[0].classList.remove('hidden');
-            accountIsPrivateOrHasNoPosts.getElementsByTagName('p')[0].classList.remove('hidden');
+            accountIsPrivate.classList.remove('hidden');
+            accountIsPrivate.getElementsByTagName('img')[0].classList.remove('hidden');
+            accountIsPrivate.getElementsByTagName('b')[0].classList.remove('hidden');
+            accountIsPrivate.getElementsByTagName('p')[0].classList.remove('hidden');
         }
     }
+
     mutualFollowers = authenticatedUserFollowing.filter(x=>profileUserFollowers.includes(x));
     if(mutualFollowers.length==1) {
         followedByText.getElementsByTagName('span')[0].textContent = mutualFollowers[0];
@@ -434,7 +449,6 @@ async function authenticateUserAndFetchData() {
         postMappings['usernames'] = vidInCurrPost['usernames']; //same for all slides of post
         postMappings['postId'] = vidInCurrPost['overallPostId']; //same for all slides of post
         profileUserPosts.push(postMappings);
-        delete postIdToVideoMappings[postId];
     }
 
     profileUserNumPosts.textContent = profileUserPosts.length;
@@ -445,10 +459,7 @@ async function authenticateUserAndFetchData() {
         postOrPostsText.textContent = 'post';
     }
     if(profileUserPosts.length==0) {
-        postsReelsTaggedSection.classList.add('hidden');
-        accountIsPrivateOrHasNoPosts.classList.remove('hidden');
-        accountIsPrivateOrHasNoPosts.getElementsByTagName('img')[1].classList.remove('hidden');
-        accountIsPrivateOrHasNoPosts.getElementsByTagName('h2')[0].classList.remove('hidden');
+        noProfileUserPosts.classList.remove('hidden');
     }
 
     //then fetch reels
@@ -499,6 +510,10 @@ function takeUserHome() {
     window.location.href = "http://localhost:3100/" + authenticatedUsername;
 }
 
+function takeUserToEditProfile() {
+    window.location.href = "http://localhost:8019/editProfile/"+authenticatedUsername;
+}
+
 function takeUserToSearch() {
     window.location.href = "http://localhost:8019/search/" + authenticatedUsername;
 }
@@ -511,9 +526,11 @@ function toggleLeftSidebarPopup() {
     displayLeftSidebarPopup = !displayLeftSidebarPopup;
     if(displayLeftSidebarPopup) {
         leftSidebarPopup.classList.remove('hidden');
+        toggleLeftSidebarPopupMoreOrLessText.textContent = 'Less';
     }
     else {
         leftSidebarPopup.classList.add('hidden');
+        toggleLeftSidebarPopupMoreOrLessText.textContent = 'More';
     }
 
 }
@@ -532,7 +549,7 @@ function createDOMElementsForProfileUserPosts() {
         counter++;
         index++;
         if(counter>3) {
-            imageGrid.appendChild(newRowDiv);
+            imageGridForProfileUserPosts.appendChild(newRowDiv);
             counter=1;
             newRowDiv = document.createElement('div');
             newRowDiv.style.display = 'flex';
@@ -659,7 +676,7 @@ function createDOMElementsForProfileUserPosts() {
 
     }
 
-    imageGrid.appendChild(newRowDiv);
+    imageGridForProfileUserPosts.appendChild(newRowDiv);
 }
 
 function takeUserToOwnProfile() {
@@ -834,22 +851,35 @@ function showReels() {
             postsGridIcon2.classList.add('hidden');
             postsText.style['color'] = "";
             postsText.style['font-size'] = "";
+            imageGridForProfileUserPosts.classList.add('hidden');
+            noProfileUserPosts.classList.add('hidden');
         }
         else if(currentlyShownSection==='TAGGED') {
             taggedPostsIcon.classList.remove('hidden');
             taggedPostsIcon2.classList.add('hidden');
             taggedText.style['color'] = "";
             taggedText.style['font-size'] = "";
+            imageGridForTaggedPosts.classList.add('hidden');
+            noProfileUserTaggedPosts.classList.add('hidden');
         }
-
         reelsIcon.classList.add('hidden');
         reelsIcon2.classList.remove('hidden');
         reelsText.style['color'] = "black";
         reelsText.style['font-size'] = "1.15em";
         currentlyShownSection = 'REELS';
-    }
-    else {
-        //refresh the reels
+
+
+        if(!haveReelDOMElementsBeenCreated) {
+            profileUserReels = [];
+            haveReelDOMElementsBeenCreated = true;
+        }
+        if(profileUserReels.length>0) {
+            imageGridForReels.classList.remove('hidden');
+        }
+        else {
+            noProfileUserReels.classList.remove('hidden');
+        }
+
     }
 }
 
@@ -860,12 +890,17 @@ function showPosts() {
             reelsIcon2.classList.add('hidden');
             reelsText.style['color'] = "";
             reelsText.style['font-size'] = "";
+            imageGridForReels.classList.add('hidden');
+            noProfileUserReels.classList.add('hidden');
+
         }
         else if(currentlyShownSection==='TAGGED') {
             taggedPostsIcon.classList.remove('hidden');
             taggedPostsIcon2.classList.add('hidden');
             taggedText.style['color'] = "";
             taggedText.style['font-size'] = "";
+            imageGridForTaggedPosts.classList.add('hidden');
+            noProfileUserTaggedPosts.classList.add('hidden');
         }
 
         postsGridIcon.classList.add('hidden');
@@ -873,26 +908,34 @@ function showPosts() {
         postsText.style['color'] = "black";
         postsText.style['font-size'] = "1.15em";
         currentlyShownSection = 'POSTS';
-    }
-    else {
-        //refresh the posts
+
+        if(profileUserPosts.length>0) {
+            imageGridForProfileUserPosts.classList.remove('hidden');
+        }
+        else {
+            noProfileUserPosts.classList.remove('hidden');
+        }
     }
 
 }
 
-function showTaggedPosts() {
+async function showTaggedPosts() {
     if(currentlyShownSection!=='TAGGED') {
         if(currentlyShownSection==='REELS') {
             reelsIcon.classList.remove('hidden');
             reelsIcon2.classList.add('hidden');
             reelsText.style['color'] = "";
             reelsText.style['font-size'] = "";
+            imageGridForReels.classList.add('hidden');
+            noProfileUserReels.classList.add('hidden');
         }
         else if(currentlyShownSection==='POSTS') {
             postsGridIcon.classList.remove('hidden');
             postsGridIcon2.classList.add('hidden');
             postsText.style['color'] = "";
             postsText.style['font-size'] = "";
+            imageGridForProfileUserPosts.classList.add('hidden');
+            noProfileUserPosts.classList.add('hidden');
         }
 
         taggedPostsIcon.classList.add('hidden');
@@ -900,10 +943,243 @@ function showTaggedPosts() {
         taggedText.style['color'] = "black";
         taggedText.style['font-size'] = "1.15em";
         currentlyShownSection = 'TAGGED';
+        imageGridForTaggedPosts.classList.remove('hidden');
+
+        if(!haveTaggedPostDOMElementsBeenCreated) {
+            const response = await fetch('http://localhost:8003/getTaggedPosts/'+profileUsername);
+            if(!response.ok) {
+                throw new Error('Network response not ok');
+            }
+            const taggedPosts = await response.json();
+
+            const response2 = await fetch('http://localhost:8004/getTaggedVideos/'+profileUsername);
+            if(!response2.ok) {
+                throw new Error('Network response not ok');
+            }
+            const taggedVideos = await response2.json();
+
+            const postIdToTaggedVideoMappings = {}; //key: postId, value: taggedVideoForThatPostId
+            for(let taggedVideo of taggedVideos) {
+                postIdToTaggedVideoMappings[taggedVideo['postId']] = taggedVideo;
+            }
+
+            let listOfPostIds = [];
+            for(let taggedPost of taggedPosts) {
+                const postId = taggedPost['postId'];
+                let taggedPostInfo = {};
+                if(postId in postIdToTaggedVideoMappings) {
+                    if(taggedPost['smallestSlideNumberWhereUserIsTagged'] > postIdToTaggedVideoMappings[postId]['smallestSlideNumberWhereUserIsTagged']) {
+                        taggedPostInfo = postIdToTaggedVideoMappings[postId];
+                        const response = await fetch('http://localhost:8004/getVideo/'+postIdToTaggedVideoMappings[postId]['videoId']);
+                        if(!response.ok) {
+                            throw new Error('Network response not ok');
+                        }
+                        const videoBlob = await response.blob();
+                        const videoURL = URL.createObjectURL(videoBlob);
+                        taggedPostInfo['videoURL'] = videoURL;
+                    }
+                    else {
+                        taggedPostInfo = taggedPost;
+                        taggedPostInfo['slideImage'] = 'data:image/png;base64,'+ taggedPostInfo['slideImage']
+                    }
+                    delete postIdToTaggedVideoMappings[postId];
+                }
+                else {
+                    taggedPostInfo = taggedPost;
+                    taggedPostInfo['slideImage'] = 'data:image/png;base64,'+ taggedPostInfo['slideImage']
+                }
+                profileUserTaggedPosts.push(taggedPostInfo);
+                listOfPostIds.push(postId);
+            }
+
+            //some tagged videos may not be associated with an image-post
+            for(let postId of Object.keys(postIdToTaggedVideoMappings)) {
+                const response = await fetch('http://localhost:8004/getVideo/'+postIdToTaggedVideoMappings[postId]['videoId']);
+                if(!response.ok) {
+                    throw new Error('Network response not ok');
+                }
+                const videoBlob = await response.blob();
+                const videoURL = URL.createObjectURL(videoBlob);
+                let taggedPostInfo = postIdToTaggedVideoMappings[postId];
+                taggedPostInfo['videoURL'] = videoURL;
+                profileUserTaggedPosts.push(taggedPostInfo);
+                listOfPostIds.push(postId);
+            }
+
+            if(listOfPostIds.length>0) {
+                    const response8 = await fetch('http://localhost:8004/getNumLikesAndCommentsOfMultiplePosts', { //numComments also includes replies
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        listOfPostIds: listOfPostIds
+                    })
+                    });
+                    if(!response8.ok) {
+                        throw new Error('Network response not ok');
+                    }
+                    let postIdToNumLikesMappings = await response8.json(); //key: postId, value: [numLikesOfPost, numCommentsOfPost]
+                    for(let post of profileUserTaggedPosts) {
+                        if(post['postId'] in postIdToNumLikesMappings) {
+                            post['numLikes'] = postIdToNumLikesMappings[post['postId']][0];
+                            if(postIdToNumLikesMappings[post['postId']].length==2) {
+                                post['numComments'] = postIdToNumLikesMappings[post['postId']][1];
+                            }
+                            else {
+                                postIdToNumLikesMappings[post['postId']].push(0);
+                                post['numComments'] = 0;
+                            }
+                        }
+                        else {
+                            postIdToNumLikesMappings[post['postId']] = [0,0];
+                            post['numLikes'] = 0;
+                            post['numComments'] = 0;
+                        }
+                    }
+                    profileUserTaggedPosts.sort((a, b) => new Date(b['dateTimeOfPost']) - new Date(a['dateTimeOfPost']));
+                    createDOMElementsForTaggedPosts();
+                }
+                haveTaggedPostDOMElementsBeenCreated = true;
+            }
+
+        if(profileUserTaggedPosts.length>0) {
+            imageGridForTaggedPosts.classList.remove('hidden');
+        }
+        else{
+            noProfileUserTaggedPosts.classList.remove('hidden');
+        }
+            
     }
-    else {
-        //refresh the reels
+
+}
+
+async function createDOMElementsForTaggedPosts() {
+    let counter = 0;
+    let index=0;
+    let newRowDiv = document.createElement('div');
+    newRowDiv.style.display = 'flex';
+    newRowDiv.style.justifyContent = 'start';
+    newRowDiv.style.alignItems = 'center';
+    newRowDiv.style.width = '100%';
+    newRowDiv.style.gap = '0.4em';
+
+    for(let taggedPost of profileUserTaggedPosts) {
+        counter++;
+        index++;
+        if(counter>3) {
+            imageGridForTaggedPosts.appendChild(newRowDiv);
+            counter=1;
+            newRowDiv = document.createElement('div');
+            newRowDiv.style.display = 'flex';
+            newRowDiv.style.justifyContent = 'start';
+            newRowDiv.style.alignItems = 'center';
+            newRowDiv.style.width = '100%';
+            newRowDiv.style.gap = '0.4em';
+        }
+
+        const postDiv = document.createElement('div');
+        postDiv.style.position = 'relative';
+        postDiv.style.width = '37%';
+
+        const imgOfFirstSlideOfPost = document.createElement('img');
+        imgOfFirstSlideOfPost.id = 'taggedPost'+index;
+        imgOfFirstSlideOfPost.style.cursor = 'pointer';
+        imgOfFirstSlideOfPost.style.height = '20em';
+        imgOfFirstSlideOfPost.style.width = '100%';
+
+        if('slideImage' in taggedPost) {
+            //first slide is an image
+            imgOfFirstSlideOfPost.src = taggedPost['slideImage'];
+        }
+        else {
+            //first slide is a video
+            const video = document.createElement('video');
+            video.src = taggedPost['videoURL'];
+
+            video.muted = true;
+
+            video.addEventListener('loadeddata', () => {
+                video.currentTime = 5;
+            });
+
+            video.addEventListener('seeked', () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                const imageDataUrl = canvas.toDataURL('image/png');
+
+                imgOfFirstSlideOfPost.src = imageDataUrl;
+            });
+        }
+
+        imgOfFirstSlideOfPost.onmouseenter = (() => {
+            const currentIndex = index;
+            return () => showNumLikesAndCommentsOfPost('taggedPost' + currentIndex);
+        })();
+        
+        imgOfFirstSlideOfPost.onmouseleave = (() => {
+            const currentIndex = index;
+            return () => hideNumLikesAndCommentsOfPost('taggedPost' + currentIndex);
+        })();
+        
+        postDiv.appendChild(imgOfFirstSlideOfPost);
+
+        const heartIcon = document.createElement('img');
+        heartIcon.id = 'taggedPost'+index+'WhiteHeartIcon';
+        heartIcon.classList.add('hidden');
+        heartIcon.src = '/images/whiteHeartIcon.png';
+        heartIcon.style.objectFit = 'contain';
+        heartIcon.style.height = '2em';
+        heartIcon.style.width = '2em';
+        heartIcon.style.position = 'absolute';
+        heartIcon.style.left = '20%';
+        heartIcon.style.top = '45%';
+        
+        postDiv.appendChild(heartIcon);
+
+        const numLikesElement = document.createElement('b');
+        numLikesElement.id = 'taggedPost'+index+'NumLikes';
+        numLikesElement.classList.add('hidden');
+        numLikesElement.style.color = 'white';
+        numLikesElement.style.position = 'absolute';
+        numLikesElement.style.left = '33%';
+        numLikesElement.style.top = '47%';
+        numLikesElement.textContent = taggedPost['numLikes'];
+        
+        postDiv.appendChild(numLikesElement);
+
+        const commentIcon = document.createElement('img');
+        commentIcon.id = 'taggedPost'+index+'WhiteCommentIcon';
+        commentIcon.classList.add('hidden');
+        commentIcon.src = '/images/whiteCommentIcon.png';
+        commentIcon.style.objectFit = 'contain';
+        commentIcon.style.height = '2em';
+        commentIcon.style.width = '2em';
+        commentIcon.style.position = 'absolute';
+        commentIcon.style.left = '53%';
+        commentIcon.style.top = '45%';
+        
+        postDiv.appendChild(commentIcon);
+
+        const numCommentsElement = document.createElement('b');
+        numCommentsElement.id = 'taggedPost'+index+'NumComments'
+        numCommentsElement.classList.add('hidden');
+        numCommentsElement.style.color = 'white';
+        numCommentsElement.style.position = 'absolute';
+        numCommentsElement.style.left = '65%';
+        numCommentsElement.style.top = '47%';
+        numCommentsElement.textContent = taggedPost['numComments'];
+        
+        postDiv.appendChild(numCommentsElement);
+
+        newRowDiv.appendChild(postDiv);
+
     }
+
+    imageGridForTaggedPosts.appendChild(newRowDiv);
 
 }
 

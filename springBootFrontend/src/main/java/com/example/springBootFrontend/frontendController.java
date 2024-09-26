@@ -26,4 +26,11 @@ public class frontendController {
         model.addAttribute("profileUsername", profileUsername);
         return "profilePage";
     }
+
+    @GetMapping("/editProfile/{authenticatedUsername}")
+    public String editProfile(@PathVariable String authenticatedUsername, Model model) {
+        model.addAttribute("authenticatedUsername", authenticatedUsername);
+        return "editProfile";
+    }
+
 }

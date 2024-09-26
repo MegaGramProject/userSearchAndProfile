@@ -58,16 +58,16 @@
 
         <div onclick="takeUserToOwnProfile()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/homeIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <img id="profileIconInLeftSidebar" th:src="@{/images/homeIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
             <p>Profile</p>
         </div>
 
 
         <div style="position: relative; height: 90%;">
-            <div onclick="toggleLeftSidebarPopup()" class="hoverableElement" style="position: absolute; top: 90%; display: flex; align-items: center; padding: 0.5em 0.35em;
+            <div class="hoverableElement" style="position: absolute; top: 90%; display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; height: 7.25em; border-radius: 0.85em; position: relative;">
                 <img th:src="@{/images/moreIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
-                <p>More</p>
+                <p id="toggleLeftSidebarPopupMoreOrLessText" onclick="toggleLeftSidebarPopup()">More</p>
 
                 <div class="hidden" id="leftSidebarPopup" style="background-color: white; border-style: solid; position: absolute;
                 top: -200%; left: -6%; width: 85%; padding: 0.5em 1em; border-radius: 0.85em; overflow-y: scroll">
@@ -106,12 +106,16 @@
                     <button onclick="toggleFollow()" id="followingButton" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
                     margin-left: 1.2em; border-radius: 0.4em; font-weight:bold;">Following</button>
 
-                    <button onclick="messageUser()" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
+                    <button id="editProfileButton" onclick="takeUserToEditProfile()" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
+                    margin-left: 2.5em; border-radius: 0.4em; font-weight:bold;">Edit profile</button>
+
+                    <button id="messageProfileUserButton" onclick="messageUser()" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
                     margin-left: 1.2em; border-radius: 0.4em; font-weight:bold;">Message</button>
 
                     <button id="showSimilarAccountsIcon" onclick="toggleSimilarAccounts()" type="button" style="border-radius: 0.4em; cursor: pointer; margin-left: 1.2em; border-style: none;"> <img th:src="@{/images/showSimilarAccountsIcon.png}" style="object-fit: contain; height: 1.7em; width: 1.7em;"></button>
                     <button id="showSimilarAccountsIcon2" onclick="toggleSimilarAccounts()" type="button" class="hidden" style="border-radius: 0.4em; cursor: pointer; margin-left: 1.2em; border-style: none;"> <img th:src="@{/images/showSimilarAccountsIcon2.png}" style="object-fit: contain; height: 1.7em; width: 1.7em;"></button>
-                    <img th:src="@{/images/optionsDots.png}" onclick="showOptionsPopup()" style="object-fit: contain; height: 1.7em; width: 1.7em; cursor: pointer; margin-left: 1.2em; border-style: none;">
+                    <img id="optionsDot" th:src="@{/images/optionsDots.png}" onclick="showOptionsPopup()" style="object-fit: contain; height: 1.7em; width: 1.7em; cursor: pointer; margin-left: 1.2em; border-style: none;">
+                    <img id="seeOwnSavedPosts" th:src="@{/images/savedPostIcon.png}" class="hidden" style="object-fit: contain; height: 1.7em; width: 1.7em; cursor: pointer; margin-left: 1.2em; border-style: none;">
                 </div>
 
                 <div style="display: flex; align-items: center; gap: 4em;">
@@ -270,37 +274,42 @@
                 </div>
             </div>
 
-            <div id="imageGrid" style="margin-top: 1.4em; display: flex; flex-direction: column; align-items: start; gap: 0.5em;">
+            <div id="imageGridForProfileUserPosts" style="margin-top: 1.4em; display: flex; flex-direction: column; align-items: start; gap: 0.5em;">
+        
+            </div>
 
-                <!--div style="display: flex; justify-content: start; align-items: center; width: 100%; gap: 0.4em;">
-                    <div style="position: relative; width: 37%;">
-                        <img id="post1" onmouseenter="showNumLikesAndCommentsOfPost('post1')" onmouseleave="hideNumLikesAndCommentsOfPost('post1')"  th:src="@{/images/sampleImage.jpg}"
-                        style="cursor: pointer; height: 20em; width: 100%;">
-                        <img th:src="@{/images/whiteReelsIcon.png}" style="position: absolute; left: 87%; top: 3%; height: 1.9em; width: 1.9em; object-fit: contain;">
-                        <img id="post1WhiteHeartIcon" class="hidden" th:src="@{/images/whiteHeartIcon.png}" style="object-fit: contain; height: 2em; width: 2em; position: absolute;
-                        left: 20%; top: 45%;">
-                        <b id="post1NumLikes" class="hidden" style="color: white; position: absolute; left: 33%; top: 47%;">251K</b>
-                        <img id="post1WhiteCommentIcon" class="hidden" th:src="@{/images/whiteCommentIcon.png}" style="object-fit: contain; height: 2em; width: 2em; position: absolute;
-                        left: 53%; top: 45%;">
-                        <b id="post1NumComments" class="hidden" style="color: white; position: absolute; left: 65%; top: 47%;">1,821</b>
-                    </div>
-                
-                </div-->
-
+            <div id="imageGridForReels" class="hidden" style="margin-top: 1.4em; display: flex; flex-direction: column; align-items: start; gap: 0.5em;">
 
             </div>
 
+            <div id="imageGridForTaggedPosts" class="hidden" style="margin-top: 1.4em; display: flex; flex-direction: column; align-items: start; gap: 0.5em;">
+
+            </div>
+
+            <div class="hidden" id="noProfileUserPosts" style="display: flex; flex-direction: column; width: 100%; justify-content: center; align-items: center; height: 35em;">
+                <img th:src="@{/images/cameraInCircleIcon.png}" style="pointer-events: none; height: 6.8em; width: 6.8em; object-fit: contain;">
+                <h2>No Posts Yet</h2>
+            </div>
+
+            <div class="hidden" id="noProfileUserReels" style="display: flex; flex-direction: column; width: 100%; justify-content: center; align-items: center; height: 35em;">
+                <img th:src="@{/images/reelsIcon3.png}" style="pointer-events: none; height: 6.2em; width: 6.2em; object-fit: contain;">
+                <h2>No Reels Yet</h2>
+            </div>
+
+            <div class="hidden" id="noProfileUserTaggedPosts" style="display: flex; flex-direction: column; width: 100%; justify-content: center; align-items: center; height: 35em;">
+                <img th:src="@{/images/taggedPostsIcon3.png}" style="pointer-events: none; height: 6.8em; width: 6.8em; object-fit: contain;">
+                <h2>No Tagged Posts Yet</h2>
+            </div>
+
+
         </div>
 
-        <!--Posts/Reels/Tagged Section for When the Account is Private or Has no Posts-->
-        <div id="accountIsPrivateOrHasNoPosts" class="hidden" style="border-style: solid; border-bottom: none; border-left: none; border-right: none; border-color: lightgray;
+        <!--Posts/Reels/Tagged Section for When the Account is Private-->
+        <div id="accountIsPrivate" class="hidden" style="border-style: solid; border-bottom: none; border-left: none; border-right: none; border-color: lightgray;
         border-width: 0.08em; width: 75%; margin-top: 4em; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 28em;">
             <img th:src="@{/images/lockInCircleIcon.png}" class="hidden" style="pointer-events: none; height: 6.3em; width: 6.3em; object-fit: contain;">
             <b class="hidden">This account is private</b>
             <p class="hidden" style="color: gray;">Follow to see their photos and videos.</p>
-
-            <img class="hidden" th:src="@{/images/cameraInCircleIcon.png}" style="pointer-events: none; height: 6.8em; width: 6.8em; object-fit: contain;">
-            <h2 class="hidden">No Posts Yet</h2>
         </div>
 
         <img id="blackScreenForMainSection" th:src="@{/images/blackScreen.png}" class="hidden" style="position: absolute; top: 0%; left: 0%; height: 100%; width: 100%; opacity: 0.7">
