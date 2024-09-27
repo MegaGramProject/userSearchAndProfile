@@ -84,7 +84,7 @@
     </div>
 
     <!--Main Section-->
-    <div id="mainSection" style="display: flex; flex-direction: column; margin-left: 20%; height: 75em; width: 80%;">
+    <div id="mainSection" style="display: flex; flex-direction: column; margin-left: 20%; height: 78em; width: 80%;">
         <h2>Edit profile</h2>
 
         <br>
@@ -93,20 +93,29 @@
         width: 80%; padding: 1em 1.8em; cursor: pointer;">
 
             <div style="display: flex; align-items: center; gap: 1em;">
-                <img id="authUserProfilePhoto" th:src="@{/images/profilePhoto.png}" style="height: 3em; width: 3em; object-fit: contain;">
+                <img id="authUserProfilePhoto" style="height: 3em; width: 3em; object-fit: contain;">
                 <div style="display: flex; flex-direction: column; margin-top: 0.7em;">
                     <p th:text="${authenticatedUsername}" style="font-weight: bold"></p>
-                    <p id="fullNameInTopDiv" style="color: gray; margin-top: 0.2em;">rishav ray</p>
+                    <p id="fullNameInTopDiv" style="color: gray; margin-top: 0.2em;"></p>
                 </div>
             </div>
 
-            <button type="button" class="blueButton">Change photo</button>
+            <button onclick="showChangeProfilePhotoPopup()" type="button" class="blueButton">Change photo</button>
 
         </div>
 
         <br>
 
+        <h3>Username</h3>
+        <small id="usernameError" class="hidden" style="color: red;">**Must be between 1 and 30 characters and only A-Z/a-z/0-9/./_ is allowed.</small>
+        <textarea id="usernameTextarea" style="font-family: Arial; resize: none; padding-top: 1em; padding-right: 1em;
+        padding-left: 1em; width: 82%; background-color: #f7f7f7; border-radius: 0.87em; font-size: 1em;"></textarea>
+
+        <br>
+        <br>
+
         <h3>Full-Name</h3>
+        <small id="fullNameError" class="hidden" style="color: red;">**Must be between 1 and 30 characters and only A-Z/a-z. At-least one-space, but not at the start.</small>
         <textarea id="fullNameTextarea" style="font-family: Arial; resize: none; padding-top: 1em; padding-right: 1em;
         padding-left: 1em; width: 82%; background-color: #f7f7f7; border-radius: 0.87em; font-size: 1em;"></textarea>
 
@@ -141,15 +150,13 @@
         <br>
         <br>
 
-        <b style="color: red; font-size: 0.9em; cursor: pointer;">Delete account</b>
+        <b onclick="showDeleteAccountConfirmationPopup()" style="color: red; font-size: 0.9em; cursor: pointer;">Delete account</b>
 
         <br>
         <br>
 
         <div style="width: 80%; display: flex; justify-content: center;">
-            <p id="userAlreadyExists" class="hidden" style="color: white; background-color: black; width: 17%; text-align: center;">Error: username already taken.</p>
-            <p id="submissionErrorMessage1" class="hidden" style="color: white; background-color: black; width: 17%; text-align: center;">You didn't change anything!</p>
-            <p id="submissionErrorMessage2" class="hidden" style="color: white; background-color: black; width: 17%; text-align: center;">Error saving changes</p>
+            <p id="submissionErrorMessage" class="hidden" style="color: white; background-color: black; width: 17%; text-align: center;"></p>
             <p id="submissionSuccessMessage" class="hidden" style="color: white; background-color: black; width: 17%; text-align: center;">Changes successfully made</p>
             <button id="submitButton" onclick="onSubmit()" type="button" class="blueButton" style="width: 32%;">Submit</button>
         </div>
@@ -164,7 +171,64 @@
     </div>
 
 
+    <img id="darkScreen" class="hidden" th:src="@{/images/blackScreen.png}" style="position: absolute; top: 0%; left: 0%; height: 150%; width: 100%; opacity: 0.7">
+
+    <!--Popups-->
+    <div id="changeProfilePhotoPopup" class="hidden" style="position: absolute; top: 35%; left: 38%; border-radius: 1em; background-color: white; width: 33%; height: 29%; border-style: solid; z-index: 10;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <div style="width: 100%; border-style: solid; border-color: lightgray; border-width:0.12em; text-align: center;
+        border-top: none; border-left: none; border-right: none;">
+            <p style="font-size: 1.4em;">Change profile picture</p>
+        </div>
+
+        <div style="width: 100%; border-style: solid; border-color: lightgray; border-width:0.12em; text-align: center;
+        border-top: none; border-left: none; border-right: none; padding-top: 1em; padding-bottom: 1em;">
+            <b onclick="uploadNewPhoto()" style="color: #2789f2; cursor: pointer;">Upload photo</b>
+        </div>
+
+        <div style="width: 100%; border-style: solid; border-color: lightgray; border-width:0.12em; text-align: center;
+        border-top: none; border-left: none; border-right: none; padding-top: 1em; padding-bottom: 1em;">
+                <b onclick="removeCurrentPhoto()" style="color: red; cursor: pointer;">Remove current photo</b>
+        </div>
+
+        <div style="width: 100%; text-align: center; padding-top: 0.6em; padding-bottom: 0.6em;">
+            <p onclick="closeChangeProfilePhotoPopup()" style="cursor: pointer;">Cancel</p>
+        </div>
+    </div>
+
+    <div id="deleteAccountConfirmationPopup" class="hidden" style="position: absolute; top: 45%; left: 38%; border-radius: 1em; background-color: white; width: 33%; height: 29%; border-style: solid; z-index: 10;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <div style="width: 100%; border-style: solid; border-color: lightgray; border-width:0.12em; text-align: center;
+        border-top: none; border-left: none; border-right: none;">
+            <p style="font-size: 1.4em;">Are you sure?</p>
+            <p style="font-size: 0.8em; color: gray; width: 65%; margin-left: 15%;">This action is irreversible. After deleting, all of your data will be removed. It will appear as though
+            your account never even existed in the first place.</p>
+        </div>
+
+        <div style="width: 100%; border-style: solid; border-color: lightgray; border-width:0.12em; text-align: center;
+        border-top: none; border-left: none; border-right: none; padding-top: 1em; padding-bottom: 1em;">
+                <b onclick="showFinalConfirmationPopup()" style="color: red; cursor: pointer;">Proceed</b>
+        </div>
+
+        <div style="width: 100%; text-align: center; padding-top: 0.6em; padding-bottom: 0.6em;">
+            <p onclick="closeDeleteAccountConfirmationPopup()" style="cursor: pointer;">Cancel</p>
+        </div>
+
+    </div>
+
+    <div id="finalDeleteAccountConfirmationPopup" class="hidden" style="position: absolute; top: 45%; left: 38%; border-radius: 1em; background-color: white; width: 33%; height: 34%; border-style: solid; z-index: 10;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <h2>Last Chance</h2>
+            <p style="color: gray; font-size:0.8em; text-align: center; max-width: 66%;">To finalize the deletion of your account once and for all, enter your username for the last time</p>
+            <textarea id="oneLastUsernameTextarea" placeholder="Sad to see you go!" style="padding-top: 0.75em; padding-left: 0.75em; width: 66%; font-family: Arial; resize: none;"></textarea>
+            <br>
+            <button onclick="deleteAccount()" id="goodbyeButton" class="hidden" style="color: white; background-color: red; font-weight: bold; cursor: pointer; padding: 0.5em 1em; border-radius: 0.8em;">Goodbye</button>
+            <br>
+            <button onclick="closeFinalConfirmationPopup()" id="noWaitCancelbutton" style="color: white; background-color: black; font-weight: bold; cursor: pointer; padding: 0.5em 1em; border-radius: 0.8em;">No wait! Cancel</button>
+    </div>
+
     <p id="authenticatedUsername" class="hidden" th:text="${authenticatedUsername}"></p>
+    <input id="fileInputForProfilePhoto" type="file" class="hidden">
     <script th:src="@{/scripts/editProfile.js}"></script>
 </body>
 

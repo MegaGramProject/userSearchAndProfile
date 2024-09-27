@@ -11,11 +11,18 @@ const accountNotFoundOrBlocksYou = document.getElementById('accountNotFoundOrBlo
 const fullNameInTopDiv = document.getElementById('fullNameInTopDiv');
 const numCharactersInBio = document.getElementById('numCharactersInBio');
 const accountVisibilitySelection = document.getElementById('accountVisibilitySelection');
-const submissionErrorMessage1 = document.getElementById('submissionErrorMessage1');
-const submissionErrorMessage2 = document.getElementById('submissionErrorMessage2');
+const submissionErrorMessage = document.getElementById('submissionErrorMessage');
 const submissionSuccessMessage = document.getElementById('submissionSuccessMessage');
 const submitButton = document.getElementById('submitButton');
-const userAlreadyExists = document.getElementById('userAlreadyExists');
+const changeProfilePhotoPopup = document.getElementById('changeProfilePhotoPopup');
+const darkScreen = document.getElementById('darkScreen');
+const deleteAccountConfirmationPopup = document.getElementById('deleteAccountConfirmationPopup');
+const finalDeleteAccountConfirmationPopup = document.getElementById('finalDeleteAccountConfirmationPopup');
+const oneLastUsernameTextarea = document.getElementById('oneLastUsernameTextarea');
+const goodbyeButton = document.getElementById('goodbyeButton');
+const fileInputForProfilePhoto = document.getElementById('fileInputForProfilePhoto');
+const usernameTextarea = document.getElementById('usernameTextarea');
+const usernameError = document.getElementById('usernameError');
 
 
 let displayLeftSidebarPopup = false;
@@ -23,6 +30,8 @@ let relevantProfileUserInfo = {};
 let userSelectedAccountVisibility = "";
 let originalAccountVisibility = "";
 let authenticatedUsername = "";
+let userSelectedProfilePhoto = null;
+
 
 async function authenticateUserAndFetchData() {
     const username = document.getElementById('authenticatedUsername').textContent;
@@ -119,6 +128,7 @@ async function authenticateUserAndFetchData() {
         return;
     }
     relevantProfileUserInfo = await response.json();
+    usernameTextarea.placeholder = authenticatedUsername;
     fullNameTextarea.placeholder = relevantProfileUserInfo['fullName'];
     fullNameInTopDiv.textContent = relevantProfileUserInfo['fullName'];
     accountBasedInTextarea.placeholder = relevantProfileUserInfo['accountBasedIn'];
@@ -206,9 +216,135 @@ accountVisibilitySelection.addEventListener('change', function() {
     userSelectedAccountVisibility = accountVisibilitySelection.value;
 });
 
+function validateFields() {
+    let isAtLeastOneFieldInvalid = false
+    if(usernameTextarea.value.length>0 && !isUsernameValid()) {
+        usernameError.classList.remove('hidden');
+        isAtLeastOneFieldInvalid = true;
+    }
+    if(fullNameTextarea.value.length>0 && !isFullNameValid()) {
+        fullNameError.classList.remove('hidden');
+        isAtLeastOneFieldInvalid = true;
+    }
+    
+    if(isAtLeastOneFieldInvalid) {
+        submitButton.classList.add('hidden');
+        submissionErrorMessage.textContent = "Please address the error(s) above";
+        submissionErrorMessage.classList.remove('hidden');
+        setTimeout(function() {
+            submitButton.classList.remove('hidden');
+            submissionErrorMessage.classList.add('hidden');
+        }, 3000);
+        return false;
+    }
+    return true;
+}
+
+function isUsernameValid() {
+    let usernameInput = usernameTextarea.value;
+    if (usernameInput.length > 30) {
+        return false;
+    }
+
+    for (let i = 0; i < usernameInput.length; i++) {
+        let char = usernameInput[i];
+        if (!(char >= 'A' && char <= 'Z') && !(char >= 'a' && char <= 'z') &&
+            !(char >= '0' && char <= '9') && char !== '.' && char!="_") {
+            return false;
+        }
+    }
+}
+
+function isFullNameValid() {
+    let fullNameInput = fullNameTextarea.value;
+    if(fullNameInput.length > 30 || fullNameInput[0]===" ") {
+        console.log("A");
+        return false;
+    }
+    if (fullNameInput.indexOf(' ') === -1) {
+        console.log("B");
+        return false;
+    }
+
+    for (let i = 0; i < fullNameInput.length; i++) {
+        let char = fullNameInput[i];
+        if (char !== ' ' && !(char >= 'A' && char <= 'Z') && !(char >= 'a' && char <= 'z')) {
+            console.log("C");
+            return false;
+        }
+    }
+
+    return true;
+}
+
 async function onSubmit() {
     const changedFields = {};
-    
+
+    let areFieldsValidated = validateFields();
+    if(!areFieldsValidated) {
+        return;
+    }
+
+    if(userSelectedProfilePhoto!==null) {
+        const formData = new FormData();
+        if(userSelectedProfilePhoto==='defaultPfp') {
+            const response0 = await fetch('http://localhost:8003/images/defaultPfp.png');
+            const blob = await response0.blob();
+            userSelectedProfilePhoto = new File([blob], 'defaultPfp.png', { type: blob.type });
+        }
+        formData.append('newProfilePhoto', userSelectedProfilePhoto);
+        const response = await fetch('http://localhost:8003/editProfilePhoto/'+authenticatedUsername, {
+            method: 'PATCH',
+            body: formData
+        });
+        if(!response.ok) {
+            submitButton.classList.add('hidden');
+            submissionErrorMessage.textContent = "Couldn't update profile-photo";
+            submissionErrorMessage.classList.remove('hidden');
+            userSelectedProfilePhoto = null;
+            authUserProfilePhoto.src = relevantProfileUserInfo['profilePhotoString'];
+            setTimeout(function() {
+                submitButton.classList.remove('hidden');
+                submissionErrorMessage.classList.add('hidden');
+            }, 3000);
+            return;
+        }
+    }
+
+    if(usernameTextarea.value.length>0 && usernameTextarea.value!==authenticatedUsername) {
+        const response = await fetch('http://localhost:8001/doesUserExist', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                username: usernameTextarea.value
+            })
+        });
+        if(!response.ok) {
+            submitButton.classList.add('hidden');
+            submissionErrorMessage.textContent = "Couldn't check if username is taken or not";
+            submissionErrorMessage.classList.remove('hidden');
+            setTimeout(function() {
+                submitButton.classList.remove('hidden');
+                submissionErrorMessage.classList.add('hidden');
+            }, 3000);
+            return;
+        }
+        const responseData = await response.json();
+        if('userExists' in responseData) {
+            changedFields['username'] = usernameTextarea;
+        }
+        else {
+            submitButton.classList.add('hidden');
+            submissionErrorMessage.textContent = "Username is already taken";
+            submissionErrorMessage.classList.remove('hidden');
+            setTimeout(function() {
+                submitButton.classList.remove('hidden');
+                submissionErrorMessage.classList.add('hidden');
+            }, 3000);
+            return;
+        }
+    }
+
     if(fullNameTextarea.value.length>0 && fullNameTextarea.value!==relevantProfileUserInfo['fullName']) {
         changedFields['fullName'] = fullNameTextarea.value;
     }
@@ -229,13 +365,28 @@ async function onSubmit() {
         });
         if(!responseToEditProfile.ok) {
             submitButton.classList.add('hidden');
-            submissionErrorMessage2.classList.remove('hidden');
+            submissionErrorMessage.textContent = "Error updating your username/fullName/accountBasedIn/accountVisibility";
+            submissionErrorMessage.classList.remove('hidden');
             setTimeout(function() {
                 submitButton.classList.remove('hidden');
-                submissionErrorMessage2.classList.add('hidden');
+                submissionErrorMessage.classList.add('hidden');
             }, 3000);
             return;
         }
+        submitButton.classList.add('hidden');
+        submissionSuccessMessage.classList.remove('hidden');
+        setTimeout(function() {
+            if('username' in changedFields) {
+                //better yet: update everything related to username even the tokens and then redirect to profilePage of new username
+                localStorage.setItem('authenticatedUsername', changedFields['username']);
+                window.location.href = "http://localhost:8000/profilePage/"+changedFields['username'];
+            }
+            else {
+                window.location.href = "http://localhost:8019/profilePage/"+authenticatedUsername;
+            }
+        }, 2000);
+    }
+    else if(userSelectedProfilePhoto!==null) {
         submitButton.classList.add('hidden');
         submissionSuccessMessage.classList.remove('hidden');
         setTimeout(function() {
@@ -244,13 +395,92 @@ async function onSubmit() {
     }
     else {
         submitButton.classList.add('hidden');
-        submissionErrorMessage1.classList.remove('hidden');
+        submissionErrorMessage.textContent = "You didn't change anything!"
+        submissionErrorMessage.classList.remove('hidden');
         setTimeout(function() {
             submitButton.classList.remove('hidden');
-            submissionErrorMessage1.classList.add('hidden');
+            submissionErrorMessage.classList.add('hidden');
         }, 3000);
     }
 
 }
+
+function showChangeProfilePhotoPopup() {
+    darkScreen.classList.remove('hidden');
+    changeProfilePhotoPopup.classList.remove('hidden');
+}
+
+function closeChangeProfilePhotoPopup() {
+    darkScreen.classList.add('hidden');
+    changeProfilePhotoPopup.classList.add('hidden');
+}
+
+function showDeleteAccountConfirmationPopup() {
+    darkScreen.classList.remove('hidden');
+    deleteAccountConfirmationPopup.classList.remove('hidden');
+}
+
+function closeDeleteAccountConfirmationPopup() {
+    darkScreen.classList.add('hidden');
+    deleteAccountConfirmationPopup.classList.add('hidden');
+}
+
+function showFinalConfirmationPopup() {
+    deleteAccountConfirmationPopup.classList.add('hidden');
+    finalDeleteAccountConfirmationPopup.classList.remove('hidden');
+}
+
+function closeFinalConfirmationPopup() {
+    oneLastUsernameTextarea.value = "";
+    darkScreen.classList.add('hidden');
+    finalDeleteAccountConfirmationPopup.classList.add('hidden');
+}
+
+async function deleteAccount(){
+    const response = await fetch('http://localhost:8001/removeUser/'+authenticatedUsername, {
+        method: 'DELETE'
+    });
+    if(!response.ok) {
+        closeFinalConfirmationPopup();
+        submitButton.classList.add('hidden');
+        submissionErrorMessage.textContent = "Couldn't delete account. Please try again later.";
+        submissionErrorMessage.classList.remove('hidden');
+        setTimeout(function() {
+            submitButton.classList.remove('hidden');
+            submissionErrorMessage.classList.add('hidden');
+        }, 3000);
+        return;
+    }
+    window.location.href = "http://localhost:8000/login"
+}
+
+oneLastUsernameTextarea.oninput = function() {
+    if(oneLastUsernameTextarea.value===authenticatedUsername) {
+        goodbyeButton.classList.remove('hidden');
+    }
+    else {
+        goodbyeButton.classList.add('hidden');
+    }
+}
+
+function removeCurrentPhoto() {
+    userSelectedProfilePhoto = 'defaultPfp';
+    authUserProfilePhoto.src = '/images/defaultPfp.png'
+    closeChangeProfilePhotoPopup();
+}
+
+function uploadNewPhoto() {
+    fileInputForProfilePhoto.click();
+    closeChangeProfilePhotoPopup();
+}
+
+fileInputForProfilePhoto.addEventListener('change', function(event) {
+    const allowedImageTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp', 'image/svg+xml'];
+    if(allowedImageTypes.includes(event.target.files[0].type)) {
+        userSelectedProfilePhoto = event.target.files[0];
+        authUserProfilePhoto.src =  URL.createObjectURL(event.target.files[0]);
+    }
+});
+
 
 authenticateUserAndFetchData();
