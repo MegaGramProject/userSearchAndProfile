@@ -7,7 +7,7 @@ const websiteTextarea = document.getElementById('websiteTextarea');
 const bioTextarea = document.getElementById('bioTextarea');
 const accountBasedInTextarea = document.getElementById('accountBasedInTextarea');
 const mainSection = document.getElementById('mainSection');
-const accountNotFoundOrBlocksYou = document.getElementById('accountNotFoundOrBlocksYou');
+const accountNotFound = document.getElementById('accountNotFound');
 const fullNameInTopDiv = document.getElementById('fullNameInTopDiv');
 const numCharactersInBio = document.getElementById('numCharactersInBio');
 const accountVisibilitySelection = document.getElementById('accountVisibilitySelection');
@@ -124,7 +124,7 @@ async function authenticateUserAndFetchData() {
         //user probably doesn't exist
         leftSidebar.classList.add('hidden');
         mainSection.classList.add('hidden');
-        accountNotFoundOrBlocksYou.classList.remove('hidden');
+        accountNotFound.classList.remove('hidden');
         return;
     }
     relevantProfileUserInfo = await response.json();
@@ -182,7 +182,6 @@ function takeUserToOwnProfile() {
     window.location.href = "http://localhost:8019/profilePage/"+authenticatedUsername;
 }
 
-
 function toggleLeftSidebarPopup() {
     displayLeftSidebarPopup = !displayLeftSidebarPopup;
     if(displayLeftSidebarPopup) {
@@ -193,7 +192,6 @@ function toggleLeftSidebarPopup() {
         leftSidebarPopup.classList.add('hidden');
         toggleLeftSidebarPopupMoreOrLessText.textContent = 'More';
     }
-
 }
 
 function takeUserToLogin() {

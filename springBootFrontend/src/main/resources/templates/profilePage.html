@@ -86,7 +86,7 @@
     </div>
 
     <!--Main Section-->
-    <div id="mainSection" style="margin-left: 14.5%; height: 100%; padding: 0.5em 1em; position: relative;
+    <div id="mainSection" style="margin-left: 14.5%; padding: 0.5em 1em; position: relative;
     display: flex; flex-direction: column; align-items: start; padding-left: 15%;">
 
         <div style="display: flex; justify-content: center; align-items: center; padding-right: 12%; gap: 3em;">
@@ -146,81 +146,17 @@
         </div>
 
         <div id="suggestedAccounts" class="hidden" style="display: flex; flex-direction: column; align-items: start; margin-top: 1.5em; width: 50%;">
-            <div style="display: flex; width: 100%; gap: 28em;">
-                <b>Suggested for you</b>
-                <b style="font-size:0.85em; color:#2789f2; cursor: pointer;">See all</b>
-            </div>
+            <b>Suggested for you</b>
 
             <br>
 
-            <div style="display: flex; align-items: center; width: 100%; overflow-x: scroll; height: 12em;
+            <div id="listOfAccountsInSuggestedAccountsDiv" style="display: flex; align-items: center; width: 100%; overflow-x: scroll; height: 12em;
             gap: 1.2em;">
 
-                <div id="suggestedAccountchrishemsworth" style="display: flex; flex-direction: column; justify-content: center; align-items: center; border-style: solid;
-                border-width: 0.01em; border-color: gray; padding: 2.1em 2.4em; font-size: 0.73em; height: 70%; border-radius: 0.3em;
-                position: relative;">
-                    <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 5em; width: 5em; cursor: pointer;">
-                    <div style="display: flex; align-items: center; justify-content: center;">
-                        <b>chrishemsworth</b>
-                        <img th:src="@{/images/verifiedCheck.png}" style="object-fit: contain; height: 1.3em; width: 1.3em;">
-                    </div>
-                    <p>Chris Hemsworth</p>
-                    <button onclick="toggleFollowInPopup('suggestedAccounts', 'chrishemsworth')" id="suggestedAccountsFollowchrishemsworth"
-                    class="blueButton" type="button" style="padding: 0.2em 1em; font-size: 0.96em;">Follow</button>
-                    <button onclick="toggleFollowInPopup('suggestedAccounts', 'chrishemsworth')" id="suggestedAccountsFollowingchrishemsworth" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
-                    border-radius: 0.4em; font-weight:bold;">Following</button>
-                    <img onclick="removeSuggestedAccount('chrishemsworth')" th:src="@{/images/thinGrayXIcon.png}" style="object-fit: contain; height: 1.6em; width: 1.6em; cursor: pointer;
-                    position: absolute; top: 8%; left: 85%;">
-                </div>
+            </div>
 
-                <div id="suggestedAccountjohncena" style="display: flex; flex-direction: column; justify-content: center; align-items: center; border-style: solid;
-                border-width: 0.01em; border-color: gray; padding: 2.1em 2.4em; font-size: 0.73em; height: 70%; border-radius: 0.3em;
-                position: relative;">
-                    <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 5em; width: 5em; cursor: pointer;">
-                    <div style="display: flex; align-items: center; justify-content: center;">
-                        <b>johncena</b>
-                        <img th:src="@{/images/verifiedCheck.png}" style="object-fit: contain; height: 1.3em; width: 1.3em;">
-                    </div>
-                    <p>John Cena</p>
-                    <button onclick="toggleFollowInPopup('suggestedAccounts', 'johncena')" id="suggestedAccountsFollowjohncena"
-                    class="blueButton" type="button" style="padding: 0.2em 1em; font-size: 0.96em;">Follow</button>
-                    <button onclick="toggleFollowInPopup('suggestedAccounts', 'johncena')" id="suggestedAccountsFollowingjohncena" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
-                    border-radius: 0.4em; font-weight:bold;">Following</button>
-                    <img onclick="removeSuggestedAccount('johncena')" th:src="@{/images/thinGrayXIcon.png}" style="object-fit: contain; height: 1.6em; width: 1.6em; cursor: pointer;
-                    position: absolute; top: 8%; left: 85%;">
-                </div>
-
-                <div id="suggestedAccountkevinhart4real" style="display: flex; flex-direction: column; justify-content: center; align-items: center; border-style: solid;
-                border-width: 0.01em; border-color: gray; padding: 2.1em 2.4em; font-size: 0.73em; height: 70%; border-radius: 0.3em;
-                position: relative;">
-                    <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 5em; width: 5em; cursor: pointer;">
-                    <div style="display: flex; align-items: center; justify-content: center;">
-                        <b>kevinhart4real</b>
-                        <img th:src="@{/images/verifiedCheck.png}" style="object-fit: contain; height: 1.3em; width: 1.3em;">
-                    </div>
-                    <p>Kevin Hart</p>
-                    <button onclick="toggleFollowInPopup('suggestedAccounts', 'kevinhart4real')" id="suggestedAccountsFollowkevinhart4real"
-                    class="blueButton" type="button" style="padding: 0.2em 1em; font-size: 0.96em;">Follow</button>
-                    <button onclick="toggleFollowInPopup('suggestedAccounts', 'kevinhart4real')" id="suggestedAccountsFollowingkevinhart4real" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
-                    border-radius: 0.4em; font-weight:bold;">Following</button>
-                    <img onclick="removeSuggestedAccount('kevinhart4real')" th:src="@{/images/thinGrayXIcon.png}" style="object-fit: contain; height: 1.6em; width: 1.6em; cursor: pointer;
-                    position: absolute; top: 8%; left: 85%;">
-                </div>
-
-                <div id="suggestedAccountmarvelstudios" style="display: flex; flex-direction: column; justify-content: center; align-items: center; border-style: solid;
-                border-width: 0.01em; border-color: gray; padding: 2.1em 2.4em; font-size: 0.73em; height: 70%; border-radius: 0.3em;
-                position: relative;">
-                    <img th:src="@{/images/profilePhoto.png}" style="object-fit: contain; height: 5em; width: 5em; cursor: pointer;">
-                    <b>marvelstudios</b>
-                    <p>Marvel Studios</p>
-                    <button onclick="toggleFollowInPopup('suggestedAccounts', 'marvelstudios')" id="suggestedAccountsFollowmarvelstudios"
-                    class="blueButton" type="button" style="padding: 0.2em 1em; font-size: 0.96em;">Follow</button>
-                    <button onclick="toggleFollowInPopup('suggestedAccounts', 'marvelstudios')" id="suggestedAccountsFollowingmarvelstudios" class="hidden" type="button" style="cursor: pointer; background-color: #edeff0; padding: 0.5em 1em; border-style: none;
-                    border-radius: 0.4em; font-weight:bold;">Following</button>
-                    <img onclick="removeSuggestedAccount('marvelstudios')" th:src="@{/images/thinGrayXIcon.png}" style="object-fit: contain; height: 1.6em; width: 1.6em; cursor: pointer;
-                    position: absolute; top: 8%; left: 85%;">
-                </div>
-
+            <div id="noSimilarAccountsDiv" class="hidden" style="width: 100%; display: flex; justify-content: center;">
+                <p style="color: gray; font-weight: bold; font-size: 0.88em;">None Similar to <span th:text="${profileUsername}"></span></p>
             </div>
 
         </div>
@@ -275,11 +211,9 @@
             </div>
 
             <div id="imageGridForProfileUserPosts" style="margin-top: 1.4em; display: flex; flex-direction: column; align-items: start; gap: 0.5em;">
-        
             </div>
 
             <div id="imageGridForReels" class="hidden" style="margin-top: 1.4em; display: flex; flex-direction: column; align-items: start; gap: 0.5em;">
-
             </div>
 
             <div id="imageGridForTaggedPosts" class="hidden" style="margin-top: 1.4em; display: flex; flex-direction: column; align-items: start; gap: 0.5em;">

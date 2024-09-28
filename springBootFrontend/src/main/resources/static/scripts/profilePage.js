@@ -56,6 +56,8 @@ const optionsDot = document.getElementById('optionsDot');
 const seeOwnSavedPosts = document.getElementById('seeOwnSavedPosts');
 const toggleLeftSidebarPopupMoreOrLessText = document.getElementById('toggleLeftSidebarPopupMoreOrLessText');
 const profileIconInLeftSidebar = document.getElementById('profileIconInLeftSidebar');
+const listOfAccountsInSuggestedAccountsDiv = document.getElementById('listOfAccountsInSuggestedAccountsDiv');
+const noSimilarAccountsDiv = document.getElementById('noSimilarAccountsDiv');
 
 let authenticatedUsername = "";
 let displayLeftSidebarPopup = false;
@@ -84,6 +86,8 @@ let profileUserReels = [];
 let profileUserTaggedPosts = [];
 let haveReelDOMElementsBeenCreated = false;
 let haveTaggedPostDOMElementsBeenCreated = false;
+let haveSuggestedAccountsDOMElementsBeenCreated = false;
+let listOfSuggestedAccountUsernames = [];
 
 
 async function authenticateUserAndFetchData() {
@@ -297,6 +301,9 @@ async function authenticateUserAndFetchData() {
         editProfileButton.classList.remove('hidden');
         messageProfileUserButton.classList.add('hidden');
         seeOwnSavedPosts.classList.remove('hidden');
+        seeOwnSavedPosts.onclick = function() {
+            window.location.href = "http://localhost:8019/savedPosts/"+authenticatedUsername;
+        }
         optionsDot.classList.add('hidden');
     }
     else if(authenticatedUserFollowing.includes(profileUsername)) {
@@ -332,32 +339,36 @@ async function authenticateUserAndFetchData() {
         followedByText.classList.remove('hidden');
     }
 
-    flattenedListOfFollowingsAndFollowers = [authenticatedUserFollowing, profileUserFollowers, profileUserFollowing].flat();
-    const response4 = await fetch('http://localhost:8001/getRelevantUserInfoOfMultipleUsers', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-            listOfUsers: flattenedListOfFollowingsAndFollowers
-        })
-    });
-    if(!response4.ok) {
-        throw new Error('Network response not ok');
-    }
-    relevantUserInfo = await response4.json();
 
-    const response5 = await fetch('http://localhost:8003/getProfilePhotosOfMultipleUsers', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-            listOfUsers: flattenedListOfFollowingsAndFollowers
-        })
-    });
-    if(!response5.ok) {
-        throw new Error('Network response not ok');
-    }
-    const profilePhotoInfoMappings = await response5.json();
-    for(let username of Object.keys(profilePhotoInfoMappings)) {
-        relevantUserInfo[username]['profilePhotoString'] = 'data:image/png;base64,'+profilePhotoInfoMappings[username];
+
+    flattenedListOfFollowingsAndFollowers = [authenticatedUserFollowing, profileUserFollowers, profileUserFollowing].flat();
+    if(flattenedListOfFollowingsAndFollowers.length>0) {
+        const response4 = await fetch('http://localhost:8001/getRelevantUserInfoOfMultipleUsers', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                listOfUsers: flattenedListOfFollowingsAndFollowers
+            })
+        });
+        if(!response4.ok) {
+            throw new Error('Network response not ok');
+        }
+        relevantUserInfo = await response4.json();
+
+        const response5 = await fetch('http://localhost:8003/getProfilePhotosOfMultipleUsers', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                listOfUsers: flattenedListOfFollowingsAndFollowers
+            })
+        });
+        if(!response5.ok) {
+            throw new Error('Network response not ok');
+        }
+        const profilePhotoInfoMappings = await response5.json();
+        for(let username of Object.keys(profilePhotoInfoMappings)) {
+            relevantUserInfo[username]['profilePhotoString'] = 'data:image/png;base64,'+profilePhotoInfoMappings[username];
+        }
     }
 
     //fetch images posted by profile user
@@ -687,12 +698,189 @@ function takeUserToLogin() {
     window.location.href = "http://localhost:8000/login";
 }
 
-function toggleSimilarAccounts() {
+function createDOMElementsForSuggestedAccounts() {
+    if(listOfSuggestedAccountUsernames.length==0) {
+        listOfAccountsInSuggestedAccountsDiv.classList.add('hidden');
+        noSimilarAccountsDiv.classList.remove('hidden');
+        return;
+    }
+    for(let suggestedAccountUsername of listOfSuggestedAccountUsernames) {
+        const div = document.createElement('div');
+        div.id = 'suggestedAccount'+suggestedAccountUsername;
+        div.style.display = 'flex';
+        div.style.flexDirection = 'column';
+        div.style.justifyContent = 'center';
+        div.style.alignItems = 'center';
+        div.style.borderStyle = 'solid';
+        div.style.borderWidth = '0.01em';
+        div.style.borderColor = 'gray';
+        div.style.padding = '2.1em 2.4em';
+        div.style.fontSize = '0.73em';
+        div.style.height = '70%';
+        div.style.borderRadius = '0.3em';
+        div.style.position = 'relative';
+
+        const profileImg = document.createElement('img');
+        profileImg.src = relevantUserInfo[suggestedAccountUsername]['profilePhotoString'];
+        profileImg.style.objectFit = 'contain';
+        profileImg.style.height = '5em';
+        profileImg.style.width = '5em';
+        profileImg.style.cursor = 'pointer';
+        profileImg.onclick = function() {
+            window.location.href = "http://localhost:8019/profilePage/"+suggestedAccountUsername;
+        }
+        div.appendChild(profileImg);
+
+        const userContainer = document.createElement('div');
+        userContainer.style.display = 'flex';
+        userContainer.style.alignItems = 'center';
+        userContainer.style.justifyContent = 'center';
+        userContainer.style.marginTop = '0.4em';
+        userContainer.style.cursor = 'pointer';
+        userContainer.onclick = function() {
+            window.location.href = "http://localhost:8019/profilePage/"+suggestedAccountUsername;
+        }
+
+        const username = document.createElement('b');
+        username.textContent = suggestedAccountUsername;
+        userContainer.appendChild(username);
+
+        if(relevantUserInfo[suggestedAccountUsername]['isVerified']) {
+            const verifiedImg = document.createElement('img');
+            verifiedImg.src = '/images/verifiedCheck.png';
+            verifiedImg.style.objectFit = 'contain';
+            verifiedImg.style.height = '1.3em';
+            verifiedImg.style.width = '1.3em';
+            userContainer.appendChild(verifiedImg);
+        }
+
+        div.appendChild(userContainer);
+
+        const fullName = document.createElement('p');
+        fullName.textContent = relevantUserInfo[suggestedAccountUsername]['fullName'];
+        div.appendChild(fullName);
+
+        const followButton = document.createElement('button');
+        followButton.id = 'suggestedAccountFollow'+suggestedAccountUsername;
+        followButton.className = 'blueButton';
+        followButton.style.padding = '0.2em 1em';
+        followButton.style.fontSize = '0.96em';
+        followButton.type = 'button';
+        followButton.textContent = 'Follow';
+        followButton.onclick = function() {
+            toggleFollowInPopup('suggestedAccount', suggestedAccountUsername);
+        };
+        div.appendChild(followButton);
+
+        const followingButton = document.createElement('button');
+        followingButton.id = 'suggestedAccountFollowing'+suggestedAccountUsername;
+        followingButton.className = 'hidden';
+        followingButton.style.cursor = 'pointer';
+        followingButton.style.backgroundColor = '#edeff0';
+        followingButton.style.padding = '0.5em 1em';
+        followingButton.style.borderStyle = 'none';
+        followingButton.style.borderRadius = '0.4em';
+        followingButton.style.fontWeight = 'bold';
+        followingButton.type = 'button';
+        followingButton.textContent = 'Following';
+        followingButton.onclick = function() {
+            toggleFollowInPopup('suggestedAccount', suggestedAccountUsername);
+        };
+        div.appendChild(followingButton);
+
+        const requestedButton = document.createElement('button');
+        requestedButton.setAttribute('onclick', "cancelFollowRequestInPopup('suggestedAccount', '" + suggestedAccountUsername + "')");
+        requestedButton.id = 'suggestedAccountRequested'+suggestedAccountUsername;
+        requestedButton.className = 'hidden';
+        requestedButton.type = 'button';
+        requestedButton.style.cursor = 'pointer';
+        requestedButton.style.backgroundColor = '#edeff0';
+        requestedButton.style.padding = '0.5em 1em';
+        requestedButton.style.borderStyle = 'none';
+        requestedButton.style.borderRadius = '0.4em';
+        requestedButton.style.fontWeight = 'bold';
+        requestedButton.textContent = 'Requested';
+        div.appendChild(requestedButton);
+
+        const closeButton = document.createElement('img');
+        closeButton.src = '/images/thinGrayXIcon.png';
+        closeButton.style.objectFit = 'contain';
+        closeButton.style.height = '1.6em';
+        closeButton.style.width = '1.6em';
+        closeButton.style.cursor = 'pointer';
+        closeButton.style.position = 'absolute';
+        closeButton.style.top = '8%';
+        closeButton.style.left = '85%';
+        closeButton.onclick = function() {
+            removeSuggestedAccount(suggestedAccountUsername);
+        };
+        div.appendChild(closeButton);
+
+        listOfAccountsInSuggestedAccountsDiv.appendChild(div);
+    }
+}
+
+async function toggleSimilarAccounts() {
     displaySimilarAccounts = !displaySimilarAccounts;
     if(displaySimilarAccounts) {
         showSimilarAccountsIcon.classList.add('hidden');
         showSimilarAccountsIcon2.classList.remove('hidden');
         suggestedAccounts.classList.remove('hidden');
+        if(!haveSuggestedAccountsDOMElementsBeenCreated) {
+            const response = await fetch('http://localhost:8013/graphql', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    query: `
+                    query {
+                        getSuggestedAccountsForAuthUser(users: { authUser: "${authenticatedUsername}", profileUser: "${profileUsername}" })
+                    }
+                    `
+                    })
+                });
+            if(!response.ok) {
+                throw new Error('Network response not ok');
+            }
+        
+            listOfSuggestedAccountUsernames = await response.json();
+
+            listOfSuggestedAccountUsernames = listOfSuggestedAccountUsernames['data']['getSuggestedAccountsForAuthUser'];
+
+            if(listOfSuggestedAccountUsernames.length>0) {
+                const response2 = await fetch('http://localhost:8001/getRelevantUserInfoOfMultipleUsers', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        listOfUsers: listOfSuggestedAccountUsernames
+                    })
+                });
+                if(!response2.ok) {
+                    throw new Error('Network response not ok');
+                }
+                const relevantInfoOfSuggestedAccounts = await response2.json();
+                for(let username of Object.keys(relevantInfoOfSuggestedAccounts)) {
+                    relevantUserInfo[username] = relevantInfoOfSuggestedAccounts[username];
+                }
+
+                const response3 = await fetch('http://localhost:8003/getProfilePhotosOfMultipleUsers', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        listOfUsers: listOfSuggestedAccountUsernames
+                    })
+                });
+                if(!response3.ok) {
+                    throw new Error('Network response not ok');
+                }
+                const profilePhotoInfoMappings = await response3.json();
+                for(let username of Object.keys(profilePhotoInfoMappings)) {
+                    relevantUserInfo[username]['profilePhotoString'] = 'data:image/png;base64,'+profilePhotoInfoMappings[username];
+                }
+            }
+
+            createDOMElementsForSuggestedAccounts();
+            haveSuggestedAccountsDOMElementsBeenCreated = true;
+        }
     }
     else {
         showSimilarAccountsIcon.classList.remove('hidden');
@@ -770,72 +958,7 @@ async function unblockUser() {
         throw new Error('Network response not ok');
     }
 
-    isUserBlocked = false;
-    unblockButton.classList.add('hidden');
-    postsReelsTaggedSection.classList.remove('hidden');
-    followButton.classList.remove('hidden');
-    optionToBlockOrUnblock.textContent = 'Block';
-    optionToBlockOrUnblock.onclick= blockUser;
-    userBlockingUsernames.splice(userBlockingUsernames.indexOf(profileUsername),1);
-
-    if(authenticatedUserFollowing.length==0 && profileUserFollowers.length==0 && profileUserFollowing.length==0) {
-        const response = await fetch('http://localhost:8013/graphql', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                query: `
-                query {
-                    getUserFollowingsForTwoUsers(users: { user1: "${authenticatedUsername}", user2: "${profileUsername}" })
-                }
-                `
-                })
-            });
-            if(!response.ok) {
-                throw new Error('Network response not ok');
-            }
-        
-            let followingsData = await response.json();
-        
-            followingsData = followingsData['data']['getUserFollowingsForTwoUsers'];
-        
-            authenticatedUserFollowing = followingsData[0];
-            profileUserFollowers = followingsData[1];
-            profileUserFollowing = followingsData[2];
-            mutualFollowers = authenticatedUserFollowing.filter(x=>profileUserFollowers.includes(x));
-            if(mutualFollowers.length==1) {
-                followedByText.getElementsByTagName('span')[0].textContent = mutualFollowers[0];
-                followedByText.getElementsByTagName('span')[0].classList.remove('hidden');
-                followedByText.classList.remove('hidden');
-            }
-            else if(mutualFollowers.length==2) {
-                followedByText.getElementsByTagName('span')[0].textContent = mutualFollowers[0] + ", " + "& " + mutualFollowers[1];
-                followedByText.getElementsByTagName('span')[0].classList.remove('hidden');
-                followedByText.classList.remove('hidden');
-            }
-            else if(mutualFollowers.length>2) {
-                followedByText.getElementsByTagName('span')[0].textContent = mutualFollowers[0]+ ", " +  mutualFollowers[1] + ", + " + (mutualFollowers.length-2) + " more";
-                followedByText.getElementsByTagName('span')[0].classList.remove('hidden');
-                followedByText.classList.remove('hidden');
-            }
-
-        
-        flattenedListOfFollowingsAndFollowers = [authenticatedUserFollowing, profileUserFollowers, profileUserFollowing].flat();
-        const response2 = await fetch('http://localhost:8001/getRelevantUserInfoOfMultipleUsers', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-            listOfUsers: flattenedListOfFollowingsAndFollowers
-            })
-        });
-        if(!response2.ok) {
-            throw new Error('Network response not ok');
-        }
-        relevantUserInfo = await response2.json();
-        
-    }
-    profileUserNumFollowers.textContent = formatNumber(profileUserFollowers.length);
-    profileUserNumFollowings.textContent = formatNumber(profileUserFollowing.length);
-    cancelOptionsPopup();
+    window.location.href = "http://localhost:8019/profilePage/"+authenticatedUsername+"/"+profileUsername;
 }
 
 async function cancelFollowRequest() {
@@ -1590,7 +1713,7 @@ function showListOfMutualFollowersPopup() {
     blackScreenForMainSection.classList.remove('hidden');
     if(!haveListOfMutualFollowersElementsBeenCreated) {
         for(let follower of mutualFollowers) {
-            if(!userBlockingUsernames.includes(follower) && follower!==authenticatedUsername) {
+            if(2==2) {
                 const containerDiv = document.createElement('div');
                 containerDiv.style.display = 'flex';
                 containerDiv.style.width = '100%';

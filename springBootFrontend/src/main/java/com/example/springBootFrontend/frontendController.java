@@ -33,4 +33,10 @@ public class frontendController {
         return "editProfile";
     }
 
+    @GetMapping("/savedPosts/{authenticatedUsername}")
+    public String savedPosts(@PathVariable String authenticatedUsername, Model model) {
+        model.addAttribute("authenticatedUsername", authenticatedUsername);
+        return "savedPosts";
+    }
+
 }
