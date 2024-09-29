@@ -2,9 +2,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Saves</title>
+    <title>Topic Matches</title>
     <link th:href="@{/images/favicon.ico}" rel="icon" type="image/x-icon">
-    <link th:href="@{/styles/savedPosts.css}" rel="stylesheet">
+    <link th:href="@{/styles/topicMatches.css}" rel="stylesheet">
 </head>
 
 <body>
@@ -86,60 +86,56 @@
     <div id="mainSection" style="margin-left: 18%; width: 85%; display: flex; flex-direction: column; align-items: center;
     gap: 1.5em;">
         
-        <h1 id="savedHeader">Saved Posts</h1>
+        <h1 id="topicHeader">Posts for '<span th:text="${topic}"></span>'</h1>
 
         <div style="border-style: solid; border-color: lightgray; border-width:0.15em; border-left: none;
         border-right: none; border-bottom: none; display: flex; flex-direction: column; width: 75%; gap: 3.5em;">
 
             <div style="display: flex; gap: 5em; justify-content: center; color: gray; font-size: 0.8em; padding-top: 1.6em;">
 
-                <div onclick="showSavedPosts()" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
+                <div onclick="showMatchingPosts()" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
                     <img id="postsGridIcon2" th:src="@{/images/postsGridIcon2.png}" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
                     <img id="postsGridIcon" th:src="@{/images/postsGridIcon.png}" class="hidden" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
                     <b id="postsText" style="color: black; font-size: 1.15em;">POSTS</b>
                 </div>
 
-                <div onclick="showSavedReels()" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
+                <div onclick="showMatchingReels()" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
                     <img id="reelsIcon" th:src="@{/images/reelsIcon.png}" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
                     <img id="reelsIcon2" th:src="@{/images/reelsIcon2.png}" class="hidden" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
                     <b id="reelsText">REELS</b>
                 </div>
 
-                <div onclick="showSavedSounds()" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
+                <div onclick="showMatchingSounds()" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
                     <img id="soundsIcon" th:src="@{/images/soundsIcon.png}" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
                     <img id="soundsIcon2" th:src="@{/images/soundsIcon2.png}" class="hidden" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
                     <b id="soundsText">SOUNDS</b>
                 </div>
             </div>
 
-            <div id="noSavedPosts" class="hidden" style="height: 35em; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <div id="noMatchingPosts" class="hidden" style="height: 35em; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                 <img th:src="@{/images/cameraInCircleIcon.png}" style="pointer-events: none; height: 6.8em; width: 6.8em; object-fit: contain;">
                 <h2>None Yet</h2>
             </div>
     
-            <div id="imageGridForSavedPosts" style="display: flex; flex-direction: column; align-items: start; justify-content: start; gap: 0.3em;">
-
-                <div style="display: flex; align-items: center; justify-content: start; width: 100%; gap: 0.3em;">
-                    
-                </div>
+            <div id="imageGridForMatchingPosts" style="display: flex; flex-direction: column; align-items: start; justify-content: start; gap: 0.3em;">
                 
             </div>
 
-            <div id="noSavedReels" class="hidden" style="height: 35em; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <div id="noMatchingReels" class="hidden" style="height: 35em; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                 <img th:src="@{/images/reelsIcon3.png}" style="pointer-events: none; height: 6.2em; width: 6.2em; object-fit: contain;">
                 <h2>None Yet</h2>
             </div>
 
-            <div id="imageGridForSavedReels" class="hidden" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <div id="imageGridForMatchingReels" class="hidden" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
                 
             </div>
 
-            <div id="noSavedSounds" class="hidden" style="height: 35em; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+            <div id="noMatchingSounds" class="hidden" style="height: 35em; display: flex; flex-direction: column; justify-content: center; align-items: center;">
                 <img th:src="@{/images/soundsInCircleIcon.png}" style="pointer-events: none; height: 6.8em; width: 6.8em; object-fit: contain;">
                 <h2>None Yet</h2>
             </div>
 
-            <div id="imageGridForSavedSounds" class="hidden" style="display: flex; flex-direction: column; gap: 1em;">
+            <div id="imageGridForMatchingSounds" class="hidden" style="display: flex; flex-direction: column; gap: 1em;">
                 
                 <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
                     <div style="display: flex; align-items: center; gap: 1em;">
@@ -150,8 +146,8 @@
                         </div>
                     </div>
 
-                    <img id="playSavedSound0"  onclick="togglePlaySavedSound(0)" th:src="@{/images/smallBlackPlayIcon.png}" style="cursor: pointer; object-fit: contain; height: 2em; width: 2em;">
-                    <img id="pauseSavedSound0" onclick="togglePlaySavedSound(0)" class="hidden" th:src="@{/images/smallBlackPauseIcon.png}" style="cursor: pointer; object-fit: contain; height: 2em; width: 2em;">
+                    <img id="playMatchingSound0"  onclick="togglePlayMatchingSound(0)" th:src="@{/images/smallBlackPlayIcon.png}" style="cursor: pointer; object-fit: contain; height: 2em; width: 2em;">
+                    <img id="pauseMatchingSound0" onclick="togglePlayMatchingSound(0)" class="hidden" th:src="@{/images/smallBlackPauseIcon.png}" style="cursor: pointer; object-fit: contain; height: 2em; width: 2em;">
                 </div>
                 <div style="width: 100%; display: flex; justify-content: space-between; align-items: center;">
                     <div style="display: flex; align-items: center; gap: 1em;">
@@ -162,8 +158,8 @@
                         </div>
                     </div>
 
-                    <img id="playSavedSound1"  onclick="togglePlaySavedSound(1)" th:src="@{/images/smallBlackPlayIcon.png}" style="cursor: pointer; object-fit: contain; height: 2em; width: 2em;">
-                    <img id="pauseSavedSound1" onclick="togglePlaySavedSound(1)" class="hidden" th:src="@{/images/smallBlackPauseIcon.png}" style="cursor: pointer; object-fit: contain; height: 2em; width: 2em;">
+                    <img id="playMatchingSound1"  onclick="togglePlayMatchingSound(1)" th:src="@{/images/smallBlackPlayIcon.png}" style="cursor: pointer; object-fit: contain; height: 2em; width: 2em;">
+                    <img id="pauseMatchingSound1" onclick="togglePlayMatchingSound(1)" class="hidden" th:src="@{/images/smallBlackPauseIcon.png}" style="cursor: pointer; object-fit: contain; height: 2em; width: 2em;">
                 </div>
                 
 
@@ -181,7 +177,8 @@
 
 
     <p id="authenticatedUsername" class="hidden" th:text="${authenticatedUsername}"></p>
-    <script th:src="@{/scripts/savedPosts.js}"></script>
+    <p id="topic" class="hidden" th:text="${topic}"></p>
+    <script th:src="@{/scripts/topicMatches.js}"></script>
 </body>
 
 </html>

@@ -32,8 +32,6 @@ const unrequestButton = document.getElementById('unrequestButton');
 const profileUserNumPosts = document.getElementById('profileUserNumPosts');
 const optionToBlockOrUnblock = document.getElementById('optionToBlockOrUnblock');
 const followedByText = document.getElementById('followedByText');
-const blackScreenForLeftSidebar = document.getElementById('blackScreenForLeftSidebar');
-const blackScreenForMainSection = document.getElementById('blackScreenForMainSection');
 const accountIsPrivate = document.getElementById('accountIsPrivate');
 const aboutAccountPopup = document.getElementById('aboutAccountPopup');
 const aboutAccountProfilePhoto = document.getElementById('aboutAccountProfilePhoto');
@@ -54,10 +52,12 @@ const editProfileButton = document.getElementById('editProfileButton');
 const messageProfileUserButton = document.getElementById('messageProfileUserButton');
 const optionsDot = document.getElementById('optionsDot');
 const seeOwnSavedPosts = document.getElementById('seeOwnSavedPosts');
+const seeOwnLikedPosts = document.getElementById('seeOwnLikedPosts');
 const toggleLeftSidebarPopupMoreOrLessText = document.getElementById('toggleLeftSidebarPopupMoreOrLessText');
 const profileIconInLeftSidebar = document.getElementById('profileIconInLeftSidebar');
 const listOfAccountsInSuggestedAccountsDiv = document.getElementById('listOfAccountsInSuggestedAccountsDiv');
 const noSimilarAccountsDiv = document.getElementById('noSimilarAccountsDiv');
+const darkScreen = document.getElementById('darkScreen');
 
 let authenticatedUsername = "";
 let displayLeftSidebarPopup = false;
@@ -302,7 +302,11 @@ async function authenticateUserAndFetchData() {
         messageProfileUserButton.classList.add('hidden');
         seeOwnSavedPosts.classList.remove('hidden');
         seeOwnSavedPosts.onclick = function() {
-            window.location.href = "http://localhost:8019/savedPosts/"+authenticatedUsername;
+            window.location.href = "http://localhost:8019/saves/"+authenticatedUsername;
+        }
+        seeOwnLikedPosts.classList.remove('hidden');
+        seeOwnLikedPosts.onclick = function() {
+            window.location.href = "http://localhost:8019/likes/"+authenticatedUsername;
         }
         optionsDot.classList.add('hidden');
     }
@@ -1309,8 +1313,7 @@ async function createDOMElementsForTaggedPosts() {
 function closeListOfFollowersPopup() {
     displayListOfFollowersPopup = false;
     listOfFollowersPopup.classList.add('hidden');
-    blackScreenForLeftSidebar.classList.add('hidden');
-    blackScreenForMainSection.classList.add('hidden');
+    darkScreen.classList.add('hidden');
 }
 
 function messageUser() {
@@ -1330,18 +1333,57 @@ function closeAboutAccountPopup() {
     cancelOptionsPopup();
 }
 
+async function removeFollower(followerToRemove) {
+    const response = await fetch('http://localhost:8013/graphql', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    query: `
+                    mutation {
+                        removeUserFollowing(userFollowingToRemove: { follower: "${followerToRemove}", followee: "${authenticatedUsername}" })
+                    }
+                    `
+                    })
+            });
+    if(!response.ok) {
+        throw new Error('Network response not ok');
+    }
+
+
+    document.getElementById('listOfFollowersContainerDiv'+followerToRemove).classList.add('hidden');
+}
+
+async function addFollowing(followerToFollow) {
+    const response = await fetch('http://localhost:8013/graphql', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    query: `
+                    mutation {
+                        addUserFollowing(newUserFollowing: { follower: "${authenticatedUsername}", followee: "${followerToFollow}" })
+                    }
+                    `
+                    })
+            });
+    if(!response.ok) {
+        throw new Error('Network response not ok');
+    }
+
+    document.getElementById("listOfFollowersPopupFollow"+followerToFollow).classList.add('hidden');
+}
+
 function showListOfFollowersPopup() {
     if(!isFollowingUser && relevantProfileUserInfo['isPrivate']) {
         return;
     }
     displayListOfFollowersPopup = true;
     listOfFollowersPopup.classList.remove('hidden');
-    blackScreenForLeftSidebar.classList.remove('hidden');
-    blackScreenForMainSection.classList.remove('hidden');
+    darkScreen.classList.remove('hidden');
     if(!haveListOfFollowersElementsBeenCreated) {
         for(let follower of profileUserFollowers) {
             if(!userBlockingUsernames.includes(follower) && follower!==authenticatedUsername) {
                 const containerDiv = document.createElement('div');
+                containerDiv.id = "listOfFollowersContainerDiv"+follower;
                 containerDiv.style.display = 'flex';
                 containerDiv.style.width = '100%';
                 containerDiv.style.justifyContent = 'space-between';
@@ -1382,6 +1424,20 @@ function showListOfFollowersPopup() {
                     verifiedCheck.style.width = '1.3em';
                     verifiedCheck.style.pointerEvents = 'none';
                     usernameAndVerifiedCheckDiv.appendChild(verifiedCheck);
+                }
+                if(authenticatedUsername===profileUsername && !authenticatedUserFollowing.includes(follower)) {
+                    const followUserSpan = document.createElement('span');
+                    followUserSpan.id = "listOfFollowersPopupFollow"+follower;
+                    followUserSpan.style.objectFit = 'contain';
+                    followUserSpan.style.color = '#2789f2';
+                    followUserSpan.style.cursor = 'pointer';
+                    followUserSpan.style.fontWeight = 'bold';
+                    followUserSpan.textContent = "· Follow"
+                    followUserSpan.addEventListener('click', function(event) {
+                        event.stopPropagation();
+                        addFollowing(follower);
+                    });
+                    usernameAndVerifiedCheckDiv.appendChild(followUserSpan);
                 }
 
                 const fullNameP = document.createElement('p');
@@ -1435,7 +1491,24 @@ function showListOfFollowersPopup() {
                 followButton.textContent = 'Follow';
                 containerDiv.appendChild(followButton);
 
-                if(authenticatedUserFollowing.includes(follower)) {
+                const removeFollowerButton = document.createElement('button');
+                removeFollowerButton.setAttribute('onclick', "removeFollower('"+follower+"')");
+                removeFollowerButton.id = 'listOfFollowersRemove'+follower;
+                removeFollowerButton.className = 'hidden';
+                removeFollowerButton.type = 'button';
+                removeFollowerButton.style.cursor = 'pointer';
+                removeFollowerButton.style.backgroundColor = '#edeff0';
+                removeFollowerButton.style.padding = '0.5em 1em';
+                removeFollowerButton.style.borderStyle = 'none';
+                removeFollowerButton.style.borderRadius = '0.4em';
+                removeFollowerButton.style.fontWeight = 'bold';
+                removeFollowerButton.textContent = 'Remove';
+                containerDiv.appendChild(removeFollowerButton);
+
+                if(authenticatedUsername===profileUsername) {
+                    removeFollowerButton.classList.remove('hidden');
+                }
+                else if(authenticatedUserFollowing.includes(follower)) {
                     followingButton.classList.remove('hidden');
                 }
                 else {
@@ -1462,8 +1535,7 @@ function showListOfFollowingsPopup() {
     }
     displayListOfFollowingsPopup = true;
     listOfFollowingsPopup.classList.remove('hidden');
-    blackScreenForLeftSidebar.classList.remove('hidden');
-    blackScreenForMainSection.classList.remove('hidden');
+    darkScreen.classList.remove('hidden');
     if(!haveListOfFollowingsElementsBeenCreated) {
         if(profileUserFollowing.includes(authenticatedUsername)) {
             const containerDiv = document.createElement('div');
@@ -1636,8 +1708,7 @@ function showListOfFollowingsPopup() {
 function closeListOfFollowingsPopup() {
     displayListOfFollowingsPopup = false;
     listOfFollowingsPopup.classList.add('hidden');
-    blackScreenForLeftSidebar.classList.add('hidden');
-    blackScreenForMainSection.classList.add('hidden');
+    darkScreen.classList.add('hidden');
 }
 
 
@@ -1662,6 +1733,7 @@ async function toggleFollowInPopup(popupName, username) {
         }
         followButtonToToggle.classList.remove('hidden');
         followingButtonToToggle.classList.add('hidden');
+        
     }
     else {
         if(relevantUserInfo[username]['isPrivate']) {
@@ -1709,8 +1781,7 @@ function removeSuggestedAccount(username) {
 function showListOfMutualFollowersPopup() {
     displayListOfMutualFollowersPopup = true;
     listOfMutualFollowersPopup.classList.remove('hidden');
-    blackScreenForLeftSidebar.classList.remove('hidden');
-    blackScreenForMainSection.classList.remove('hidden');
+    darkScreen.classList.remove('hidden');
     if(!haveListOfMutualFollowersElementsBeenCreated) {
         for(let follower of mutualFollowers) {
             if(2==2) {
@@ -1827,21 +1898,18 @@ function showListOfMutualFollowersPopup() {
 function closeListOfMutualFollowersPopup() {
     displayListOfMutualFollowersPopup = false;
     listOfMutualFollowersPopup.classList.add('hidden');
-    blackScreenForLeftSidebar.classList.add('hidden');
-    blackScreenForMainSection.classList.add('hidden');
+    darkScreen.classList.add('hidden');
 }
 
 function cancelOptionsPopup() {
     optionsPopup.classList.add('hidden');
-    blackScreenForLeftSidebar.classList.add('hidden');
-    blackScreenForMainSection.classList.add('hidden');
+    darkScreen.classList.add('hidden');
 }
 
 
 function showOptionsPopup() {
     optionsPopup.classList.remove('hidden');
-    blackScreenForLeftSidebar.classList.remove('hidden');
-    blackScreenForMainSection.classList.remove('hidden');
+    darkScreen.classList.remove('hidden');
 }
 
 function showNumLikesAndCommentsOfPost(postId) {

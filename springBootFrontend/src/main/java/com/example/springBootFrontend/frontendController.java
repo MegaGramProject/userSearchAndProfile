@@ -33,10 +33,23 @@ public class frontendController {
         return "editProfile";
     }
 
-    @GetMapping("/savedPosts/{authenticatedUsername}")
-    public String savedPosts(@PathVariable String authenticatedUsername, Model model) {
+    @GetMapping("/saves/{authenticatedUsername}")
+    public String saves(@PathVariable String authenticatedUsername, Model model) {
         model.addAttribute("authenticatedUsername", authenticatedUsername);
-        return "savedPosts";
+        return "saves";
+    }
+
+    @GetMapping("/likes/{authenticatedUsername}")
+    public String likes(@PathVariable String authenticatedUsername, Model model) {
+        model.addAttribute("authenticatedUsername", authenticatedUsername);
+        return "likes";
+    }
+
+    @GetMapping("/topicMatches/{authenticatedUsername}/{topic}")
+    public String topicMatches(@PathVariable String authenticatedUsername, @PathVariable String topic, Model model) {
+        model.addAttribute("authenticatedUsername", authenticatedUsername);
+        model.addAttribute("topic", topic);
+        return "topicMatches";
     }
 
 }

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Likes</title>
+    <link th:href="@{/images/favicon.ico}" rel="icon" type="image/x-icon">
+    <link th:href="@{/styles/likes.css}" rel="stylesheet">
+</head>
+
+<body>
+    <!--Left sidebar-->
+    <div id="leftSidebar" style="height: 100%; width: 12%; border-style: solid; position: fixed; overflow-y: scroll; border-top: none;
+    border-left: none; border-bottom: none; border-width: 0.01em; border-color: gray; display: flex; flex-direction: column;
+    align-items: start; padding: 0.5em 1em;">
+        <h1 style="font-family: Billabong; font-size:2.4em;">Megagram</h1>
+
+        <div onclick="takeUserHome()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/homeIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Home</p>
+        </div>
+
+        <div onclick="takeUserToSearch()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/searchIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Search</p>
+        </div>
+
+        <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/exploreIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Explore</p>
+        </div>
+
+        <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/reelsIcon2.png}" style="object-fit: contain; height: 2.1em; width: 2.1em;">
+            <p>Reels</p>
+        </div>
+
+        <div onclick="takeUserToMessages()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/messagesIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Messages</p>
+        </div>
+
+        <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/blankHeart.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Notifications</p>
+        </div>
+
+        <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/createIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Create</p>
+        </div>
+
+        <div onclick="takeUserToOwnProfile()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img id="profileIconInLeftSidebar" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Profile</p>
+        </div>
+
+
+        <div style="position: relative; height: 90%;">
+            <div class="hoverableElement" style="position: absolute; top: 90%; display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; height: 7.25em; border-radius: 0.85em; position: relative;">
+                <img th:src="@{/images/moreIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+                <p id="toggleLeftSidebarPopupMoreOrLessText" onclick="toggleLeftSidebarPopup()">More</p>
+
+                <div class="hidden" id="leftSidebarPopup" style="background-color: white; border-style: solid; position: absolute;
+                top: -200%; left: -6%; width: 85%; padding: 0.5em 1em; border-radius: 0.85em; overflow-y: scroll">
+                    <p style="border-style: solid; border-color: lightgray; border-top: none; border-left: none; border-right: none;">Settings</p>
+                    <p style="border-style: solid; border-color: lightgray; border-top: none; border-left: none; border-right: none;">Your Activity</p>
+                    <p style="border-style: solid; border-color: lightgray; border-top: none; border-left: none; border-right: none;">Saved</p>
+                    <p onclick="takeUserToLogin()" style="border-style: solid; border-color: lightgray; border-top: none; border-left: none; border-right: none;">Switch accounts</p>
+                    <p style="border-style: solid; border-color: lightgray; border-top: none; border-left: none; border-right: none;">Log out</p>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <div id="mainSection" style="margin-left: 18%; width: 85%; display: flex; flex-direction: column; align-items: center;
+    gap: 1.5em;">
+        
+        <h1 id="likedHeader">Liked Posts</h1>
+
+        <div style="border-style: solid; border-color: lightgray; border-width:0.15em; border-left: none;
+        border-right: none; border-bottom: none; display: flex; flex-direction: column; width: 75%; gap: 3.5em;">
+
+            <div style="display: flex; gap: 5em; justify-content: center; color: gray; font-size: 0.8em; padding-top: 1.6em;">
+
+                <div onclick="showLikedPosts()" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
+                    <img id="postsGridIcon2" th:src="@{/images/postsGridIcon2.png}" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
+                    <img id="postsGridIcon" th:src="@{/images/postsGridIcon.png}" class="hidden" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
+                    <b id="postsText" style="color: black; font-size: 1.15em;">POSTS</b>
+                </div>
+
+                <div onclick="showLikedReels()" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
+                    <img id="reelsIcon" th:src="@{/images/reelsIcon.png}" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
+                    <img id="reelsIcon2" th:src="@{/images/reelsIcon2.png}" class="hidden" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
+                    <b id="reelsText">REELS</b>
+                </div>
+
+            </div>
+
+            <div id="noLikedPosts" class="hidden" style="height: 35em; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <img th:src="@{/images/cameraInCircleIcon.png}" style="pointer-events: none; height: 6.8em; width: 6.8em; object-fit: contain;">
+                <h2>None Yet</h2>
+            </div>
+    
+            <div id="imageGridForLikedPosts" style="display: flex; flex-direction: column; align-items: start; justify-content: start; gap: 0.3em;">
+
+                <div style="display: flex; align-items: center; justify-content: start; width: 100%; gap: 0.3em;">
+                    
+                </div>
+                
+            </div>
+
+            <div id="noLikedReels" class="hidden" style="height: 35em; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                <img th:src="@{/images/reelsIcon3.png}" style="pointer-events: none; height: 6.2em; width: 6.2em; object-fit: contain;">
+                <h2>None Yet</h2>
+            </div>
+
+            <div id="imageGridForLikedReels" class="hidden" style="display: flex; flex-direction: column; justify-content: center; align-items: center;">
+                
+            </div>
+
+
+        </div>
+
+    </div>
+
+    <div id="accountNotFound" class="hidden">
+        <h1>404 - Page Not Found</h1>
+        <p>Sorry, but the page you are looking for does not exist.</p>
+        <a href="http://localhost:3100">Go Back Home</a>
+    </div>
+
+
+    <p id="authenticatedUsername" class="hidden" th:text="${authenticatedUsername}"></p>
+    <script th:src="@{/scripts/likes.js}"></script>
+</body>
+
+</html>

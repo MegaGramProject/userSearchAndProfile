@@ -84,8 +84,9 @@
     </div>
 
     <!--Main Section-->
-    <div id="mainSection" style="display: flex; flex-direction: column; margin-left: 20%; height: 78em; width: 80%;">
+    <div id="mainSection" style="display: flex; flex-direction: column; margin-left: 20%; height: 90em; width: 80%;">
         <h2>Edit profile</h2>
+        <small style="color: lightgray">Not all fields need to be filled out in order to submit changes, just the ones you prefer!</small>
 
         <br>
 
@@ -117,6 +118,14 @@
         <h3>Full-Name</h3>
         <small id="fullNameError" class="hidden" style="color: red;">**Must be between 1 and 30 characters and only A-Z/a-z. At-least one-space, but not at the start.</small>
         <textarea id="fullNameTextarea" style="font-family: Arial; resize: none; padding-top: 1em; padding-right: 1em;
+        padding-left: 1em; width: 82%; background-color: #f7f7f7; border-radius: 0.87em; font-size: 1em;"></textarea>
+
+        <br>
+        <br>
+
+        <h3>Contact-Info (email/phone-number)</h3>
+        <small id="contactInfoError" class="hidden" style="color: red;">**Must be a valid email/number. No spaces/hyphens/special-characters in number.</small>
+        <textarea id="contactInfoTextarea" style="font-family: Arial; resize: none; padding-top: 1em; padding-right: 1em;
         padding-left: 1em; width: 82%; background-color: #f7f7f7; border-radius: 0.87em; font-size: 1em;"></textarea>
 
         <br>
@@ -171,7 +180,7 @@
     </div>
 
 
-    <img id="darkScreen" class="hidden" th:src="@{/images/blackScreen.png}" style="position: absolute; top: 0%; left: 0%; height: 150%; width: 100%; opacity: 0.7">
+    <img id="darkScreen" class="hidden" th:src="@{/images/blackScreen.png}" style="position: absolute; top: 0%; left: 0%; height: 170%; width: 100%; opacity: 0.7">
 
     <!--Popups-->
     <div id="changeProfilePhotoPopup" class="hidden" style="position: absolute; top: 35%; left: 38%; border-radius: 1em; background-color: white; width: 33%; height: 29%; border-style: solid; z-index: 10;
@@ -226,6 +235,33 @@
             <br>
             <button onclick="closeFinalConfirmationPopup()" id="noWaitCancelbutton" style="color: white; background-color: black; font-weight: bold; cursor: pointer; padding: 0.5em 1em; border-radius: 0.8em;">No wait! Cancel</button>
     </div>
+
+    <div id="confirmCodePopup" class="hidden" style="position: absolute; top: 85%; left: 38%; border-radius: 1em; background-color: white; width: 33%; height: 42%; border-style: solid; z-index: 10;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <div style="width: 100%; text-align: center;">
+            <p id="confirmCodeHeader" style="font-size: 1.4em;"></p>
+            <p id="confirmCodeInstruction" style="font-size: 0.8em; color: gray; width: 65%; margin-left: 15%;"></p>
+            <p id="timeTillCodeExpires"></p>
+            <small id="incorrectCodeMessage" class="hidden" style="color: red">Incorrect</small>
+        </div>
+        <br>
+        <div style="width: 100%; display: flex; align-items: center; gap: 1.2em; justify-content: center;">
+            <textarea id="confirmationCodeTextarea" style="width: 60%; font-family: Arial; resize: none;"></textarea>
+            <button onclick="checkConfirmationCode()" id="confirmCodeButton" type="button" class="blueButton" style="opacity: 0.5">
+            Confirm</button>
+        </div>
+
+        <div style="width: 100%; text-align: center; padding-top: 0.6em; padding-bottom: 0.6em; border-style: solid;
+        border-color: lightgray; border-top: none; border-left: none; border-right: none;">
+            <p onclick="resendConfirmationCode()" style="cursor: pointer; color: darkblue">Resend</p>
+        </div>
+
+        <div style="width: 100%; text-align: center; padding-top: 0.6em; padding-bottom: 0.6em;">
+            <p onclick="closeConfirmCodePopup()" style="cursor: pointer;">Cancel</p>
+        </div>
+
+    </div>
+
 
     <p id="authenticatedUsername" class="hidden" th:text="${authenticatedUsername}"></p>
     <input id="fileInputForProfilePhoto" type="file" class="hidden">

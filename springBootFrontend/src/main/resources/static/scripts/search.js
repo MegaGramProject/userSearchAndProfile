@@ -376,7 +376,7 @@ async function fetchRecentSearchesOfAuthenticatedUser() {
                     if(!response.ok) {
                         throw new Error('Network response not ok');
                     }
-                    window.location.href = "http://localhost:8019/postsMatchingTopic/"+authenticatedUsername+"/" + recentSearch.search;
+                    window.location.href = "http://localhost:8019/topicMatches/"+authenticatedUsername+"/" + recentSearch.search;
                 });
 
                 newElementDiv.addEventListener('mouseenter', function() {
@@ -645,7 +645,7 @@ async function handleInputChange(event) {
                             throw new Error('Network response not ok');
                         }
                     }
-                    window.location.href = "http://localhost:8019/postsMatchingTopic/"+authenticatedUsername+"/" + searchResult.search;
+                    window.location.href = "http://localhost:8019/topicMatches/"+authenticatedUsername+"/" + searchResult.search;
                 });
 
                 newElementDiv.addEventListener('mouseenter', function() {
@@ -889,7 +889,7 @@ function updateUIAfterRemovingRecentSearches() {
                     if(!response.ok) {
                         throw new Error('Network response not ok');
                     }
-                    window.location.href = "http://localhost:8019/postsMatchingTopic/"+authenticatedUsername+"/" + recentSearch.search;
+                    window.location.href = "http://localhost:8019/topicMatches/"+authenticatedUsername+"/" + recentSearch.search;
                 });
 
                 newElementDiv.addEventListener('mouseenter', function() {

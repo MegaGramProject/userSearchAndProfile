@@ -26,6 +26,7 @@ let currentlyShownSection = 'POSTS';
 let listOfSavedPosts = [];
 let listOfSavedReels = [];
 let listOfSavedSounds = [];
+let userBlockings = [];
 
 async function authenticateUserAndFetchData() {
     let username = document.getElementById('authenticatedUsername').textContent;
@@ -138,6 +139,33 @@ async function authenticateUserAndFetchData() {
     const listOfSavedPostIds = await response2.json();
     
     if(listOfSavedPostIds.length>0) {
+        const response2b = await fetch('http://localhost:8013/graphql', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            query: `
+            query {
+                getAllUserBlockings(filter: { username: "${authenticatedUsername}" }) {
+                    blocker
+                    blockee
+                }
+            }
+            `
+            })
+        });
+        if(!response2b.ok) {
+            throw new Error('Network response not ok');
+        }
+        userBlockings = await response2b.json();
+        userBlockings = userBlockings['data']['getAllUserBlockings'];
+        userBlockings = userBlockings.map(userBlocking => {
+            if(userBlocking['blockee']===authenticatedUsername) {
+                return userBlocking['blocker'];
+            }
+            return userBlocking['blockee'];
+        });
+
+    
         //getImagePosts that were saved
         const response3 = await fetch('http://localhost:8003/getPostsForMultiplePostIds', {
             method: 'POST',
@@ -193,6 +221,7 @@ async function authenticateUserAndFetchData() {
                     }
                 }
             }
+            
             listOfSavedPosts.push(postInfo);
         }
 
@@ -224,8 +253,6 @@ async function authenticateUserAndFetchData() {
                 post['numComments'] = 0;
             }
         }
-
-
 
         listOfSavedPosts.sort((a, b) => new Date(b['dateTimeOfPost']) - new Date(a['dateTimeOfPost']));
         
@@ -429,6 +456,16 @@ function createDOMElementsForSavedPosts() {
     newRowDiv.style.gap = '0.3em';
 
     for(let post of listOfSavedPosts) {
+        let isAnyPosterOfThisPostInUserBlockings = false;
+        for(let username of post['usernames']) {
+            if(userBlockings.includes(username)) {
+                isAnyPosterOfThisPostInUserBlockings = true;
+                break;
+            }
+        }
+        if(isAnyPosterOfThisPostInUserBlockings) {
+            continue;
+        }
         counter++;
         index++;
         if(counter>3) {

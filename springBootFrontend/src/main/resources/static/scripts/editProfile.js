@@ -23,8 +23,18 @@ const goodbyeButton = document.getElementById('goodbyeButton');
 const fileInputForProfilePhoto = document.getElementById('fileInputForProfilePhoto');
 const usernameTextarea = document.getElementById('usernameTextarea');
 const usernameError = document.getElementById('usernameError');
+const contactInfoTextarea = document.getElementById('contactInfoTextarea');
+const contactInfoError = document.getElementById('contactInfoError');
+const confirmCodePopup = document.getElementById('confirmCodePopup');
+const confirmCodeHeader = document.getElementById('confirmCodeHeader');
+const confirmCodeInstruction = document.getElementById('confirmCodeInstruction');
+const timeTillCodeExpires = document.getElementById('timeTillCodeExpires');
+const confirmCodeButton = document.getElementById('confirmCodeButton');
+const incorrectCodeMessage = document.getElementById('incorrectCodeMessage');
+const confirmationCodeTextarea = document.getElementById('confirmationCodeTextarea');
 
-
+let correctCode;
+let intervalId;
 let displayLeftSidebarPopup = false;
 let relevantProfileUserInfo = {};
 let userSelectedAccountVisibility = "";
@@ -119,7 +129,7 @@ async function authenticateUserAndFetchData() {
             }
             */
     
-    const response = await fetch('http://localhost:8001/getRelevantUserInfoFromUsername/'+authenticatedUsername);
+    const response = await fetch('http://localhost:8001/getRelevantUserInfoFromUsernameIncludingContactInfo/'+authenticatedUsername);
     if(!response.ok) {
         //user probably doesn't exist
         leftSidebar.classList.add('hidden');
@@ -129,8 +139,9 @@ async function authenticateUserAndFetchData() {
     }
     relevantProfileUserInfo = await response.json();
     usernameTextarea.placeholder = authenticatedUsername;
-    fullNameTextarea.placeholder = relevantProfileUserInfo['fullName'];
     fullNameInTopDiv.textContent = relevantProfileUserInfo['fullName'];
+    fullNameTextarea.placeholder = relevantProfileUserInfo['fullName'];
+    contactInfoTextarea.placeholder = relevantProfileUserInfo['contactInfo'];
     accountBasedInTextarea.placeholder = relevantProfileUserInfo['accountBasedIn'];
 
     const publicOption = document.createElement('option');
@@ -214,6 +225,7 @@ accountVisibilitySelection.addEventListener('change', function() {
     userSelectedAccountVisibility = accountVisibilitySelection.value;
 });
 
+
 function validateFields() {
     let isAtLeastOneFieldInvalid = false
     if(usernameTextarea.value.length>0 && !isUsernameValid()) {
@@ -224,6 +236,11 @@ function validateFields() {
         fullNameError.classList.remove('hidden');
         isAtLeastOneFieldInvalid = true;
     }
+    if(contactInfoTextarea.value.length>0 && !isValidNumber() && !isValidEmail()) {
+        contactInfoError.classList.remove('hidden');
+        isAtLeastOneFieldInvalid = true;
+    }
+
     
     if(isAtLeastOneFieldInvalid) {
         submitButton.classList.add('hidden');
@@ -235,6 +252,9 @@ function validateFields() {
         }, 3000);
         return false;
     }
+    usernameError.classList.add('hidden');
+    fullNameError.classList.add('hidden');
+    contactInfoError.classList.add('hidden');
     return true;
 }
 
@@ -281,6 +301,11 @@ async function onSubmit() {
     let areFieldsValidated = validateFields();
     if(!areFieldsValidated) {
         return;
+    }
+    
+    if(contactInfoTextarea.value.length>0 && contactInfoTextarea.value!==relevantProfileUserInfo['contactInfo']) {
+        showConfirmCodePopup();
+        return
     }
 
     if(userSelectedProfilePhoto!==null) {
@@ -432,6 +457,238 @@ function closeFinalConfirmationPopup() {
     oneLastUsernameTextarea.value = "";
     darkScreen.classList.add('hidden');
     finalDeleteAccountConfirmationPopup.classList.add('hidden');
+}
+
+function checkConfirmationCode() {
+    if(correctCode.toString()===confirmationCodeTextarea.value) {
+        incorrectCodeMessage.classList.add('hidden');
+        closeConfirmCodePopup();
+        submitProfileEditsAfterConfirmingCode();
+    }
+    else {
+        incorrectCodeMessage.classList.remove('hidden');
+    }
+}
+
+async function submitProfileEditsAfterConfirmingCode() {
+    const changedFields = {'contactInfo': contactInfoTextarea.value};
+    if(userSelectedProfilePhoto!==null) {
+        const formData = new FormData();
+        if(userSelectedProfilePhoto==='defaultPfp') {
+            const response0 = await fetch('http://localhost:8003/images/defaultPfp.png');
+            const blob = await response0.blob();
+            userSelectedProfilePhoto = new File([blob], 'defaultPfp.png', { type: blob.type });
+        }
+        formData.append('newProfilePhoto', userSelectedProfilePhoto);
+        const response = await fetch('http://localhost:8003/editProfilePhoto/'+authenticatedUsername, {
+            method: 'PATCH',
+            body: formData
+        });
+        if(!response.ok) {
+            submitButton.classList.add('hidden');
+            submissionErrorMessage.textContent = "Couldn't update profile-photo";
+            submissionErrorMessage.classList.remove('hidden');
+            userSelectedProfilePhoto = null;
+            authUserProfilePhoto.src = relevantProfileUserInfo['profilePhotoString'];
+            setTimeout(function() {
+                submitButton.classList.remove('hidden');
+                submissionErrorMessage.classList.add('hidden');
+            }, 3000);
+            return;
+        }
+    }
+
+    if(usernameTextarea.value.length>0 && usernameTextarea.value!==authenticatedUsername) {
+        const response = await fetch('http://localhost:8001/doesUserExist', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                username: usernameTextarea.value
+            })
+        });
+        if(!response.ok) {
+            submitButton.classList.add('hidden');
+            submissionErrorMessage.textContent = "Couldn't check if username is taken or not";
+            submissionErrorMessage.classList.remove('hidden');
+            setTimeout(function() {
+                submitButton.classList.remove('hidden');
+                submissionErrorMessage.classList.add('hidden');
+            }, 3000);
+            return;
+        }
+        const responseData = await response.json();
+        if('userExists' in responseData) {
+            changedFields['username'] = usernameTextarea;
+        }
+        else {
+            submitButton.classList.add('hidden');
+            submissionErrorMessage.textContent = "Username is already taken";
+            submissionErrorMessage.classList.remove('hidden');
+            setTimeout(function() {
+                submitButton.classList.remove('hidden');
+                submissionErrorMessage.classList.add('hidden');
+            }, 3000);
+            return;
+        }
+    }
+
+    if(fullNameTextarea.value.length>0 && fullNameTextarea.value!==relevantProfileUserInfo['fullName']) {
+        changedFields['fullName'] = fullNameTextarea.value;
+    }
+
+    if(accountBasedInTextarea.value.length>0 && accountBasedInTextarea.value!==relevantProfileUserInfo['accountBasedIn']) {
+        changedFields['accountBasedIn'] = accountBasedInTextarea.value;
+    }
+
+    if(userSelectedAccountVisibility!==originalAccountVisibility) {
+        changedFields['isPrivate'] = userSelectedAccountVisibility === 'Private' ? true : false;
+    }
+
+    if(Object.keys(changedFields).length>0) {
+        const responseToEditProfile = await fetch('http://localhost:8001/updateUser/'+authenticatedUsername, {
+            method: 'PATCH',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(changedFields)
+        });
+        if(!responseToEditProfile.ok) {
+            submitButton.classList.add('hidden');
+            submissionErrorMessage.textContent = "Error updating your username/fullName/accountBasedIn/accountVisibility";
+            submissionErrorMessage.classList.remove('hidden');
+            setTimeout(function() {
+                submitButton.classList.remove('hidden');
+                submissionErrorMessage.classList.add('hidden');
+            }, 3000);
+            return;
+        }
+        submitButton.classList.add('hidden');
+        submissionSuccessMessage.classList.remove('hidden');
+        setTimeout(function() {
+            if('username' in changedFields) {
+                //better yet: update everything related to username even the tokens and then redirect to profilePage of new username
+                localStorage.setItem('authenticatedUsername', changedFields['username']);
+                window.location.href = "http://localhost:8000/profilePage/"+changedFields['username'];
+            }
+            else {
+                window.location.href = "http://localhost:8019/profilePage/"+authenticatedUsername;
+            }
+        }, 2000);
+    }
+    else if(userSelectedProfilePhoto!==null) {
+        submitButton.classList.add('hidden');
+        submissionSuccessMessage.classList.remove('hidden');
+        setTimeout(function() {
+            window.location.href = "http://localhost:8019/profilePage/"+authenticatedUsername;
+        }, 2000);
+    }
+    else {
+        submitButton.classList.add('hidden');
+        submissionErrorMessage.textContent = "You didn't change anything!"
+        submissionErrorMessage.classList.remove('hidden');
+        setTimeout(function() {
+            submitButton.classList.remove('hidden');
+            submissionErrorMessage.classList.add('hidden');
+        }, 3000);
+    }
+}
+
+function isValidEmail() {
+    let email = contactInfoTextarea.value;
+    let atIndex = email.indexOf('@');
+    if (atIndex < 1 || email.indexOf('@', atIndex + 1) !== -1) {
+        return false;
+    }
+    let localPart = email.substring(0, atIndex);
+    let domainPart = email.substring(atIndex + 1);
+    if (localPart.length === 0 || localPart.length > 64) {
+        return false;
+    }
+
+    if (domainPart.length === 0 || domainPart.length > 255) {
+        return false;
+    }
+    let dotIndex = domainPart.indexOf('.');
+    if (dotIndex < 1 || dotIndex === domainPart.length - 1) {
+        return false;
+    }
+    let domainLabels = domainPart.split('.');
+    for (let label of domainLabels) {
+        if (label.length === 0 || label.length > 63) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+function isValidNumber() {
+    let phoneNumberInput = contactInfoTextarea.value;
+    const phoneRegex = /^\d{8,17}$/;
+    return phoneRegex.test(phoneNumberInput);
+}
+
+async function showConfirmCodePopup() {
+    darkScreen.classList.remove('hidden');
+    confirmCodePopup.classList.remove('hidden');
+    let isContactInfoEmail = isValidEmail();
+
+    if(isContactInfoEmail) {
+        confirmCodeHeader.textContent = "Confirm Email";
+        const response = await fetch('http://localhost:8001/sendEmail/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                email: contactInfoTextarea.value
+            })
+        });
+        if(!response.ok) {
+            throw new Error('Network response not ok');
+        }
+        correctCode = await response.json();
+        correctCode = correctCode['confirmationCode'];
+    }
+    else {
+        confirmCodeHeader.textContent = "Confirm Phone-Number";
+        const response = await fetch('http://localhost:8001/sendText/'+contactInfoTextarea.value);
+        if(!response.ok) {
+            throw new Error('Network response not ok');
+        }
+        correctCode = await response.json();
+        correctCode = correctCode['confirmationCode'];
+    }
+
+    confirmCodeInstruction.textContent = "Before you update your contact-info, please enter the temporary code we sent to " +
+    contactInfoTextarea.value;
+    let timeLeft = 60;
+    intervalId = setInterval(function() {
+        if(timeLeft==0) {
+            timeTillCodeExpires.textContent="Time's up!"
+            confirmCodeButton.style['opacity'] = '0.5';
+            confirmCodeButton.style['cursor'] = 'auto';
+            clearInterval(intervalId);
+        }
+        else {
+            timeTillCodeExpires.textContent=timeLeft+"s";
+            timeLeft--;
+        }
+    }, 1000);
+}
+
+confirmationCodeTextarea.oninput = function() {
+    if(confirmationCodeTextarea.value.length>0) {
+        confirmCodeButton.style['opacity'] = '1';
+        confirmCodeButton.style['cursor'] = 'pointer';
+    }
+    else {
+        confirmCodeButton.style['opacity'] = '0.5';
+        confirmCodeButton.style['cursor'] = 'auto';
+    }
+}
+
+function closeConfirmCodePopup() {
+    darkScreen.classList.add('hidden');
+    confirmCodePopup.classList.add('hidden');
+    timeTillCodeExpires.textContent="";
+    clearInterval(intervalId);
 }
 
 async function deleteAccount(){
