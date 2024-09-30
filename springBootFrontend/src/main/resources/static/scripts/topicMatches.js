@@ -179,7 +179,9 @@ async function authenticateUserAndFetchData() {
         return userBlocking['blockee'];
     });
 
-    const response3 = await fetch('http://localhost:8003/getPostsForMultiplePostIds', {
+
+    //get list of posts whose category is the topic or whose postId is in the array of postIds
+    const response3 = await fetch('http://localhost:8003/getPostsRelatedToTopic/'+topic, {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
@@ -188,6 +190,8 @@ async function authenticateUserAndFetchData() {
     });
 
     postIdToPostMappings = await response3.json(); //key: postId, value: relevant info on post
+    
+
 
     //get list of videos whose category is the topic or whose postId is in the array of postIds
     const response4 = await fetch('http://localhost:8004/getVideosRelatedToTopic/'+topic, {
@@ -232,12 +236,16 @@ async function authenticateUserAndFetchData() {
             }
         }
         listOfMatchingPosts.push(postInfo);
+        delete postIdToPostMappings[postId];
         delete postIdToVidMappings[postId];
     }
 
     
     for(let postId of Object.keys(postIdToVidMappings)) {
         //this means that this is a video that has been categorized as the topic but has not hashtagged the topic
+        if(postIdToVidMappings[postId]['smallestSlideNumber']!==0) {
+            continue;
+        }
         let postInfo = {};
         postInfo = postIdToVidMappings[postId];
         const response = await fetch('http://localhost:8004/getVideo/'+postInfo['videoId']);
@@ -250,6 +258,22 @@ async function authenticateUserAndFetchData() {
         
         if(!postInfo['hasMoreThanOneSlide']) {
             if(postId in postIdToPostMappings) {
+                postInfo['hasMoreThanOneSlide'] = true;
+            }
+        }
+
+        delete postIdToPostMappings[postId];
+        listOfMatchingPosts.push(postInfo);
+    }
+
+    for(let postId of Object.keys(postIdToPostMappings)) {
+        //this means that this is an image-post that has been categorized as the topic but has not hashtagged the topic
+        let postInfo = {};
+        postInfo = postIdToPostMappings[postId];
+        
+        postInfo['base64StringOfImageWithSmallestSlideNumber'] = 'data:image/png;base64,'+ postInfo['base64StringOfImageWithSmallestSlideNumber'];
+        if(!postInfo['hasMoreThanOneSlide']) {
+            if(postId in postIdToVidMappings) {
                 postInfo['hasMoreThanOneSlide'] = true;
             }
         }
