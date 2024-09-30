@@ -3,7 +3,7 @@ from django.db import models
 class UserBioAndLink(models.Model):
     username = models.CharField(max_length=30, unique=True, db_index=True, primary_key=True)
     bio = models.CharField(max_length=250)
-    link = models.CharField(max_length=200)
+    link = models.CharField(max_length=200, null=True, blank=True)
 
     class Meta:
         db_table = 'userBiosAndLinks'

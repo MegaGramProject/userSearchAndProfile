@@ -58,6 +58,9 @@ const profileIconInLeftSidebar = document.getElementById('profileIconInLeftSideb
 const listOfAccountsInSuggestedAccountsDiv = document.getElementById('listOfAccountsInSuggestedAccountsDiv');
 const noSimilarAccountsDiv = document.getElementById('noSimilarAccountsDiv');
 const darkScreen = document.getElementById('darkScreen');
+const profileBio = document.getElementById('profileBio');
+const profileLink = document.getElementById('profileLink');
+
 
 let authenticatedUsername = "";
 let displayLeftSidebarPopup = false;
@@ -88,6 +91,7 @@ let haveReelDOMElementsBeenCreated = false;
 let haveTaggedPostDOMElementsBeenCreated = false;
 let haveSuggestedAccountsDOMElementsBeenCreated = false;
 let listOfSuggestedAccountUsernames = [];
+let followRequestsMadeByAuthUser = []; //list of usernames that authUser requested to follow
 
 
 async function authenticateUserAndFetchData() {
@@ -202,6 +206,32 @@ async function authenticateUserAndFetchData() {
     }
     let profilePhotoBlob = await response1.blob();
     relevantProfileUserInfo['profilePhotoString'] = URL.createObjectURL(profilePhotoBlob);
+
+    const response1b = await fetch('http://localhost:8021/graphql/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            query: `
+            query {
+                userBioAndLinkForUser(username: "${profileUsername}" ) {
+                    username
+                    bio
+                    link
+                }
+
+                followRequestsMadeByUser(username: "${authenticatedUsername}" )
+            }
+            `
+            })
+        });
+    if(!response1b.ok) {
+        throw new Error('Network response not ok');
+    }
+    let response1bData = await response1b.json();
+    profileBio.textContent = response1bData['data']['userBioAndLinkForUser']['bio'];
+    profileLink.href =  response1bData['data']['userBioAndLinkForUser']['link'];
+    profileLink.textContent = response1bData['data']['userBioAndLinkForUser']['link'];
+    followRequestsMadeByAuthUser = response1bData['data']['followRequestsMadeByUser'];
     
 
     const response2 = await fetch('http://localhost:8013/graphql', {
@@ -314,8 +344,16 @@ async function authenticateUserAndFetchData() {
         followingButton.classList.remove('hidden')
         isFollowingUser = true;
     }
+    else if(relevantProfileUserInfo['isPrivate'] && followRequestsMadeByAuthUser.includes(profileUsername)) {
+        unrequestButton.classList.remove('hidden');
+        isRequestingFollow = true;
+        postsReelsTaggedSection.classList.add('hidden');
+        accountIsPrivate.classList.remove('hidden');
+        accountIsPrivate.getElementsByTagName('img')[0].classList.remove('hidden');
+        accountIsPrivate.getElementsByTagName('b')[0].classList.remove('hidden');
+        accountIsPrivate.getElementsByTagName('p')[0].classList.remove('hidden');
+    }
     else {
-        //check if isRequestingUser
         followButton.classList.remove('hidden');
         if(relevantProfileUserInfo['isPrivate']) {
             postsReelsTaggedSection.classList.add('hidden');
@@ -709,6 +747,9 @@ function createDOMElementsForSuggestedAccounts() {
         return;
     }
     for(let suggestedAccountUsername of listOfSuggestedAccountUsernames) {
+        if(followRequestsMadeByAuthUser.includes(suggestedAccountUsername)) {
+            continue;
+        }
         const div = document.createElement('div');
         div.id = 'suggestedAccount'+suggestedAccountUsername;
         div.style.display = 'flex';
@@ -896,7 +937,25 @@ async function toggleSimilarAccounts() {
 async function toggleFollow() {
     if(!isFollowingUser) {
         if(relevantProfileUserInfo['isPrivate']) {
-            //add follow-request via API-call
+            const response = await fetch('http://localhost:8021/graphql/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    query: `
+                    mutation {
+                        addFollowRequest(requester: "${authenticatedUsername}", requestee: "${profileUsername}") {
+                            followRequest {
+                                requester
+                                requestee
+                            }
+                        }
+                    }
+                    `
+                    })
+            });
+            if(!response.ok) {
+                throw new Error('Network response not ok');
+            }
             followButton.classList.add('hidden');
             unrequestButton.classList.remove('hidden');
             isRequestingFollow = true;
@@ -966,6 +1025,22 @@ async function unblockUser() {
 }
 
 async function cancelFollowRequest() {
+    const response = await fetch('http://localhost:8021/graphql/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            query: `
+            mutation {
+                removeFollowRequest(requester: "${authenticatedUsername}", requestee: "${profileUsername}") {
+                    wasDeleteSuccessful
+                }
+            }
+            `
+            })
+    });
+    if(!response.ok) {
+        throw new Error('Network response not ok');
+    }
     unrequestButton.classList.add('hidden');
     followButton.classList.remove('hidden');
     isRequestingFollow = false;
@@ -1511,9 +1586,10 @@ function showListOfFollowersPopup() {
                 else if(authenticatedUserFollowing.includes(follower)) {
                     followingButton.classList.remove('hidden');
                 }
+                else if(followRequestsMadeByAuthUser.includes(follower)) {
+                    requestedButton.classList.remove('hidden');
+                }
                 else {
-                    //if authUser requested to follow follower, remove the 'hidden' class from it
-                    //else
                     followButton.classList.remove('hidden');
                 }
 
@@ -1692,9 +1768,10 @@ function showListOfFollowingsPopup() {
                 if(authenticatedUserFollowing.includes(following)) {
                     followingButton.classList.remove('hidden');
                 }
+                else if(followRequestsMadeByAuthUser.includes(following)) {
+                    requestedButton.classList.remove('hidden');
+                }
                 else {
-                    //if authUser requested to follow following, remove the 'hidden' class from it
-                    //else
                     followButton.classList.remove('hidden');
                 }
 
@@ -1737,7 +1814,25 @@ async function toggleFollowInPopup(popupName, username) {
     }
     else {
         if(relevantUserInfo[username]['isPrivate']) {
-            //API-call to add follow-request
+            const response = await fetch('http://localhost:8021/graphql/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    query: `
+                    mutation {
+                        addFollowRequest(requester: "${authenticatedUsername}", requestee: "${username}") {
+                            followRequest {
+                                requester
+                                requestee
+                            }
+                        }
+                    }
+                    `
+                    })
+            });
+            if(!response.ok) {
+                throw new Error('Network response not ok');
+            }
             let requestedButtonToShow = document.getElementById(popupName+"Requested"+username);
             followButtonToToggle.classList.add('hidden');
             requestedButtonToShow.classList.remove('hidden');
@@ -1766,7 +1861,22 @@ async function toggleFollowInPopup(popupName, username) {
 }
 
 async function cancelFollowRequestInPopup(popupName, username) {
-    //API-call to remove follow-request
+    const response = await fetch('http://localhost:8021/graphql/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            query: `
+            mutation {
+                removeFollowRequest(requester: "${authenticatedUsername}", requestee: "${username}") {
+                    wasDeleteSuccessful
+                }
+            }
+            `
+            })
+    });
+    if(!response.ok) {
+        throw new Error('Network response not ok');
+    }
     let requestedButtonToCancel = document.getElementById(popupName+"Requested"+username);
     let followButtonToToggle = document.getElementById(popupName+"Follow"+username);
     requestedButtonToCancel.classList.add('hidden');

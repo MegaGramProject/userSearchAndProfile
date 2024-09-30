@@ -128,15 +128,11 @@
                 <br>
                 
                 <b id="profileFullName" style="font-size: 0.84em; margin-top: -1em;"></b>
-                <p style="font-size: 0.86em; max-width: 22em;">builder of stuff
-                    cheat meal crusher
-                    tequila sipper</p>
+                <p id="profileBio" style="font-size: 0.86em; max-width: 22em;"></p>
 
                 <div style="display: flex; align-items: center; gap: 0.2em;">
                     <img th:src="@{/images/linkIcon.png}" style="height: 1.2em; width: 1.2em; object-fit: contain; pointer-events: none;">
-                    <a href="https://therock.komi.io/" style="font-size: 0.85em; font-weight: bold; color: #3a53a6; text-decoration: none;">
-                        therock.komi.io
-                    </a>
+                    <a id="profileLink" href="" style="font-size: 0.85em; font-weight: bold; color: #3a53a6; text-decoration: none;"></a>
                 </div>
         
 
@@ -306,7 +302,7 @@
 
         <!--About-Account Popup-->
         <div id="aboutAccountPopup" class="hidden" style="position: absolute; left: 28%; top: 12%; z-index: 10; background-color: white; width: 27%; height: 44%; border-style: solid;
-        display: flex; flex-direction: column; align-items: start; border-radius: 0.7em;">
+        display: flex; flex-direction: column; align-items: start; border-radius: 0.7em; overflow-y: scroll">
             
             <div style="border-style: solid; border-left: none; border-top: none; border-right: none; width: 100%; border-color: lightgray;">
                 <p style="text-align: center; font-weight: bold;">About this account</p>

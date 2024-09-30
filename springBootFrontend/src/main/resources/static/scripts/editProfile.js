@@ -174,7 +174,35 @@ async function authenticateUserAndFetchData() {
     authUserProfilePhoto.src = relevantProfileUserInfo['profilePhotoString'];
     profileIconInLeftSidebar.src = relevantProfileUserInfo['profilePhotoString'];
 
-    
+    const response2 = await fetch('http://localhost:8021/graphql/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            query: `
+            query {
+                userBioAndLinkForUser(username: "${authenticatedUsername}" ) {
+                    username
+                    bio
+                    link
+                }
+            }
+            `
+            })
+        });
+    if(!response2.ok) {
+        throw new Error('Network response not ok');
+    }
+    let response2Data = await response2.json();
+    relevantProfileUserInfo['bio'] = response2Data['data']['userBioAndLinkForUser']['bio'];
+    relevantProfileUserInfo['link'] = response2Data['data']['userBioAndLinkForUser']['link'];
+    bioTextarea.placeholder = relevantProfileUserInfo['bio'];
+
+    if(relevantProfileUserInfo['link']!==null) {
+        websiteTextarea.placeholder = response2Data['data']['userBioAndLinkForUser']['link'];
+    }
+    else {
+        websiteTextarea.placeholder = "(no website yet)";
+    }
 }
 
 function takeUserHome() {
@@ -297,6 +325,7 @@ function isFullNameValid() {
 
 async function onSubmit() {
     const changedFields = {};
+    let changedBioAndOrLink = false;
 
     let areFieldsValidated = validateFields();
     if(!areFieldsValidated) {
@@ -306,6 +335,45 @@ async function onSubmit() {
     if(contactInfoTextarea.value.length>0 && contactInfoTextarea.value!==relevantProfileUserInfo['contactInfo']) {
         showConfirmCodePopup();
         return
+    }
+
+    if((bioTextarea.value.length>0 && bioTextarea.value!==relevantProfileUserInfo['bio']) ||
+    (websiteTextarea.value.length>0 && websiteTextarea.value!==relevantProfileUserInfo['link'])) {
+        const dataForEditingBioAndLink = {};
+        if(bioTextarea.value.length>0 && bioTextarea.value!==relevantProfileUserInfo['bio']) {
+            dataForEditingBioAndLink['newBio'] = bioTextarea.value;
+        }
+        if(websiteTextarea.value.length>0 && websiteTextarea.value!==relevantProfileUserInfo['link']) {
+            dataForEditingBioAndLink['newLink'] = websiteTextarea.value;
+        }
+        const response = await fetch('http://localhost:8021/graphql/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            query: `
+            mutation EditUserBioAndLink($username: String!, $data: UserBioLinkEdit!) {
+                editUserBioAndLink(username: $username, data: $data) {
+                    wasEditSuccessful
+                }
+            }
+            `,
+            variables: {
+                username: authenticatedUsername,
+                data: dataForEditingBioAndLink
+            }
+        })
+        });
+        if(!response.ok) {
+            submitButton.classList.add('hidden');
+            submissionErrorMessage.textContent = "Couldn't update bio/website.";
+            submissionErrorMessage.classList.remove('hidden');
+            setTimeout(function() {
+                submitButton.classList.remove('hidden');
+                submissionErrorMessage.classList.add('hidden');
+            }, 3000);
+            return;
+        }
+        changedBioAndOrLink = true;
     }
 
     if(userSelectedProfilePhoto!==null) {
@@ -409,7 +477,7 @@ async function onSubmit() {
             }
         }, 2000);
     }
-    else if(userSelectedProfilePhoto!==null) {
+    else if(userSelectedProfilePhoto!==null || changedBioAndOrLink) {
         submitButton.classList.add('hidden');
         submissionSuccessMessage.classList.remove('hidden');
         setTimeout(function() {
