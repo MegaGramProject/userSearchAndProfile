@@ -52,4 +52,10 @@ public class frontendController {
         return "topicMatches";
     }
 
+    @GetMapping("/notifications/{authenticatedUsername}")
+    public String notifications(@PathVariable String authenticatedUsername, Model model) {
+        model.addAttribute("authenticatedUsername", authenticatedUsername);
+        return "notifications";
+    }
+
 }
