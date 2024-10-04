@@ -15,13 +15,14 @@ class UserBioAndLinkType(DjangoObjectType):
 class FollowRequestType(DjangoObjectType):
     class Meta:
         model = FollowRequest
-
+    
 
 class Query(graphene.ObjectType):
     allUserBiosAndLinks = graphene.List(UserBioAndLinkType)
     allFollowRequests = graphene.List(FollowRequestType)
     userBioAndLinkForUser = graphene.Field(UserBioAndLinkType, username=graphene.String(required=True))
     followRequestsMadeByUser = graphene.List(graphene.String, username=graphene.String(required=True))
+    followRequestsReceivedByUser = graphene.List(FollowRequestType, username=graphene.String(required=True))
 
     def resolve_allUserBiosAndLinks(root, info):
         return UserBioAndLink.objects.all()
@@ -39,6 +40,11 @@ class Query(graphene.ObjectType):
     def resolve_followRequestsMadeByUser(self, info, username):
         follow_requests = FollowRequest.objects.filter(requester=username).values_list('requestee', flat=True)
         return list(follow_requests)
+    
+    def resolve_followRequestsReceivedByUser(self, info, username):
+        follow_requests = FollowRequest.objects.filter(requestee=username)
+        return list(follow_requests)
+
 
 
 

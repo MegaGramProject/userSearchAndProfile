@@ -200,11 +200,20 @@ async function authenticateUserAndFetchData() {
     }
     relevantProfileUserInfo = await response.json();
 
+    const response0b = await fetch('http://localhost:8003/getProfilePhoto/'+authenticatedUsername);
+    if(!response0b.ok) {
+        throw new Error('Network response not ok');
+    }
+    let profilePhotoBlob = await response0b.blob();
+    profileIconInLeftSidebar.src = URL.createObjectURL(profilePhotoBlob);
+
+
+
     const response1 = await fetch('http://localhost:8003/getProfilePhoto/'+profileUsername);
     if(!response1.ok) {
         throw new Error('Network response not ok');
     }
-    let profilePhotoBlob = await response1.blob();
+    profilePhotoBlob = await response1.blob();
     relevantProfileUserInfo['profilePhotoString'] = URL.createObjectURL(profilePhotoBlob);
 
     const response1b = await fetch('http://localhost:8021/graphql/', {
@@ -286,7 +295,6 @@ async function authenticateUserAndFetchData() {
     profileFullName.textContent = relevantProfileUserInfo['fullName'];
     profilePhotoAtTop.src = relevantProfileUserInfo['profilePhotoString'];
     aboutAccountProfilePhoto.src = relevantProfileUserInfo['profilePhotoString'];
-    profileIconInLeftSidebar.src = relevantProfileUserInfo['profilePhotoString'];
     if(relevantProfileUserInfo['isVerified']) {
         aboutAccountVerifiedIcon.classList.remove('hidden');
         aboutAccountShowIfVerifiedDiv.classList.remove('hidden');

@@ -15,6 +15,8 @@ class FollowRequest(models.Model):
     id = models.AutoField(primary_key=True)
     requester = models.CharField(max_length=30)
     requestee = models.CharField(max_length=30)
+    isRead = models.BooleanField(default=False)
+
 
     class Meta:
         db_table = 'followRequests'

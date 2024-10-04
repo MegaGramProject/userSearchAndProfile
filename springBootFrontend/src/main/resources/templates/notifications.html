@@ -12,7 +12,7 @@
     <!--Left sidebar-->
     <div id="leftSidebar" style="height: 100%; width: 12%; border-style: solid; position: fixed; overflow-y: scroll; border-top: none;
     border-left: none; border-bottom: none; border-width: 0.01em; border-color: gray; display: flex; flex-direction: column;
-    align-items: start; padding: 0.5em 1em;">
+    align-items: start; padding: 0.5em 1em; z-index: 10; background-color: white;">
         <h1 style="font-family: Billabong; font-size:2.4em;">Megagram</h1>
 
         <div onclick="takeUserHome()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
@@ -86,19 +86,22 @@
 
 
     <!--Notifications Section-->
-    <div id="notificationsSection" class="hidden" style="position: absolute; top: 0%; left: 15%; width: 85%; display: flex; flex-direction: column;
+    <div id="notificationsSection" style="position: absolute; top: 0%; left: 15%; width: 85%; display: flex; flex-direction: column;
     padding: 1em 2em;">
 
         <div style="display: flex; justify-content: space-between; width: 85%; align-items: center;">
             <h1>Notifications</h1>
             <div style="display: flex; align-items: center; gap: 1.4em; cursor: pointer;">
-                <img id="redDotForFollowRequests" th:src="@{/images/redDot.png}" style="height: 1em; width: 1em; pointer-events: none; object-fit: contain;">
-                <b id="followRequestsText" onclick="showFollowRequests()" style="color: gray;">Follower Requests (4)</b>
+                <img id="redDotForFollowRequests" class="hidden" th:src="@{/images/redDot.png}" style="height: 1em; width: 1em; pointer-events: none; object-fit: contain;">
+                <b id="followRequestsText" onclick="showFollowRequests()" style="color: gray;"></b>
             </div>
         </div>
 
+        <b id="totalAndUnreadNotificationsText" style="color: gray;"></b>
+
         <br>
         <br>
+
 
         <h3>Today</h3>
 
@@ -144,76 +147,6 @@
             </div>
         
         </div>
-
-        <div id="notification2" style="display: flex; justify-content: space-between; width: 85%; height: 5em; align-items: center; border-radius:
-        0.85em;">
-
-            <div style="display: flex; align-items: end; gap: 1em;">
-                <img onclick="takeToProfile('jordan3love')" th:src="@{/images/profilePhoto.png}" style="height: 3em; width: 3em; object-fit: contain; cursor: pointer;">
-                <div style="display: flex; flex-direction: column; margin-top: 0.7em;">
-                    <p style="max-width: 50em;"><b onclick="takeToProfile('jordan3love')" style="cursor: pointer;">jordan3love</b> and you collaborated on a post. <span style="color: gray;">5h</span></p>
-                </div>
-            </div>
-
-            <div onmouseenter="showDeleteNotificationIcon(2)" onmouseleave="hideDeleteNotificationIcon(2)" style="display: flex; justify-content: end; align-items: center; gap: 1.7em;">
-                <img th:src="@{/images/sampleImg.webp}" style="height: 102%; width: 10%; cursor: pointer;">
-                <img id="notification2DeleteIcon" onclick="removeNotification(2)" class="hidden" th:src="@{/images/thinGrayXIcon.png}" style="height: 1.3em; width: 1.3em; cursor: pointer;">
-            </div>
-
-        </div>
-
-        <div id="notification3" style="display: flex; justify-content: space-between; width: 85%; height: 5em; align-items: center; border-radius:
-        0.85em;">
-
-            <div style="display: flex; align-items: end; gap: 1em;">
-                <img onclick="takeToProfile('impaulsive')" th:src="@{/images/profilePhoto.png}" style="height: 3em; width: 3em; object-fit: contain; cursor: pointer;">
-                <div style="display: flex; flex-direction: column; margin-top: 0.7em;">
-                    <p style="max-width: 50em;"><b onclick="takeToProfile('impaulsive')" style="cursor: pointer;">impaulsive</b> mentioned you in a comment:
-                    <span style="color: rgb(69, 69, 218); cursor: pointer;">@rishavry</span> how dare you! <span style="color: gray;">5h</span></p>
-                </div>
-            </div>
-
-            <div onmouseenter="showDeleteNotificationIcon(3)" onmouseleave="hideDeleteNotificationIcon(3)" style="display: flex; justify-content: end; align-items: center; gap: 1.7em;">
-                <img th:src="@{/images/sampleImg.webp}" style="height: 102%; width: 10%; cursor: pointer;">
-                <img id="notification3DeleteIcon" onclick="removeNotification(3)" class="hidden" th:src="@{/images/thinGrayXIcon.png}" style="height: 1.3em; width: 1.3em; cursor: pointer;">
-            </div>
-
-        </div>
-
-        <div id="notification4" style="display: flex; justify-content: space-between; width: 85%; height: 5em; align-items: center; border-radius:
-        0.85em;">
-
-            <div style="display: flex; align-items: end; gap: 1em;">
-                <img onclick="takeToProfile('ksi')" th:src="@{/images/profilePhoto.png}" style="height: 3em; width: 3em; object-fit: contain; cursor: pointer;">
-                <div style="display: flex; flex-direction: column; margin-top: 0.7em;">
-                    <p style="max-width: 50em;"><b onclick="takeToProfile('ksi')" style="cursor: pointer;">ksi</b> made a comment on your post:
-                    how dare you! <span style="color: gray;">5h</span></p>
-                </div>
-            </div>
-
-            <div onmouseenter="showDeleteNotificationIcon(4)" onmouseleave="hideDeleteNotificationIcon(4)" style="display: flex; justify-content: end; align-items: center; gap: 1.7em;">
-                <img th:src="@{/images/sampleImg.webp}" style="height: 102%; width: 10%; cursor: pointer;">
-                <img id="notification4DeleteIcon" onclick="removeNotification(4)" class="hidden" th:src="@{/images/thinGrayXIcon.png}" style="height: 1.3em; width: 1.3em; cursor: pointer;">
-            </div>
-
-        </div>
-
-        <div id="notification5" style="display: flex; justify-content: space-between; width: 85%; height: 5em; align-items: center; border-radius:
-        0.85em;">
-
-            <div style="display: flex; align-items: end; gap: 1em;">
-                <img onclick="takeToProfile('jp')" th:src="@{/images/profilePhoto.png}" style="height: 3em; width: 3em; object-fit: contain; cursor: pointer;">
-                <div style="display: flex; flex-direction: column; margin-top: 0.7em;">
-                    <p style="max-width: 50em;"><b onclick="takeToProfile('jp')" style="cursor: pointer;">jp</b> liked your post. <span style="color: gray;">5h</span></p>
-                </div>
-            </div>
-
-            <div onmouseenter="showDeleteNotificationIcon(5)" onmouseleave="hideDeleteNotificationIcon(5)" style="display: flex; justify-content: end; align-items: center; gap: 1.7em;">
-                <img th:src="@{/images/sampleImg.webp}" style="height: 102%; width: 10%; cursor: pointer;">
-                <img id="notification5DeleteIcon" onclick="removeNotification(5)" class="hidden" th:src="@{/images/thinGrayXIcon.png}" style="height: 1.3em; width: 1.3em; cursor: pointer;">
-            </div>
-
-        </div>
         
         <!--h3>Yesterday</h3>
         <h3>This Week</h3>
@@ -225,40 +158,29 @@
 
 
     <!--Follow-Requests Section-->
-    <div id="followRequestsSection" style="position: absolute; top: 0%; left: 15%; width: 85%; display: flex; flex-direction: column;
+    <div id="followRequestsSection" class="hidden" style="position: absolute; top: 0%; left: 15%; width: 85%; display: flex; flex-direction: column;
     padding: 1em 2em;">
         <div style="display: flex; justify-content: space-between; width: 85%; align-items: center;">
             <h1>Follow Requests</h1>
             <div style="display: flex; align-items: center; gap: 1.4em; cursor: pointer;">
                 <img id="redDotForNotifications" th:src="@{/images/redDot.png}" style="height: 1em; width: 1em; pointer-events: none; object-fit: contain;">
-                <b id="notificationsText" onclick="showNotifications()" style="color: gray;">Notifications (7)</b>
+                <b id="notificationsText" onclick="showNotifications()" style="color: gray;">Notifications (6)</b>
             </div>
         </div>
+
+
+        <b id="totalAndUnreadFollowRequestsText" style="color: gray;">4 total, 4 unread</b>
 
         <br>
         <br>
 
-        <div id="followRequest0" style="display: flex; justify-content: space-between; width: 85%; height: 5em; align-items: center; border-radius:
-        0.85em;">
+    </div>
 
-            <div style="display: flex; align-items: center; gap: 1.7em;">
-                <img onclick="takeToProfile('ksi')" th:src="@{/images/profilePhoto.png}" style="height: 3em; width: 3em; object-fit: contain; cursor: pointer;">
-                <div style="display: flex; flex-direction: column; margin-top: 0.7em;">
-                    <b onclick="takeToProfile('ksi')" style="cursor: pointer;">ksi</b>
-                    <p style="color: gray; margin-top:0.45em;">Olajide Olatunji</p>
-                </div>
-            </div>
-
-            <div style="display: flex; justify-content: end; align-items: center; gap: 1.7em;">
-                <button id="followRequest0AcceptButton" onclick="acceptFollowRequest(0)" class="blueButton" style="height: 36%;">Accept</button>
-                <button id="followRequest0DeclineButton" onclick="declineFollowRequest(0)" style="height: 36%; background-color: #f0f0f0; padding: 0.6em 1.2em; border-radius: 0.5em; border: none;
-                font-weight: bold; cursor: pointer;">Decline</button>
-            </div>
-
-        </div>
-
-
-
+    <!--Account not Found-->
+    <div id="accountNotFound" class="hidden">
+        <h1>404 - Page Not Found</h1>
+        <p>Sorry, but the page you are looking for does not exist.</p>
+        <a href="http://localhost:3100">Go Back Home</a>
     </div>
 
 
