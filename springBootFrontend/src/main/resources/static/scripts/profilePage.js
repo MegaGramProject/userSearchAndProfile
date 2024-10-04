@@ -1404,7 +1404,7 @@ function messageUser() {
 }
 
 function showAboutAccountPopup() {
-    if(!isFollowingUser && relevantProfileUserInfo['isPrivate']) {
+    if(!isFollowingUser && relevantProfileUserInfo['isPrivate'] && authenticatedUsername!==profileUsername) {
         return;
     }
     optionsPopup.classList.add('hidden');
@@ -1456,7 +1456,7 @@ async function addFollowing(followerToFollow) {
 }
 
 function showListOfFollowersPopup() {
-    if(!isFollowingUser && relevantProfileUserInfo['isPrivate']) {
+    if(!isFollowingUser && relevantProfileUserInfo['isPrivate'] && authenticatedUsername!==profileUsername) {
         return;
     }
     displayListOfFollowersPopup = true;
@@ -1614,7 +1614,7 @@ function takeToUsersProfile(username) {
 }
 
 function showListOfFollowingsPopup() {
-    if(!isFollowingUser && relevantProfileUserInfo['isPrivate']) {
+    if(!isFollowingUser && relevantProfileUserInfo['isPrivate'] && authenticatedUsername!==profileUsername) {
         return;
     }
     displayListOfFollowingsPopup = true;

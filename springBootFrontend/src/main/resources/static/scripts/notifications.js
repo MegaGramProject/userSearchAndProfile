@@ -15,8 +15,8 @@ const totalAndUnreadFollowRequestsText = document.getElementById('totalAndUnread
 
 let authenticatedUsername = "";
 let displayLeftSidebarPopup = false;
-let numNotifications = 6;
-let numUnreadNotifications = 3;
+let numNotifications = 0;
+let numUnreadNotifications = 0;
 let numFollowRequests = 0;
 let numUnreadFollowRequests = 0;
 let haveDOMElementsForFollowRequestsBeenCreated = false;
@@ -25,6 +25,8 @@ let relevantUserInfo = {};
 let userBlockings = []; //usernames of users that authUser blocks or is blocked by
 let userFollowings = []; //usernames of users that authUser follows
 let userRequestings = []; //usernames of users that authUser requested to follow
+let userNotifications = [];
+let haveUserFollowingsAndRequestingsBeenFetched = false;
 
 
 
@@ -199,6 +201,25 @@ async function authenticateUserAndFetchData() {
     let profilePhotoBlob = await response1.blob();
     profileIconInLeftSidebar.src =  URL.createObjectURL(profilePhotoBlob);
 
+    const response2 = await fetch('http://localhost:8022/getAllNotificationsOfUser/'+authenticatedUsername);
+    if(!response2.ok) {
+        throw new Error('Network response not ok');
+    }
+    userNotifications = await response2.json();
+    numNotifications = userNotifications.length;
+    numUnreadNotifications = userNotifications.filter(x=>!x.isread).length;
+
+    notificationsText.textContent = "Notifications";
+    
+    totalAndUnreadNotificationsText.textContent = numNotifications + " total";
+    if(numUnreadNotifications>0) {
+        totalAndUnreadNotificationsText.textContent+= ", " + numUnreadNotifications + " unread";
+    }
+
+    if(numNotifications>0) {
+        createDOMElementsForNotifications();
+    }
+
 }
 
 function toggleLeftSidebarPopup() {
@@ -235,8 +256,25 @@ function takeUserToLogin() {
     window.location.href = "http://localhost:8000/login";
 }
 
-async function removeNotification(index) {
+async function removeNotification(recipient, subject, action, index) {
+    const response = await fetch('http://localhost:8022/deleteNotification', {
+        method: 'DELETE',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            recipient: recipient,
+            subject: subject,
+            action: action
+        })
+    });
+    if(!response.ok) {
+        throw new Error('Network response not ok');
+    }
     document.getElementById('notification'+index).classList.add('hidden');
+    numNotifications--;
+    totalAndUnreadNotificationsText.textContent = numNotifications + " total";
+    if(numUnreadNotifications>0) {
+        totalAndUnreadFollowRequestsText.textContent+= ", " + numUnreadNotifications + " unread";
+    }
 }
 
 function showDeleteNotificationIcon(index) {
@@ -251,19 +289,100 @@ function takeToProfile(profileUsername) {
     window.location.href = "http://localhost:8019/profilePage/"+authenticatedUsername + "/" + profileUsername;
 }
 
-async function toggleNotificationFollow(index) {
+async function toggleNotificationFollow(notificationSubject, index) {
     const targetedFollowButton = document.getElementById('notification'+index+'FollowButton');
     const targetedFollowingButton = document.getElementById('notification'+index+'FollowingButton');
+    const targetedRequestedButton = document.getElementById('notification'+index+'RequestedButton');
 
     if(targetedFollowButton.classList.contains('hidden')) {
+        //notificationSubject is to be unfollowed
+        const response = await fetch('http://localhost:8013/graphql', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                query: `
+                mutation {
+                    removeUserFollowing(userFollowingToRemove: { follower: "${authenticatedUsername}", followee: "${notificationSubject}" })
+                }
+                `
+                })
+        });
+        if(!response.ok) {
+            throw new Error('Network response not ok');
+        }
         targetedFollowButton.classList.remove('hidden');
         targetedFollowingButton.classList.add('hidden');
     }
     else {
+         //notificationSubject is to be followed
+        if(relevantUserInfo[notificationSubject]['isPrivate']) {
+            const response = await fetch('http://localhost:8021/graphql/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    query: `
+                    mutation {
+                        addFollowRequest(requester: "${authenticatedUsername}", requestee: "${notificationSubject}") {
+                            followRequest {
+                                requester
+                                requestee
+                            }
+                        }
+                    }
+                    `
+                })
+            });
+            if(!response.ok) {
+                throw new Error('Network response not ok');
+            }
+            targetedFollowButton.classList.add('hidden');
+            targetedRequestedButton.classList.remove('hidden');
+        }
+        else {
+            const response = await fetch('http://localhost:8013/graphql', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    query: `
+                    mutation {
+                        addUserFollowing(newUserFollowing: { follower: "${authenticatedUsername}", followee: "${notificationSubject}" })
+                    }
+                    `
+                })
+            });
+            if(!response.ok) {
+                throw new Error('Network response not ok');
+            }
+        }
         targetedFollowButton.classList.add('hidden');
         targetedFollowingButton.classList.remove('hidden');
     }
 
+}
+
+async function cancelNotificationFollowRequest(notificationSubject, index) {
+    const targetedFollowButton = document.getElementById('notification'+index+'FollowButton');
+    const targetedRequestedButton = document.getElementById('notification'+index+'RequestedButton');
+
+    const response = await fetch('http://localhost:8021/graphql/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            query: `
+            mutation {
+                removeFollowRequest(requester: "${authenticatedUsername}", requestee: "${notificationSubject}") {
+                    wasDeleteSuccessful
+                }
+            }
+            `
+        })
+    });
+    if(!response.ok) {
+        throw new Error('Network response not ok');
+    }
+
+    targetedRequestedButton.classList.add('hidden');
+    targetedFollowButton.classList.remove('hidden');
 }
 
 async function showFollowRequests() {
@@ -278,6 +397,22 @@ async function showFollowRequests() {
         await createDOMElementsForFollowRequests();
         haveDOMElementsForFollowRequestsBeenCreated = true;
     }
+    if(numUnreadFollowRequests>0) {
+        const response = await fetch('http://localhost:8021/graphql/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                query: `mutation {
+                    markUnreadFollowRequestsOfUserAsRead(username: "${authenticatedUsername}") {
+                        wasOperationSuccessful
+                    }
+                }`
+            })
+        });
+        if(!response.ok) {
+            throw new Error('Network response not ok');
+        }
+    }
 }
 
 function showNotifications() {
@@ -289,6 +424,360 @@ function showNotifications() {
     redDotForFollowRequests.classList.add('hidden');
     document.title = "Notifications";
 }
+
+function formatComment(comment) {
+    const usernameRegex = /@([a-z0-9._]+)/g;
+
+    const formattedComment = comment.replace(usernameRegex, (match, username) => {
+        return `<span onclick="takeToProfile('${username}')" style="cursor: pointer; color: #2a72a8;">${match}</span>`;
+    });
+
+    return formattedComment;
+}
+
+async function createDOMElementsForNotifications() {
+    let userNotificationSubjectUsernames = userNotifications.map(x=>x['subject']);
+    userNotificationSubjectUsernames = [...new Set(userNotificationSubjectUsernames)];
+    if(Object.keys(relevantUserInfo).length>0) {
+        userNotificationSubjectUsernames = userNotificationSubjectUsernames.filter(x=>!(x in relevantUserInfo));
+    }
+    if(userNotificationSubjectUsernames.length>0) {
+        const response = await fetch('http://localhost:8001/getRelevantUserInfoOfMultipleUsers', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                listOfUsers: userNotificationSubjectUsernames
+            })
+        });
+        if(!response.ok) {
+            throw new Error('Network response not ok');
+        }
+
+        const newlyFetchedUserInfo = await response.json();
+        if(Object.keys(relevantUserInfo).length==0) {
+            relevantUserInfo = newlyFetchedUserInfo;
+        }
+        else {
+            for(let key of Object.keys(newlyFetchedUserInfo)) {
+                relevantUserInfo[key] = newlyFetchedUserInfo[key];
+            }
+        }
+
+        const response1 = await fetch('http://localhost:8003/getProfilePhotosOfMultipleUsers', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                listOfUsers: userNotificationSubjectUsernames
+            })
+        });
+        if(!response1.ok) {
+            throw new Error('Network response not ok');
+        }
+        const profilePhotoInfoMappings = await response1.json();
+        for(let username of Object.keys(profilePhotoInfoMappings)) {
+            relevantUserInfo[username]['profilePhotoString'] = 'data:image/png;base64,'+profilePhotoInfoMappings[username];
+        }
+
+        if(!haveUserFollowingsAndRequestingsBeenFetched) {
+            const response2 = await fetch('http://localhost:8013/graphql', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    query: `query {
+                        getAllUserFollowings(filter: {username: "${authenticatedUsername}", justFollowersOfUser: ${false}}) {
+                            followee
+                        }
+                    }
+                `
+            })
+            });
+            if(!response2.ok) {
+                throw new Error('Network response not ok');
+            }
+            userFollowings = await response2.json();
+            userFollowings = userFollowings['data']['getAllUserFollowings'];
+            userFollowings = userFollowings.map(x=>x['followee']);
+
+            const response3 = await fetch('http://localhost:8021/graphql/', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    query: `query {
+                        followRequestsMadeByUser(username: "${authenticatedUsername}" )
+                    }`
+                })
+            });
+            if(!response3.ok) {
+                throw new Error('Network response not ok');
+            }
+            userRequestings = await response3.json();
+            userRequestings = userRequestings['data']['followRequestsMadeByUser'];
+            haveUserFollowingsAndRequestingsBeenFetched = true;
+        }
+
+    }
+
+    let counter = -1;
+    for(let notification of userNotifications) {
+        counter++;
+        const currCounterValue = counter;
+
+        if (notification.action==='subject-started-following' || notification.action==='recipient-accepted-follow-req') {
+            const notificationDiv = document.createElement('div');
+            notificationDiv.id = 'notification'+currCounterValue;
+            notificationDiv.style.display = 'flex';
+            notificationDiv.style.justifyContent = 'space-between';
+            notificationDiv.style.width = '85%';
+            notificationDiv.style.height = '5em';
+            notificationDiv.style.alignItems = 'center';
+            notificationDiv.style.borderRadius = '0.85em';
+
+            const leftDiv = document.createElement('div');
+            leftDiv.style.display = 'flex';
+            leftDiv.style.alignItems = 'end';
+            leftDiv.style.gap = '1em';
+
+            const profileImage = document.createElement('img');
+            profileImage.style.height = '3em';
+            profileImage.style.width = '3em';
+            profileImage.style.objectFit = 'contain';
+            profileImage.style.cursor = 'pointer';
+            profileImage.onclick = () => takeToProfile(notification.subject);
+            profileImage.src = '/images/profilePhoto.png';
+
+            const contentDiv = document.createElement('div');
+            contentDiv.style.display = 'flex';
+            contentDiv.style.flexDirection = 'column';
+            contentDiv.style.marginTop = '0.7em';
+
+            const paragraph = document.createElement('p');
+            paragraph.style.maxWidth = '50em';
+
+            const nameBold = document.createElement('b');
+            nameBold.style.cursor = 'pointer';
+            nameBold.onclick = () => takeToProfile(notification.subject);
+            nameBold.textContent = notification.subject;
+
+            paragraph.appendChild(nameBold);
+            if(relevantUserInfo[notification.subject]['isVerified']) {
+                const verifiedCheck = document.createElement('img');
+                verifiedCheck.style.height = '1.55em';
+                verifiedCheck.style.width = '1.55em';
+                verifiedCheck.style.objectFit = 'contain';
+                verifiedCheck.style.pointerEvents = 'none';
+                verifiedCheck.src = '/images/verifiedCheck2.png';
+                paragraph.appendChild(verifiedCheck);
+            }
+            paragraph.appendChild(document.createTextNode(' started following you. '));
+
+            const timeSpan = document.createElement('span');
+            timeSpan.style.color = 'gray';
+            timeSpan.textContent = '30s';
+
+            paragraph.appendChild(timeSpan);
+            contentDiv.appendChild(paragraph);
+
+            leftDiv.appendChild(profileImage);
+            leftDiv.appendChild(contentDiv);
+
+            const rightDiv = document.createElement('div');
+            rightDiv.style.display = 'flex';
+            rightDiv.style.alignItems = 'center';
+            rightDiv.style.gap = '1.7em';
+            rightDiv.onmouseenter = () => showDeleteNotificationIcon(currCounterValue);
+            rightDiv.onmouseleave = () => hideDeleteNotificationIcon(currCounterValue);
+
+            const followButton = document.createElement('button');
+            followButton.id = 'notification'+currCounterValue+'FollowButton';
+            followButton.className = 'blueButton hidden';
+            followButton.style.height = '36%';
+            followButton.textContent = 'Follow';
+            followButton.onclick = () => toggleNotificationFollow(notification.subject, currCounterValue);
+
+            const followingButton = document.createElement('button');
+            followingButton.id = 'notification'+currCounterValue+'FollowingButton';
+            followingButton.className = 'hidden';
+            followingButton.style.height = '36%';
+            followingButton.style.backgroundColor = '#f0f0f0';
+            followingButton.style.padding = '0.6em 1.2em';
+            followingButton.style.borderRadius = '0.5em';
+            followingButton.style.border = 'none';
+            followingButton.style.fontWeight = 'bold';
+            followingButton.style.cursor = 'pointer';
+            followingButton.textContent = 'Following';
+            followingButton.onclick = () => toggleNotificationFollow(notification.subject, currCounterValue);
+
+            const requestedButton = document.createElement('button');
+            requestedButton.id = 'notification'+currCounterValue+'RequestedButton';
+            requestedButton.className = 'hidden';
+            requestedButton.style.height = '36%';
+            requestedButton.style.backgroundColor = '#f0f0f0';
+            requestedButton.style.padding = '0.6em 1.2em';
+            requestedButton.style.borderRadius = '0.5em';
+            requestedButton.style.border = 'none';
+            requestedButton.style.fontWeight = 'bold';
+            requestedButton.style.cursor = 'pointer';
+            requestedButton.textContent = 'Requested';
+            requestedButton.onclick = () => cancelNotificationFollowRequest(notification.subject, currCounterValue);
+
+            if(!userFollowings.includes(notification.subject)) {
+                if(userRequestings.includes(notification.subject)) {
+                    requestedButton.classList.remove('hidden');
+                }
+                else {
+                    followButton.classList.remove('hidden');
+                }
+            }
+            else {
+                followingButton.classList.remove('hidden');
+            }
+
+            const deleteIcon = document.createElement('img');
+            deleteIcon.id = 'notification'+currCounterValue+'DeleteIcon';
+            deleteIcon.className = 'hidden';
+            deleteIcon.style.height = '1.3em';
+            deleteIcon.style.width = '1.3em';
+            deleteIcon.style.cursor = 'pointer';
+            deleteIcon.src = '/images/thinGrayXIcon.png';
+            deleteIcon.onclick = () => removeNotification(notification.recipient, notification.subject, notification.action, currCounterValue);
+
+            rightDiv.appendChild(followButton);
+            rightDiv.appendChild(followingButton);
+            rightDiv.appendChild(requestedButton);
+            rightDiv.appendChild(deleteIcon);
+
+            notificationDiv.appendChild(leftDiv);
+            notificationDiv.appendChild(rightDiv);
+
+            notificationsSection.appendChild(notificationDiv);
+        }
+        else {
+            const notificationDiv = document.createElement('div');
+            notificationDiv.id = 'notification'+currCounterValue;
+            notificationDiv.style.display = 'flex';
+            notificationDiv.style.justifyContent = 'space-between';
+            notificationDiv.style.width = '85%';
+            notificationDiv.style.height = '5em';
+            notificationDiv.style.alignItems = 'center';
+            notificationDiv.style.borderRadius = '0.85em';
+
+            const leftDiv = document.createElement('div');
+            leftDiv.style.display = 'flex';
+            leftDiv.style.alignItems = 'end';
+            leftDiv.style.gap = '1em';
+
+            const profileImg = document.createElement('img');
+            profileImg.style.height = '3em';
+            profileImg.style.width = '3em';
+            profileImg.style.objectFit = 'contain';
+            profileImg.style.cursor = 'pointer';
+            profileImg.src = '/images/profilePhoto.png';
+            profileImg.onclick = function() { takeToProfile(notification.subject); };
+
+            const textDiv = document.createElement('div');
+            textDiv.style.display = 'flex';
+            textDiv.style.flexDirection = 'column';
+            textDiv.style.marginTop = '0.7em';
+
+            const messageP = document.createElement('p');
+            messageP.style.maxWidth = '50em';
+            if(notification.action.startsWith('tag')) {
+                if(relevantUserInfo[notification.subject]['isVerified']) {
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> tagged you in a post. <span style="color: gray;">26m</span>`;
+                }
+                else {
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> tagged you in a post. <span style="color: gray;">26m</span>`;
+                }
+            }
+            else if(notification.action.startsWith('like')) {
+                if(relevantUserInfo[notification.subject]['isVerified']) {
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> liked your post. <span style="color: gray;">26m</span>`;
+                }
+                else {
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> liked your post. <span style="color: gray;">26m</span>`;
+                }
+            }
+            else if(notification.action.startsWith('comment ')) {
+                //const comment = formatComment(notification.action.substring(45));
+                const comment = formatComment(notification.action.substring(15));
+                if(relevantUserInfo[notification.subject]['isVerified']) {
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> commented on your post: ${comment} <span style="color: gray;">26m</span>`;
+                }
+                else {
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> commented on your post: ${comment} <span style="color: gray;">26m</span>`;
+                }
+            }
+            else if(notification.action.startsWith('comment-like')) {
+                //const comment = formatComment(notification.action.substring(50));
+                const comment = formatComment(notification.action.substring(20));
+                if(relevantUserInfo[notification.subject]['isVerified']) {
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> liked your comment: ${comment} <span style="color: gray;">26m</span>`;
+                }
+                else {
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> liked your comment: ${comment} <span style="color: gray;">26m</span>`;
+                }
+            }
+            else if(notification.action.startsWith('reply')) {
+                //const comment = formatComment(notification.action.substring(43));
+                const comment = formatComment(notification.action.substring(13));
+                if(relevantUserInfo[notification.subject]['isVerified']) {
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> replied to your comment with this: ${comment} <span style="color: gray;">26m</span>`;
+                }
+                else {
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> replied to your comment with this: ${comment} <span style="color: gray;">26m</span>`;
+                }
+            }
+            else {
+                //const comment = formatComment(notification.action.substring(45));
+                const comment = formatComment(notification.action.substring(15));
+                if(relevantUserInfo[notification.subject]['isVerified']) {
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> mentioned in you in comment: ${comment} <span style="color: gray;">26m</span>`;
+                }
+                else {
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> mentioned in you in comment: ${comment} <span style="color: gray;">26m</span>`;
+                }
+            }
+
+            textDiv.appendChild(messageP);
+
+            leftDiv.appendChild(profileImg);
+            leftDiv.appendChild(textDiv);
+
+            const rightDiv = document.createElement('div');
+            rightDiv.style.display = 'flex';
+            rightDiv.style.justifyContent = 'end';
+            rightDiv.style.alignItems = 'center';
+            rightDiv.style.gap = '1.7em';
+            rightDiv.onmouseenter = function() { showDeleteNotificationIcon(currCounterValue); };
+            rightDiv.onmouseleave = function() { hideDeleteNotificationIcon(currCounterValue); };
+
+            const sampleImg = document.createElement('img');
+            sampleImg.style.height = '4em';
+            sampleImg.style.width = '4em';
+            sampleImg.style.cursor = 'pointer';
+            sampleImg.src = '/images/sampleImg.webp';
+
+            const deleteIcon = document.createElement('img');
+            deleteIcon.id = 'notification'+currCounterValue+'DeleteIcon';
+            deleteIcon.classList.add('hidden');
+            deleteIcon.style.height = '1.3em';
+            deleteIcon.style.width = '1.3em';
+            deleteIcon.style.cursor = 'pointer';
+            deleteIcon.src = '/images/thinGrayXIcon.png';
+            deleteIcon.onclick = () => removeNotification(notification.recipient, notification.subject, notification.action, currCounterValue);
+
+            rightDiv.appendChild(sampleImg);
+            rightDiv.appendChild(deleteIcon);
+
+            notificationDiv.appendChild(leftDiv);
+            notificationDiv.appendChild(rightDiv);
+
+            notificationsSection.appendChild(notificationDiv);
+        }
+    }
+    //mark all notifications as read.
+}
+
 
 async function createDOMElementsForFollowRequests() {
     if(followRequestsReceivedByUser.length>0) {
@@ -352,6 +841,7 @@ async function createDOMElementsForFollowRequests() {
         }
         userRequestings = await response3.json();
         userRequestings = userRequestings['data']['followRequestsMadeByUser'];
+        haveUserFollowingsAndRequestingsBeenFetched = true;
 
     }
     else {
@@ -525,9 +1015,9 @@ async function acceptFollowRequest(userToAccept, index) {
                 `
                 })
         });
-        if(!response1.ok) {
-            throw new Error('Network response not ok');
-        }
+    if(!response1.ok) {
+        throw new Error('Network response not ok');
+    }
 
     document.getElementById('followRequest'+index).classList.add('hidden');
     numFollowRequests--;

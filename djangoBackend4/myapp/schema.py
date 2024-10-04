@@ -127,6 +127,25 @@ class EditUserBioAndLink(graphene.Mutation):
         except:
             return EditUserBioAndLink(wasEditSuccessful = False)
 
+class MarkUnreadFollowRequestsOfUserAsRead(graphene.Mutation):
+    class Arguments:
+        username = graphene.String(required=True)
+
+    wasOperationSuccessful = graphene.Boolean()
+
+    def mutate(self, info, username):
+        try:
+            unreadFollowRequests = FollowRequest.objects.filter(requestee=username, isRead=False)
+
+            for ufr in unreadFollowRequests:
+                ufr.isRead = True
+                ufr.save()
+
+            return MarkUnreadFollowRequestsOfUserAsRead(wasOperationSuccessful=True)
+        except Exception as e:
+            return MarkUnreadFollowRequestsOfUserAsRead(wasOperationSuccessful=False)
+
+        
 
 class Mutation(graphene.ObjectType):
     addUserBioAndLink = AddUserBioAndLink.Field()
@@ -134,6 +153,7 @@ class Mutation(graphene.ObjectType):
     removeUserBioAndLink = RemoveUserBioAndLink.Field()
     removeFollowRequest = RemoveFollowRequest.Field()
     editUserBioAndLink = EditUserBioAndLink.Field()
+    markUnreadFollowRequestsOfUserAsRead = MarkUnreadFollowRequestsOfUserAsRead.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
