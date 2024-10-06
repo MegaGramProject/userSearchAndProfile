@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "8Y8a+J2q0n3hLQAmxKSZh+2fhi0ximtWwZn3v9g2x/s=",
+  "Source": "aspNetCoreWebsocket",
+  "BasePath": "_content/aspNetCoreWebsocket",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}

@@ -42,7 +42,7 @@ class Query(graphene.ObjectType):
         return list(follow_requests)
     
     def resolve_followRequestsReceivedByUser(self, info, username):
-        follow_requests = FollowRequest.objects.filter(requestee=username)
+        follow_requests = FollowRequest.objects.filter(requestee=username).order_by('requester')
         return list(follow_requests)
 
 

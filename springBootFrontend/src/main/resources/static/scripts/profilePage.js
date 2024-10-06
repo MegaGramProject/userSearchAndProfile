@@ -983,6 +983,19 @@ async function toggleFollow() {
             if(!response.ok) {
                 throw new Error('Network response not ok');
             }
+            const response1 = await fetch('http://localhost:8022/addNotification', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    recipient: profileUsername,
+                    subject: authenticatedUsername,
+                    action: 'subject-started-following',
+                    origin_datetime: new Date()
+                })
+            });
+            if(!response1.ok) {
+                throw new Error('Network response not ok');
+            }
             followButton.classList.add('hidden');
             followingButton.classList.remove('hidden');
             profileUserFollowers.push(authenticatedUsername);
@@ -1436,23 +1449,83 @@ async function removeFollower(followerToRemove) {
     document.getElementById('listOfFollowersContainerDiv'+followerToRemove).classList.add('hidden');
 }
 
-async function addFollowing(followerToFollow) {
-    const response = await fetch('http://localhost:8013/graphql', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    query: `
-                    mutation {
-                        addUserFollowing(newUserFollowing: { follower: "${authenticatedUsername}", followee: "${followerToFollow}" })
-                    }
-                    `
-                    })
-            });
+async function cancelRequest(followerToCancelRequestTo) {
+    const response = await fetch('http://localhost:8021/graphql/', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            query: `
+            mutation {
+                removeFollowRequest(requester: "${authenticatedUsername}", requestee: "${followerToCancelRequestTo}") {
+                    wasDeleteSuccessful
+                }
+            }
+            `
+            })
+    });
     if(!response.ok) {
         throw new Error('Network response not ok');
     }
 
-    document.getElementById("listOfFollowersPopupFollow"+followerToFollow).classList.add('hidden');
+    document.getElementById("listOfFollowersPopupFollow"+followerToCancelRequestTo).classList.remove('hidden');
+    document.getElementById("listOfFollowersPopupRequested"+followerToCancelRequestTo).classList.add('hidden');
+}
+
+async function addFollowing(followerToFollow) {
+    if(relevantUserInfo[followerToFollow]['isPrivate']) {
+        const response = await fetch('http://localhost:8021/graphql/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                query: `
+                mutation {
+                    addFollowRequest(requester: "${authenticatedUsername}", requestee: "${followerToFollow}") {
+                        followRequest {
+                            requester
+                            requestee
+                        }
+                    }
+                }
+                `
+                })
+        });
+        if(!response.ok) {
+            throw new Error('Network response not ok');
+        }
+        document.getElementById("listOfFollowersPopupFollow"+followerToFollow).classList.add('hidden');
+        document.getElementById("listOfFollowersPopupRequested"+followerToFollow).classList.remove('hidden');
+    }
+    else {
+        const response = await fetch('http://localhost:8013/graphql', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            query: `
+            mutation {
+                addUserFollowing(newUserFollowing: { follower: "${authenticatedUsername}", followee: "${followerToFollow}" })
+            }
+            `
+            })
+        });
+        if(!response.ok) {
+            throw new Error('Network response not ok');
+        }
+        const response1 = await fetch('http://localhost:8022/addNotification', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                recipient: followerToFollow,
+                subject: authenticatedUsername,
+                action: 'subject-started-following',
+                origin_datetime: new Date()
+            })
+        });
+        if(!response1.ok) {
+            throw new Error('Network response not ok');
+        }
+
+        document.getElementById("listOfFollowersPopupFollow"+followerToFollow).classList.add('hidden');
+    }
 }
 
 function showListOfFollowersPopup() {
@@ -1508,10 +1581,11 @@ function showListOfFollowersPopup() {
                     verifiedCheck.style.pointerEvents = 'none';
                     usernameAndVerifiedCheckDiv.appendChild(verifiedCheck);
                 }
+                
                 if(authenticatedUsername===profileUsername && !authenticatedUserFollowing.includes(follower)) {
                     const followUserSpan = document.createElement('span');
                     followUserSpan.id = "listOfFollowersPopupFollow"+follower;
-                    followUserSpan.style.objectFit = 'contain';
+                    followUserSpan.className = "hidden";
                     followUserSpan.style.color = '#2789f2';
                     followUserSpan.style.cursor = 'pointer';
                     followUserSpan.style.fontWeight = 'bold';
@@ -1521,6 +1595,26 @@ function showListOfFollowersPopup() {
                         addFollowing(follower);
                     });
                     usernameAndVerifiedCheckDiv.appendChild(followUserSpan);
+
+                    const requestedToFollowUserSpan = document.createElement('span');
+                    requestedToFollowUserSpan.id = "listOfFollowersPopupRequested"+follower;
+                    requestedToFollowUserSpan.className = "hidden";
+                    requestedToFollowUserSpan.style.color = 'gray';
+                    requestedToFollowUserSpan.style.cursor = 'pointer';
+                    requestedToFollowUserSpan.style.fontWeight = 'bold';
+                    requestedToFollowUserSpan.textContent = "· Requested"
+                    requestedToFollowUserSpan.addEventListener('click', function(event) {
+                        event.stopPropagation();
+                        cancelRequest(follower);
+                    });
+                    usernameAndVerifiedCheckDiv.appendChild(requestedToFollowUserSpan);
+
+                    if(followRequestsMadeByAuthUser.includes(follower)) {
+                        requestedToFollowUserSpan.classList.remove('hidden');
+                    }
+                    else {
+                        followUserSpan.classList.remove('hidden');
+                    }
                 }
 
                 const fullNameP = document.createElement('p');
@@ -1859,6 +1953,19 @@ async function toggleFollowInPopup(popupName, username) {
                     })
             });
             if(!response.ok) {
+                throw new Error('Network response not ok');
+            }
+            const response1 = await fetch('http://localhost:8022/addNotification', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    recipient: username,
+                    subject: authenticatedUsername,
+                    action: 'subject-started-following',
+                    origin_datetime: new Date()
+                })
+            });
+            if(!response1.ok) {
                 throw new Error('Network response not ok');
             }
             followButtonToToggle.classList.add('hidden');

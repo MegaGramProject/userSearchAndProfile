@@ -23,7 +23,7 @@ const pool = new Pool({
 app.get('/getAllNotificationsOfUser/:username', async (req, res) => {
     try {
         const username = req.params.username;
-        const pgsqlQuery = "SELECT * FROM user_notifications WHERE recipient = $1";
+        const pgsqlQuery = "SELECT * FROM user_notifications WHERE recipient = $1 ORDER BY origin_datetime DESC";
         const results = await pool.query(pgsqlQuery, [username]);
         res.send(results.rows);
     }
@@ -38,13 +38,14 @@ app.post('/addNotification', async (req, res) => {
         const recipient = req.body.recipient;
         const subject = req.body.subject;
         const action = req.body.action;
+        const origin_datetime = req.body.origin_datetime;
 
         const pgsqlMutation = `
-        INSERT INTO user_notifications (recipient, subject, action, isread)
-        VALUES ($1, $2, $3, false)
+        INSERT INTO user_notifications (recipient, subject, action, origin_datetime, isread)
+        VALUES ($1, $2, $3, $4, false)
         `;
 
-        await pool.query(pgsqlMutation, [recipient, subject, action]);
+        await pool.query(pgsqlMutation, [recipient, subject, action, origin_datetime]);
         res.send({wasOperationSuccessful: true});
     } catch (error) {
         console.error('Error querying PostgresSQL:', error);
@@ -52,19 +53,17 @@ app.post('/addNotification', async (req, res) => {
     }
 });
 
-app.patch('/markNotificationAsRead', async (req, res) => {
+app.patch('/markAllUnreadNotificationsOfUserToRead/:username', async (req, res) => {
     try {
-        const recipient = req.body.recipient;
-        const subject = req.body.subject;
-        const action = req.body.action;
+        const username = req.params.username;
 
         const pgsqlMutation = `
         UPDATE user_notifications
         SET isread = true
-        WHERE recipient = $1 AND subject = $2 and action = $3
+        WHERE recipient = $1 AND isread = false
         `;
 
-        await pool.query(pgsqlMutation, [recipient, subject, action]);
+        await pool.query(pgsqlMutation, [username]);
         res.send({wasOperationSuccessful: true});
     }
     catch (error) {
@@ -81,7 +80,7 @@ app.delete('/deleteNotification', async (req, res) => {
 
         const pgsqlMutation = `
         DELETE FROM user_notifications
-        WHERE recipient = $1 AND subject = $2 and action = $3
+        WHERE recipient = $1 AND subject = $2 AND action = $3
         `;
 
         await pool.query(pgsqlMutation, [recipient, subject, action]);

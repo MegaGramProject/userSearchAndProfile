@@ -102,34 +102,6 @@
         <br>
         <br>
 
-
-        <h3>Today</h3>
-
-
-        <!--div id="notification1" style="display: flex; justify-content: space-between; width: 85%; height: 5em; align-items: center; border-radius:
-        0.85em;">
-
-            <div style="display: flex; align-items: end; gap: 1em;">
-                <img onclick="takeToProfile('justinbieber')" th:src="@{/images/profilePhoto.png}" style="height: 3em; width: 3em; object-fit: contain; cursor: pointer;">
-                <div style="display: flex; flex-direction: column; margin-top: 0.7em;">
-                    <p style="max-width: 50em;"><b onclick="takeToProfile('justinbieber')" style="cursor: pointer;">justinbieber</b> tagged you in a post. <span style="color: gray;">26m</span></p>
-                </div>
-            </div>
-
-
-            <div onmouseenter="showDeleteNotificationIcon(1)" onmouseleave="hideDeleteNotificationIcon(1)" style="display: flex; justify-content: end; align-items: center; gap: 1.7em;">
-                <img th:src="@{/images/sampleImg.webp}" style="height: 102%; width: 10%; cursor: pointer;">
-                <img id="notification1DeleteIcon" onclick="removeNotification(1)" class="hidden" th:src="@{/images/thinGrayXIcon.png}" style="height: 1.3em; width: 1.3em; cursor: pointer;">
-            </div>
-        
-        </div-->
-        
-        <!--h3>Yesterday</h3>
-        <h3>This Week</h3>
-        <h3>This Month</h3>
-        <h3>This Year</h3>
-        <h3>Before This Year</h3-->
-
     </div>
 
 
@@ -150,20 +122,27 @@
         <br>
         <br>
 
-        <h3>Today</h3>
 
-        <!--h3>Yesterday</h3>
-        <h3>This Week</h3>
-        <h3>This Month</h3>
-        <h3>This Year</h3>
-        <h3>Before This Year</h3-->
     </div>
+
+
+    <img id="darkScreen" class="hidden" th:src="@{/images/blackScreen.png}" style="position: absolute; top: 0%; left: 0%; height: 150%; width: 100%; opacity: 0.7;
+    z-index:12;">
 
     <!--Account not Found-->
     <div id="accountNotFound" class="hidden">
         <h1>404 - Page Not Found</h1>
         <p>Sorry, but the page you are looking for does not exist.</p>
         <a href="http://localhost:3100">Go Back Home</a>
+    </div>
+
+    <!--Notification Delete-Confirmation Popup-->
+    <div id="confirmNotificationDeletePopup" class="hidden" style="position: fixed; background-color: white; z-index: 13; top: 35%; left: 40%; width: 25%; height: 25%;
+    border-radius: 0.85em; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+        <h3 style="text-align: center;">Delete this notification?</h3>
+        <p onclick="removeNotification()" style="color: red; font-size: 1.2em; cursor: pointer;">Yes</p>
+        <hr style="color: lightgray; width: 98%;">
+        <p onclick="cancelNotificationDelete()" style="font-size: 1.05em; cursor: pointer;">No</p>
     </div>
 
 
