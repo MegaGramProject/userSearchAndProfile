@@ -58,4 +58,11 @@ public class frontendController {
         return "notifications";
     }
 
+    @GetMapping("/viewPost/{authenticatedUsername}/{postId}")
+    public String viewPost(@PathVariable String authenticatedUsername, @PathVariable String postId, Model model) {
+        model.addAttribute("authenticatedUsername", authenticatedUsername);
+        model.addAttribute("postId", postId);
+        return "viewPost";
+    }
+
 }

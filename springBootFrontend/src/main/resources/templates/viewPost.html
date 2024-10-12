@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>View Post</title>
+    <link th:href="@{/images/favicon.ico}" rel="icon" type="image/x-icon">
+    <link th:href="@{/styles/viewPost.css}" rel="stylesheet">
+</head>
+
+<body>
+
+    <!--Left sidebar-->
+    <div id="leftSidebar" style="height: 100%; width: 12%; border-style: solid; position: fixed; overflow-y: scroll; border-top: none;
+    border-left: none; border-bottom: none; border-width: 0.01em; border-color: gray; display: flex; flex-direction: column;
+    align-items: start; padding: 0.5em 1em;">
+        <h1 style="font-family: Billabong; font-size:2.4em;">Megagram</h1>
+
+        <div onclick="takeUserHome()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/homeIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Home</p>
+        </div>
+
+        <div onclick="takeUserToSearch()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/searchIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Search</p>
+        </div>
+
+        <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/exploreIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Explore</p>
+        </div>
+
+        <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/reelsIcon2.png}" style="object-fit: contain; height: 2.1em; width: 2.1em;">
+            <p>Reels</p>
+        </div>
+
+        <div onclick="takeUserToMessages()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/messagesIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Messages</p>
+        </div>
+
+        <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/blankHeart.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Notifications</p>
+        </div>
+
+        <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img th:src="@{/images/createIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Create</p>
+        </div>
+
+        <div onclick="takeUserToOwnProfile()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
+            <img id="profileIconInLeftSidebar" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <p>Profile</p>
+        </div>
+
+
+        <div style="position: relative; height: 90%;">
+            <div class="hoverableElement" style="position: absolute; top: 90%; display: flex; align-items: center; padding: 0.5em 0.35em;
+        gap: 0.5em; cursor: pointer; width: 95%; height: 7.25em; border-radius: 0.85em; position: relative;">
+                <img th:src="@{/images/moreIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+                <p id="toggleLeftSidebarPopupMoreOrLessText" onclick="toggleLeftSidebarPopup()">More</p>
+
+                <div class="hidden" id="leftSidebarPopup" style="background-color: white; border-style: solid; position: absolute;
+                top: -200%; left: -6%; width: 85%; padding: 0.5em 1em; border-radius: 0.85em; overflow-y: scroll">
+                    <p style="border-style: solid; border-color: lightgray; border-top: none; border-left: none; border-right: none;">Settings</p>
+                    <p style="border-style: solid; border-color: lightgray; border-top: none; border-left: none; border-right: none;">Your Activity</p>
+                    <p style="border-style: solid; border-color: lightgray; border-top: none; border-left: none; border-right: none;">Saved</p>
+                    <p onclick="takeUserToLogin()" style="border-style: solid; border-color: lightgray; border-top: none; border-left: none; border-right: none;">Switch accounts</p>
+                    <p style="border-style: solid; border-color: lightgray; border-top: none; border-left: none; border-right: none;">Log out</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!--Main Section-->
+    <div id="mainSection" style="position: absolute; top: 9%; left: 19.5%; background-color: white; height: 87%; width: 75%;
+    z-index: 10; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
+        <div id="mainSectionLeft" onclick="toggleHasUserClickedOnMainSectionRight()" style="position: relative; top: 0%; left: 0%; height: 100%; width: 66%; border-style: solid; border-color: lightgray;
+        border-top: none; border-left: none; border-bottom: none; border-width: 0.05em;">
+                <img ondblclick="likePost()" id="currSlideImg" th:src="@{/images/sampleImg.webp}" style="position: absolute; top: 0%; left: 0%; height: 100%; width: 100%;">
+                <img id="blackBackgroundForVids" th:src="@{/images/blackScreen.png}" class="hidden" style="position: absolute; top: 0%; left: 0%; height: 100%; width: 100%;">
+                <video ondblclick="likePost()" id="currSlideVid" onclick="setHasUserClickedOnVidToTrue()" class="hidden" th:src="@{/videos/storyOfMyLife.mp4}" style="position: absolute; top: 0%; left: 0%; height: 100%; width: 100%;" controls></video>
+                <div id="slideDotsDiv" style="position: absolute; top: 95%; left: 48%; display: flex; align-items: center;">
+                    <img th:src="@{/images/solidWhiteDot.png}" style="height: 1.2em; width: 1.2em; object-fit: contain; pointer-events: none;">
+                    <img th:src="@{/images/solidGrayDot.png}" style="height: 1em; width: 1em; object-fit: contain; pointer-events: none;">
+                    <img th:src="@{/images/solidGrayDot.png}" style="height: 1em; width: 1em; object-fit: contain; pointer-events: none;">
+                    <img th:src="@{/images/solidGrayDot.png}" style="height: 1em; width: 1em; object-fit: contain; pointer-events: none;">
+                </div>
+                <img id="goToNextSlideArrow" onclick="goToNextSlide()" th:src="@{/images/goToNextSlideArrow.png}" style="position: absolute; top: 45%; left: 95%; height: 2em;
+                width: 2em; object-fit: contain; cursor: pointer;">
+                <img id="goToPreviousSlideArrow" class="hidden" onclick="goToPreviousSlide()" th:src="@{/images/goToNextSlideArrow.png}" style="transform: scaleX(-1); position: absolute; top: 45%; left: 2%; height: 2em;
+                width: 2em; object-fit: contain; cursor: pointer;">
+                <img id="seeTaggedAccountsIcon" onclick="toggleShowTaggedAccountsOfCurrSlide()" th:src="@{/images/seeTaggedAccountsIcon.png}" style="cursor: pointer; position: absolute;
+                top: 87%; left: 1.2%; height: 5em; width: 5em; object-fit: contain;">
+        </div>
+
+        <div id="mainSectionRight" onclick="toggleHasUserClickedOnMainSectionRight()" style="position: absolute; top: 0%; left: 66%; height: 100%; width: 34%;
+        display: flex; flex-direction: column;">
+            <div style="display: flex; align-items: center; width: 92%; padding: 0.5em 1em; border-style: solid; border-color: lightgray;
+            border-top: none; border-left: none; border-right: none; gap: 1em; position: relative;">
+                <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain;">
+                <div style="display: flex; flex-direction: column; margin-top: 1em;">
+                    <b style="cursor: pointer; max-width: 10em; overflow-wrap: break-word;">hurdles</b>
+                    <p style="font-size: 0.8em; margin-top: 0.2em; max-width: 13em; overflow-wrap: break-word;">Los Angeles, California</p>
+                    <p style="font-size: 0.8em; margin-top: -0.4em; max-width: 13em; overflow-wrap: break-word;">One Call Away · Charlie Puth</p>
+                </div>
+                <b style="position: absolute; left: 84%; top: 48%; cursor: pointer; color: #2789f2">Follow</b>
+            </div>
+
+            <div id="commentsDiv" style="overflow-y: scroll; height: 65.5%; width: 92.6%; border-style: solid; border-color: lightgray; border-top: none;
+            border-left: none; border-right: none; padding: 0.5em 1em; display: flex; flex-direction: column; gap: 1em;">
+
+                <div id="postCaption" style="display: flex; align-items: start; position: relative; gap: 0.7em; margin-top: -0.5em;
+                width: 100%;">
+                    <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain">
+                    <div style="display: flex; flex-direction: column; width: 100%;">
+                        <p style="font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;">
+                            <b style="cursor: pointer;">hurdles</b> <span ondblclick="likeComment('AuthUserFollowingReply', 0)">another day, another slay. we keep the streak alive!!!</span>
+                        </p>
+                        <p style="color: gray; font-size: 0.7em; margin-top: -1em;">3d</p>
+                    </div>
+                </div>
+
+                <div id="authUserComment0" onmouseenter="showOptionsIcon('AuthUserComment0')" onmouseleave="hideOptionsIcon('AuthUserComment0')" style="display: flex; align-items: start; width: 100%; position: relative; gap: 0.7em;">
+                    <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain;">
+                    <div id="mainDivAuthUserComment0" style="display: flex; flex-direction: column;">
+                        <p style="font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;">
+                            <b style="cursor: pointer;">rishavry</b> <span id="contentAuthUserComment0" ondblclick="likeComment('AuthUserComment', 0)">What a random collage of slides lmao, but 10/10!</span>
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;">
+                            <p id="dateTextAuthUserComment0">3d</p>
+                            <b id="numLikesTextAuthUserComment0" style="cursor: pointer;">15,360 likes</b>
+                            <b onclick="startReplyToComment('AuthUserComment', 0)" style="cursor: pointer;">Reply</b>
+                            <img onclick="showOptionsPopupForComment('AuthUserComment', 0)" id="optionsIconForAuthUserComment0" class="hidden" th:src="@{/images/optionsDots.png}" style="height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;">
+                        </div>
+                        <b id="viewRepliesTextAuthUserComment0" onclick="toggleRepliesText('AuthUserComment', 0)" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">View replies (2)</span></b>
+                        <b id="hideRepliesTextAuthUserComment0" onclick="toggleRepliesText('AuthUserComment', 0)" class="hidden" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">Hide replies</span></b>
+                    </div>
+                    <div id="editModeDivAuthUserComment0" class="hidden" style="display: flex; align-items: center; gap: 0.5em; width: 100%;">
+                        <textarea id="textareaForEditingAuthUserComment0" oninput="onInputOfTextareaForEditingComment('AuthUserComment0')" placeholder="" style="outline: none; width:77%; resize: none; outline: none; font-family: Arial; padding: 0.5em 1em;"></textarea>
+                        <button onclick="cancelCommentEdit('AuthUserComment', 0)" type="button" style="border-radius:1em; color: white; padding: 0.5em 1em; cursor: pointer; background-color: black; font-size: 0.7em;">Cancel</button>
+                        <button id="confirmEditButtonAuthUserComment0" onclick="confirmCommentEdit('AuthUserComment', 0)"  class="blueButton hidden" style="font-size: 0.7em;" type="button">Ok</button>
+                    </div>
+                    <img id="blankHeartIconAuthUserComment0" onclick="toggleLikeComment('AuthUserComment', 0)" th:src="@{/images/blankHeart.png}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                    <img id="redHeartIconAuthUserComment0" onclick="toggleLikeComment('AuthUserComment', 0)" th:src="@{/images/redHeartIcon.webp}" class="hidden" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                </div>
+
+                <div id="parentOfAuthUserReply0" style="display: flex; align-items: start; width: 100%; position: relative; gap: 0.7em;">
+                    <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain;">
+                    <div style="display: flex; flex-direction: column;">
+                        <p style="font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;">
+                            <b style="cursor: pointer;">rishavry6</b> <span ondblclick="likeComment('ParentOfAuthUserReply', 0)">I'm gonna lie this stuff is amazing!</span>
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;">
+                            <p>16h</p>
+                            <b id="numLikesTextParentOfAuthUserReply0" style="cursor: pointer;">300 likes</b>
+                            <b onclick="startReplyToComment('ParentOfAuthUserReply', 0)" style="cursor: pointer;">Reply</b>
+                        </div>
+                        <b id="viewRepliesTextParentOfAuthUserReply0" onclick="toggleRepliesText('ParentOfAuthUserReply', 0)" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">View replies (1)</span></b>
+                        <b id="hideRepliesTextParentOfAuthUserReply0" onclick="toggleRepliesText('ParentOfAuthUserReply', 0)" class="hidden" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">Hide replies</span></b>
+                    </div>
+                    <img id="blankHeartIconParentOfAuthUserReply0" onclick="toggleLikeComment('ParentOfAuthUserReply', 0)" th:src="@{/images/blankHeart.png}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                    <img id="redHeartIconParentOfAuthUserReply0" onclick="toggleLikeComment('ParentOfAuthUserReply', 0)" th:src="@{/images/redHeartIcon.webp}" class="hidden" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                </div>
+
+                <div id="authUserReply0" onmouseenter="showOptionsIcon('AuthUserReply0')" onmouseleave="hideOptionsIcon('AuthUserReply0')" style="display: flex; align-items: start; margin-left: 5em; position: relative; gap: 0.7em; margin-top: -0.5em;
+                width: 100%;">
+                    <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain">
+                    <div id="mainDivAuthUserReply0" style="display: flex; flex-direction: column; width: 100%;">
+                        <p style="font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;">
+                            <b style="cursor: pointer;">rishavry</b> <span id="contentAuthUserReply0" ondblclick="likeComment('AuthUserReply', 0)">I think you meant to say 'I'm not gonna lie'</span>
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;">
+                            <p id="dateTextAuthUserReply0">2m</p>
+                            <b id="numLikesTextAuthUserReply0" style="cursor: pointer;">28 likes</b>
+                            <b onclick="startReplyToComment('AuthUserReply', 0)" style="cursor: pointer;">Reply</b>
+                            <img id="optionsIconForAuthUserReply0" onclick="showOptionsPopupForComment('AuthUserReply', 0)" class="hidden" th:src="@{/images/optionsDots.png}" style="height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;">
+                        </div>
+                        <b id="viewRepliesTextAuthUserReply0" onclick="toggleRepliesText('AuthUserReply', 0)" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">View replies (1)</span></b>
+                        <b id="hideRepliesTextAuthUserReply0" onclick="toggleRepliesText('AuthUserReply', 0)" class="hidden" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">Hide replies</span></b>
+                    </div>
+                    <div id="editModeDivAuthUserReply0" class="hidden" style="display: flex; align-items: center; gap: 0.5em; width: 100%;">
+                        <textarea id="textareaForEditingAuthUserReply0" oninput="onInputOfTextareaForEditingComment('AuthUserReply0')" placeholder="" style="outline: none; width:77%; resize: none; outline: none; font-family: Arial; padding: 0.5em 1em;"></textarea>
+                        <button onclick="cancelCommentEdit('AuthUserReply', 0)" type="button" style="border-radius:1em; color: white; padding: 0.5em 1em; cursor: pointer; background-color: black; font-size: 0.7em;">Cancel</button>
+                        <button id="confirmEditButtonAuthUserReply0" onclick="confirmCommentEdit('AuthUserReply', 0)"  class="blueButton hidden" style="font-size: 0.7em;" type="button">Ok</button>
+                    </div>
+                    <img id="blankHeartIconAuthUserReply0" onclick="toggleLikeComment('AuthUserReply', 0)" th:src="@{/images/blankHeart.png}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                    <img id="redHeartIconAuthUserReply0" onclick="toggleLikeComment('AuthUserReply', 0)" th:src="@{/images/redHeartIcon.webp}" class="hidden"  style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                </div>
+
+                <div id="authUserMentionComment0" style="display: flex; align-items: start; width: 100%; position: relative; gap: 0.7em;">
+                    <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain;">
+                    <div style="display: flex; flex-direction: column;">
+                        <p style="font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;">
+                            <b style="cursor: pointer;">rishavry6</b> <span ondblclick="likeComment('AuthUserMentionComment', 0)">Welcome to the jungle, we've got fun and games don't we <span onclick="takeToProfile('rishavry')" style="cursor: pointer; color:#2789f2">@rishavry</span>?</span>
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;">
+                            <p>1d</p>
+                            <b id="numLikesTextAuthUserMentionComment0" style="cursor: pointer;">5 likes</b>
+                            <b onclick="startReplyToComment('AuthUserMentionComment', 0)" style="cursor: pointer;">Reply</b>
+                        </div>
+                        <b id="viewRepliesTextAuthUserMentionComment0" onclick="toggleRepliesText('AuthUserMentionComment', 0)" class="hidden" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">View replies (0)</span></b>
+                        <b id="hideRepliesTextAuthUserMentionComment0" onclick="toggleRepliesText('AuthUserMentionComment', 0)" class="hidden" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">Hide replies</span></b>
+                    </div>
+                    <img id="blankHeartIconAuthUserMentionComment0" onclick="toggleLikeComment('AuthUserMentionComment', 0)" th:src="@{/images/blankHeart.png}" class="hidden" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                    <img id="redHeartIconAuthUserMentionComment0" onclick="toggleLikeComment('AuthUserMentionComment', 0)" th:src="@{/images/redHeartIcon.webp}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                </div>
+
+                <div id="parentOfAuthUserMentionReply0" style="display: flex; align-items: start; width: 100%; position: relative; gap: 0.7em;">
+                    <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain;">
+                    <div style="display: flex; flex-direction: column;">
+                        <p style="font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;">
+                            <b style="cursor: pointer;">rishavry5</b> <span ondblclick="likeComment('ParentOfAuthUserMentionReply', 0)">That pilot prank would've given me a heart attack if I was the passenger...</span>
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;">
+                            <p>5h</p>
+                            <b id="numLikesTextParentOfAuthUserMentionReply0" style="cursor: pointer;">199 likes</b>
+                            <b onclick="startReplyToComment('ParentOfAuthUserMentionReply', 0)" style="cursor: pointer;">Reply</b>
+                        </div>
+                        <b id="viewRepliesTextParentOfAuthUserMentionReply0" onclick="toggleRepliesText('ParentOfAuthUserMentionReply', 0)" class="hidden" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">View replies (0)</span></b>
+                        <b id="hideRepliesTextParentOfAuthUserMentionReply0" onclick="toggleRepliesText('ParentOfAuthUserMentionReply', 0)" class="hidden" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">Hide replies</span></b>
+                    </div>
+                    <img id="blankHeartIconParentOfAuthUserMentionReply0" onclick="toggleLikeComment('ParentOfAuthUserMentionReply', 0)" th:src="@{/images/blankHeart.png}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                    <img id="redHeartIconParentOfAuthUserMentionReply0" onclick="toggleLikeComment('ParentOfAuthUserMentionReply', 0)" th:src="@{/images/redHeartIcon.webp}" class="hidden" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                </div>
+
+
+                <div id="authUserMentionReply0" style="display: flex; align-items: start; margin-left: 5em; position: relative; gap: 0.7em; margin-top: -0.5em;
+                width: 100%;">
+                    <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain">
+                    <div style="display: flex; flex-direction: column; width: 100%;">
+                        <p style="font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;">
+                            <b style="cursor: pointer;">rishavry6</b> <span ondblclick="likeComment('AuthUserMentionReply', 0)"><span onclick="takeToProfile('rishavry')" style="cursor: pointer; color:#2789f2">@rishavry</span> & I were thinking the exact same thing. $$$ lawsuits!</span>
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;">
+                            <p>44s</p>
+                            <b id="numLikesTextAuthUserMentionReply0" class="hidden" style="cursor: pointer;">0 likes</b>
+                            <b onclick="startReplyToComment('AuthUserMentionReply', 0)" style="cursor: pointer;">Reply</b>
+                        </div>
+                        <b id="viewRepliesTextAuthUserMentionReply0" onclick="toggleRepliesText('AuthUserMentionReply', 0)" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">View replies (27)</span></b>
+                        <b id="hideRepliesTextAuthUserMentionReply0" onclick="toggleRepliesText('AuthUserMentionReply', 0)" class="hidden" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">Hide replies</span></b>
+                    </div>
+                    <img id="blankHeartIconAuthUserMentionReply0" onclick="toggleLikeComment('AuthUserMentionReply', 0)" th:src="@{/images/blankHeart.png}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                    <img id="redHeartIconAuthUserMentionReply0" onclick="toggleLikeComment('AuthUserMentionReply', 0)" th:src="@{/images/redHeartIcon.webp}" class="hidden"  style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                </div>
+
+                <div id="authUserFollowingComment0" style="display: flex; align-items: start; width: 100%; position: relative; gap: 0.7em;">
+                    <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain;">
+                    <div style="display: flex; flex-direction: column;">
+                        <p style="font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;">
+                            <b style="cursor: pointer;">rishavry4 <span style="color: gray; font-size: 0.87em; margin-right: 1em;"><span style="cursor: auto;">•</span> Following</span></b> <span ondblclick="likeComment('AuthUserFollowingComment', 0)">This post reminds me of good times I had earlier</span>
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;">
+                            <p>2h</p>
+                            <b id="numLikesTextAuthUserFollowingComment0" class="hidden" style="cursor: pointer;">0 likes</b>
+                            <b onclick="startReplyToComment('AuthUserFollowingComment', 0)" style="cursor: pointer;">Reply</b>
+                        </div>
+                        <b id="viewRepliesTextAuthUserFollowingComment0" onclick="toggleRepliesText('AuthUserFollowingComment', 0)" class="hidden" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">View replies (0)</span></b>
+                        <b id="hideRepliesTextAuthUserFollowingComment0" onclick="toggleRepliesText('AuthUserFollowingComment', 0)" class="hidden" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">Hide replies</span></b>
+                    </div>
+                    <img id="blankHeartIconAuthUserFollowingComment0" onclick="toggleLikeComment('AuthUserFollowingComment', 0)" th:src="@{/images/blankHeart.png}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                    <img id="redHeartIconAuthUserFollowingComment0" onclick="toggleLikeComment('AuthUserFollowingComment', 0)" th:src="@{/images/redHeartIcon.webp}" class="hidden" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                </div>
+
+                <div id="parentOfAuthUserFollowingReply0" style="display: flex; align-items: start; width: 100%; position: relative; gap: 0.7em;">
+                    <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain;">
+                    <div style="display: flex; flex-direction: column;">
+                        <p style="font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;">
+                            <b style="cursor: pointer;">rishavry3<img th:src="@{/images/verifiedCheck.png}" style="height: 1.1em; width: 1.1em; pointer-events: none; object-fit: contain;"></b> <span ondblclick="likeComment('ParentOfAuthUserFollowingReply', 0)">dude pick a genre</span>
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;">
+                            <p>18m</p>
+                            <b id="numLikesTextParentOfAuthUserFollowingReply0" style="cursor: pointer;">10 likes</b>
+                            <b onclick="startReplyToComment('ParentOfAuthUserFollowingReply', 0)" style="cursor: pointer;">Reply</b>
+                        </div>
+                        <b id="viewRepliesTextParentOfAuthUserFollowingReply0" onclick="toggleRepliesText('ParentOfAuthUserFollowingReply', 0)" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">View replies (13)</span></b>
+                        <b id="hideRepliesTextParentOfAuthUserFollowingReply0" onclick="toggleRepliesText('ParentOfAuthUserFollowingReply', 0)" class="hidden" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">Hide replies</span></b>
+                    </div>
+                    <img id="blankHeartIconParentOfAuthUserFollowingReply0" onclick="toggleLikeComment('ParentOfAuthUserFollowingReply', 0)" th:src="@{/images/blankHeart.png}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                    <img id="redHeartIconParentOfAuthUserFollowingReply0" onclick="toggleLikeComment('ParentOfAuthUserFollowingReply', 0)" th:src="@{/images/redHeartIcon.webp}" class="hidden" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                </div>
+
+
+                <div id="authUserFollowingReply0" style="display: flex; align-items: start; margin-left: 5em; position: relative; gap: 0.7em; margin-top: -0.5em;
+                width: 100%;">
+                    <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain">
+                    <div style="display: flex; flex-direction: column; width: 100%;">
+                        <p style="font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;">
+                            <b style="cursor: pointer;">rishavry9</b> <span ondblclick="likeComment('AuthUserFollowingReply', 0)">dude pick a life</span>
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;">
+                            <p>15m</p>
+                            <b id="numLikesTextAuthUserFollowingReply0" style="cursor: pointer;">5 likes</b>
+                            <b onclick="startReplyToComment('AuthUserFollowingReply', 0)" style="cursor: pointer;">Reply</b>
+                        </div>
+                        <b id="viewRepliesTextAuthUserFollowingReply0" onclick="toggleRepliesText('AuthUserFollowingReply', 0)" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">View replies (27)</span></b>
+                        <b id="hideRepliesTextAuthUserFollowingReply0" onclick="toggleRepliesText('AuthUserFollowingReply', 0)" class="hidden" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">Hide replies</span></b>
+                    </div>
+                    <img id="blankHeartIconAuthUserFollowingReply0" onclick="toggleLikeComment('AuthUserFollowingReply', 0)" th:src="@{/images/blankHeart.png}" class="hidden" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                    <img id="redHeartIconAuthUserFollowingReply0" onclick="toggleLikeComment('AuthUserFollowingReply', 0)" th:src="@{/images/redHeartIcon.webp}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                </div>
+
+                <div id="postAuthorComment0" style="display: flex; align-items: start; width: 100%; position: relative; gap: 0.7em;">
+                    <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain;">
+                    <div style="display: flex; flex-direction: column;">
+                        <p style="font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;">
+                            <b style="cursor: pointer;">hurdles<img th:src="@{/images/verifiedCheck.png}" style="height: 1.1em; width: 1.1em; pointer-events: none; object-fit: contain;"><span style="color: gray; font-size: 0.87em; margin-right: 1em; cursor: auto;">• Author</span></b> <span ondblclick="likeComment('PostAuthorComment', 0)">i dont normally post this ik, but i thought it would be a nice change of pace lol</span>
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;">
+                            <p>52s</p>
+                            <b id="numLikesTextPostAuthorComment0" style="cursor: pointer;">65 likes</b>
+                            <b onclick="startReplyToComment('PostAuthorComment', 0)" style="cursor: pointer;">Reply</b>
+                        </div>
+                        <b id="viewRepliesTextPostAuthorComment0" onclick="toggleRepliesText('PostAuthorComment', 0)" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">View replies (6)</span></b>
+                        <b id="hideRepliesTextPostAuthorComment0" onclick="toggleRepliesText('PostAuthorComment', 0)" class="hidden" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">Hide replies</span></b>
+                    </div>
+                    <img id="blankHeartIconPostAuthorComment0" onclick="toggleLikeComment('PostAuthorComment', 0)" th:src="@{/images/blankHeart.png}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                    <img id="redHeartIconPostAuthorComment0" onclick="toggleLikeComment('PostAuthorComment', 0)" th:src="@{/images/redHeartIcon.webp}" class="hidden" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                </div>
+
+                <div id="parentOfPostAuthorReply0" style="display: flex; align-items: start; width: 100%; position: relative; gap: 0.7em;">
+                    <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain;">
+                    <div style="display: flex; flex-direction: column;">
+                        <p style="font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;">
+                            <b style="cursor: pointer;">uncertifiedhater</b> <span ondblclick="likeComment('ParentOfPostAuthorReply', 0)">L post, hate everything about it</span>
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;">
+                            <p>2d</p>
+                            <b id="numLikesTextParentOfPostAuthorReply0" style="cursor: pointer;">1,400 likes</b>
+                            <b onclick="startReplyToComment('ParentOfPostAuthorReply', 0)" style="cursor: pointer;">Reply</b>
+                        </div>
+                        <b id="viewRepliesTextParentOfPostAuthorReply0" onclick="toggleRepliesText('ParentOfPostAuthorReply', 0)" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">View replies (50)</span></b>
+                        <b id="hideRepliesTextParentOfPostAuthorReply0" onclick="toggleRepliesText('ParentOfPostAuthorReply', 0)" class="hidden" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">Hide replies</span></b>
+                    </div>
+                    <img id="blankHeartIconParentOfPostAuthorReply0" onclick="toggleLikeComment('ParentOfPostAuthorReply', 0)" th:src="@{/images/blankHeart.png}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                    <img id="redHeartIconParentOfPostAuthorReply0" onclick="toggleLikeComment('ParentOfPostAuthorReply', 0)" th:src="@{/images/redHeartIcon.webp}" class="hidden" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                </div>
+
+                <div id="postAuthorReply0" style="display: flex; align-items: start; margin-left: 5em; position: relative; gap: 0.7em; margin-top: -0.5em;
+                width: 100%;">
+                    <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain">
+                    <div style="display: flex; flex-direction: column; width: 100%;">
+                        <p style="font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;">
+                            <b style="cursor: pointer;">hurdles</b> <span ondblclick="likeComment('PostAuthorReply', 0)">ratio</span>
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;">
+                            <p>15m</p>
+                            <b id="numLikesTextPostAuthorReply0" style="cursor: pointer;">1401 likes</b>
+                            <b onclick="startReplyToComment('PostAuthorReply', 0)" style="cursor: pointer;">Reply</b>
+                        </div>
+                        <b id="viewRepliesTextPostAuthorReply0" onclick="toggleRepliesText('PostAuthorReply', 0)" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">View replies (27)</span></b>
+                        <b id="hideRepliesTextPostAuthorReply0" onclick="toggleRepliesText('PostAuthorReply', 0)" class="hidden" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">Hide replies</span></b>
+                    </div>
+                    <img id="blankHeartIconPostAuthorReply0" onclick="toggleLikeComment('PostAuthorReply', 0)" th:src="@{/images/blankHeart.png}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                    <img id="redHeartIconPostAuthorReply0" onclick="toggleLikeComment('PostAuthorReply', 0)" th:src="@{/images/redHeartIcon.webp}" class="hidden" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                </div>
+
+                <div id="regularComment0" style="display: flex; align-items: start; width: 100%; position: relative; gap: 0.7em;">
+                    <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain;">
+                    <div id="mainDivRegularComment0" style="display: flex; flex-direction: column;">
+                        <p style="font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;">
+                            <b style="cursor: pointer;">deztrohester</b> <span ondblclick="likeComment('RegularComment', 0)">nahhh Cam Ward didn't forget he was on live broadcast 😂😂😂</span>
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;">
+                            <p>3d</p>
+                            <b id="numLikesTextRegularComment0" style="cursor: pointer;">101 likes</b>
+                            <b onclick="startReplyToComment('RegularComment', 0)" style="cursor: pointer;">Reply</b>
+                            <div style="display: flex; align-items: center; gap: 0.35em;">
+                                <img th:src="@{/images/redHeartIcon.webp}" style="height: 1.2em; width: 1.2em; object-fit: contain; pointer-events: none;">
+                                <small>by author</small>
+                            </div>
+                        </div>
+                        <b id="viewRepliesTextRegularComment0" onclick="toggleRepliesText('RegularComment', 0)" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">View replies (1)</span></b>
+                        <b id="hideRepliesTextRegularComment0" onclick="toggleRepliesText('RegularComment', 0)" class="hidden" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">Hide replies</span></b>
+                    </div>
+                    <img id="blankHeartIconRegularComment0" onclick="toggleLikeComment('RegularComment', 0)" th:src="@{/images/blankHeart.png}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                    <img id="redHeartIconRegularComment0" onclick="toggleLikeComment('RegularComment', 0)" th:src="@{/images/redHeartIcon.webp}" class="hidden" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                </div>
+
+                <div id="regularComment1" style="display: flex; align-items: start; width: 100%; position: relative; gap: 0.7em;">
+                    <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain;">
+                    <div id="mainDivRegularComment0" style="display: flex; flex-direction: column;">
+                        <p style="font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;">
+                            <b style="cursor: pointer;">xavier_dc85</b> <span ondblclick="likeComment('RegularComment', 1)">that response to the shotgun is legendary</span>
+                        </p>
+                        <div style="display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;">
+                            <p>2d</p>
+                            <b id="numLikesTextRegularComment1" style="cursor: pointer;">17 likes</b>
+                            <b onclick="startReplyToComment('RegularComment', 1)" style="cursor: pointer;">Reply</b>
+                        </div>
+                        <b id="viewRepliesTextRegularComment1" onclick="toggleRepliesText('RegularComment', 1)" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">View replies (3)</span></b>
+                        <b id="hideRepliesTextRegularComment1" onclick="toggleRepliesText('RegularComment', 1)" class="hidden" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">Hide replies</span></b>
+                    </div>
+                    <img id="blankHeartIconRegularComment1" onclick="toggleLikeComment('RegularComment', 1)" th:src="@{/images/blankHeart.png}" class="hidden" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                    <img id="redHeartIconRegularComment1" onclick="toggleLikeComment('RegularComment', 1)" th:src="@{/images/redHeartIcon.webp}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+                    left: 93%; top: 36%;">
+                </div>
+
+            </div>
+
+            <div style="display: flex; align-items: center; width: 93%; height: 5%; padding: 0.5em 1em; position: relative;">
+                <img id="postIsNotLikedIcon" onclick="toggleLikePost()" th:src="@{/images/blankHeartWithSolidOutline.png}" style="height: 100%; width: 2.5em; object-fit: contain; cursor: pointer;">
+                <img id="postIsLikedIcon" onclick="toggleLikePost()" th:src="@{/images/redHeartIcon.webp}" class="hidden" style="height: 80%; width: 2.5em; object-fit: contain; cursor: pointer;">
+                <img th:src="@{/images/commentIcon.png}" onclick="setFocusToCommentTextarea()" style="height: 88%; width: 2.5em; object-fit: contain; cursor: pointer;">
+                <img th:src="@{/images/sendPostIcon.png}" style="height: 70%; width: 2.5em; object-fit: contain; cursor: pointer;">
+                <img id="postIsNotSavedIcon" onclick="toggleSavePost()" th:src="@{/images/savePostIconWithSolidOutline.png}" style="position: absolute; left: 90%; top: 10%; height: 70%; width: 2.2em; object-fit: contain; cursor: pointer;">
+                <img id="postIsSavedIcon" onclick="toggleSavePost()" th:src="@{/images/filledBlackSavedIcon.png}" class="hidden" style="position: absolute; left: 90%; top: 10%; height: 70%; width: 2.2em; object-fit: contain; cursor: pointer;">
+            </div>
+
+            <div style="padding: 0.5em 1em; display: flex; flex-direction: column; margin-top: -0.5em;">
+                <b id="postNumLikesText" style="cursor: pointer;">82,881 likes</b>
+                <small style="color: gray; cursor: pointer;">3 days ago</small>
+            </div>
+
+            <div style="width: 100%; height: 6%; display: flex; align-items: center;">
+                <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 3em; width: 3em; object-fit: contain;">
+                <textarea id="textareaToAddComment" placeholder="Add a comment..." style="outline: none; border: none; font-family: Arial; padding-top: 1em; width: 65%; margin-left: 0.5em;"></textarea>
+                <b id="postCommentButton" onclick="postComment()" style="cursor: pointer; color: #2789f2; margin-left: 1em;" class="hidden">Post</b>
+            </div>
+
+        </div>
+    </div>
+
+    <!--Comment Options Popup-->
+    <div id="commentOptionsPopup" class="hidden" style="position: absolute; top: 38%; left: 40%; width: 25%; height: 25%; background-color: white; border-radius: 0.85em;
+    z-index: 10; display: flex; flex-direction: column; align-items: center;">
+        <br>
+        <p>Comment Actions</p>
+        <hr style="color: lightgray; width:98%;">
+        <p onclick="goToCommentEditMode()" style="cursor: pointer; font-weight: bold; font-size: 0.9em; margin-top: 0.5em; margin-bottom: 0.5em;">Edit</p>
+        <hr style="color: lightgray; width:98%;">
+        <p onclick="deleteComment()" style="color: red; cursor: pointer; font-weight: bold; font-size: 0.9em; margin-top: 0.5em; margin-bottom: 0.5em;">Delete</p>
+        <hr style="color: lightgray; width:98%;">
+        <p onclick="cancelOptionsPopupForComment()" style="cursor: pointer; font-size: 0.9em; margin-top: 0.5em; margin-bottom: 0.5em;">Cancel</p>
+    </div>
+
+
+    <img id="goToNextPostArrow" onclick="goToNextPost()" th:src="@{/images/showNextPostArrow.png}" style="position: absolute; top: 48%; left: 96%; cursor: pointer; z-index: 10; height: 3.5em; width: 3.5em; object-fit: contain;">
+    <img id="goToPreviousPostArrow" onclick="goToPreviousPost()" th:src="@{/images/showNextPostArrow.png}" style="transform: scaleX(-1); position: absolute; top: 48%; left: 15%; cursor: pointer; z-index: 10; height: 3.5em; width: 3.5em; object-fit: contain;">
+    <img id="darkScreenCoveringEntirePage" th:src="@{/images/blackScreen.png}" class="" style="position: absolute; top: 0%; left: 0%; height: 100%; width: 100%; opacity: 0.75">
+    <img id="darkScreenCoveringRightSideOfPage" th:src="@{/images/blackScreen.png}" class="hidden" style="position: absolute; top: 0%; left: 14.2%; height: 100%; width: 86%; opacity: 0.75">
+    <b onclick="changeBackground()" style="position: absolute; top: 3%; left: 88%; font-size: 0.7em; cursor: pointer; background-color: black;
+    color: white; cursor: pointer; padding: 0.5em 1em; user-select: none;">Change Background</b>
+
+
+    <p id="authenticatedUsername" class="hidden" th:text="${authenticatedUsername}"></p>
+    <p id="postId" class="hidden" th:text="${postId}"></p>
+
+    <script th:src="@{/scripts/viewPost.js}"></script>
+</body>
+
+</html>

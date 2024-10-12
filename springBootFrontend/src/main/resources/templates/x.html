@@ -1,0 +1,25 @@
+<div id="authUserComment0" onmouseenter="showOptionsIcon('AuthUserComment0')" onmouseleave="hideOptionsIcon('AuthUserComment0')" style="display: flex; align-items: start; width: 100%; position: relative; gap: 0.7em;">
+    <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain;">
+    <div id="mainDivAuthUserComment0" style="display: flex; flex-direction: column;">
+        <p style="font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;">
+            <b style="cursor: pointer;">rishavry</b> <span id="contentAuthUserComment0" ondblclick="likeComment('AuthUserComment', 0)">What a random collage of slides lmao, but 10/10!</span>
+        </p>
+        <div style="display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;">
+            <p id="dateTextAuthUserComment0">3d</p>
+            <b id="numLikesTextAuthUserComment0" style="cursor: pointer;">15,360 likes</b>
+            <b onclick="startReplyToComment('AuthUserComment', 0)" style="cursor: pointer;">Reply</b>
+            <img onclick="showOptionsPopupForComment('AuthUserComment', 0)" id="optionsIconForAuthUserComment0" class="hidden" th:src="@{/images/optionsDots.png}" style="height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;">
+        </div>
+        <b id="viewRepliesTextAuthUserComment0" onclick="toggleRepliesText('AuthUserComment', 0)" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">View replies (2)</span></b>
+        <b id="hideRepliesTextAuthUserComment0" onclick="toggleRepliesText('AuthUserComment', 0)" class="hidden" style="cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;">—— <span style="margin-left: 0.9em;">Hide replies</span></b>
+    </div>
+    <div id="editModeDivAuthUserComment0" class="hidden" style="display: flex; align-items: center; gap: 0.5em; width: 100%;">
+        <textarea id="textareaForEditingAuthUserComment0" oninput="onInputOfTextareaForEditingComment('AuthUserComment0')" placeholder="" style="outline: none; width:77%; resize: none; outline: none; font-family: Arial; padding: 0.5em 1em;"></textarea>
+        <button onclick="cancelCommentEdit('AuthUserComment', 0)" type="button" style="border-radius:1em; color: white; padding: 0.5em 1em; cursor: pointer; background-color: black; font-size: 0.7em;">Cancel</button>
+        <button id="confirmEditButtonAuthUserComment0" onclick="confirmCommentEdit('AuthUserComment', 0)"  class="blueButton hidden" style="font-size: 0.7em;" type="button">Ok</button>
+    </div>
+    <img id="blankHeartIconAuthUserComment0" onclick="toggleLikeComment('AuthUserComment', 0)" th:src="@{/images/blankHeart.png}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+    left: 93%; top: 36%;">
+    <img id="redHeartIconAuthUserComment0" onclick="toggleLikeComment('AuthUserComment', 0)" th:src="@{/images/redHeartIcon.webp}" class="hidden" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
+    left: 93%; top: 36%;">
+</div>
