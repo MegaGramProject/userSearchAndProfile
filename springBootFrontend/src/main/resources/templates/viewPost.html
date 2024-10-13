@@ -90,14 +90,10 @@
     z-index: 10; box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);">
         <div id="mainSectionLeft" onclick="toggleHasUserClickedOnMainSectionRight()" style="position: relative; top: 0%; left: 0%; height: 100%; width: 66%; border-style: solid; border-color: lightgray;
         border-top: none; border-left: none; border-bottom: none; border-width: 0.05em;">
-                <img ondblclick="likePost()" id="currSlideImg" th:src="@{/images/sampleImg.webp}" style="position: absolute; top: 0%; left: 0%; height: 100%; width: 100%;">
+                <img ondblclick="likePost()" id="currSlideImg" style="position: absolute; top: 0%; left: 0%; height: 100%; width: 100%;">
                 <img id="blackBackgroundForVids" th:src="@{/images/blackScreen.png}" class="hidden" style="position: absolute; top: 0%; left: 0%; height: 100%; width: 100%;">
-                <video ondblclick="likePost()" id="currSlideVid" onclick="setHasUserClickedOnVidToTrue()" class="hidden" th:src="@{/videos/storyOfMyLife.mp4}" style="position: absolute; top: 0%; left: 0%; height: 100%; width: 100%;" controls></video>
+                <video ondblclick="likePost()" id="currSlideVid" onclick="setHasUserClickedOnVidToTrue()" class="hidden" style="position: absolute; top: 0%; left: 0%; height: 100%; width: 100%;" controls></video>
                 <div id="slideDotsDiv" style="position: absolute; top: 95%; left: 48%; display: flex; align-items: center;">
-                    <img th:src="@{/images/solidWhiteDot.png}" style="height: 1.2em; width: 1.2em; object-fit: contain; pointer-events: none;">
-                    <img th:src="@{/images/solidGrayDot.png}" style="height: 1em; width: 1em; object-fit: contain; pointer-events: none;">
-                    <img th:src="@{/images/solidGrayDot.png}" style="height: 1em; width: 1em; object-fit: contain; pointer-events: none;">
-                    <img th:src="@{/images/solidGrayDot.png}" style="height: 1em; width: 1em; object-fit: contain; pointer-events: none;">
                 </div>
                 <img id="goToNextSlideArrow" onclick="goToNextSlide()" th:src="@{/images/goToNextSlideArrow.png}" style="position: absolute; top: 45%; left: 95%; height: 2em;
                 width: 2em; object-fit: contain; cursor: pointer;">
@@ -113,11 +109,17 @@
             border-top: none; border-left: none; border-right: none; gap: 1em; position: relative;">
                 <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain;">
                 <div style="display: flex; flex-direction: column; margin-top: 1em;">
-                    <b style="cursor: pointer; max-width: 10em; overflow-wrap: break-word;">hurdles</b>
-                    <p style="font-size: 0.8em; margin-top: 0.2em; max-width: 13em; overflow-wrap: break-word;">Los Angeles, California</p>
-                    <p style="font-size: 0.8em; margin-top: -0.4em; max-width: 13em; overflow-wrap: break-word;">One Call Away · Charlie Puth</p>
+                    <b id="postAuthorOrAuthorsText" style="cursor: pointer; max-width: 10em; overflow-wrap: break-word;">hurdles</b>
+                    <p id="locationOfPostText" style="font-size: 0.8em; margin-top: 0.2em; max-width: 13em; overflow-wrap: break-word;">Los Angeles, California</p>
+                    <div style="display: flex; align-items: start; gap: 0.7em;">
+                        <p style="font-size: 0.8em; margin-top: -0.4em; max-width: 13em; overflow-wrap: break-word;"><img th:src="@{/images/soundsIcon2.png}" style="pointer-events: none; object-fit: contain; height: 1em; width :1em; margin-right: 1em;">One Call Away · Charlie Puth
+                        </p>
+                        <img onclick="playBackgroundSound()" id="playBackgroundSoundIcon" th:src="@{/images/playIcon.png}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain;">
+                        <img id="pauseBackgroundSoundIcon" onclick="pauseBackgroundSound()" th:src="@{/images/pauseIcon.png}" class="hidden" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain;">
+                    </div>
                 </div>
-                <b style="position: absolute; left: 84%; top: 48%; cursor: pointer; color: #2789f2">Follow</b>
+                <b id="followPostAuthorText" class="hidden" style="position: absolute; left: 84%; top: 48%; cursor: pointer; color: #2789f2">Follow</b>
+                <b id="followingPostAuthorText" class="hidden" style="position: absolute; left: 80%; top: 48%; cursor: pointer;">Following</b>
             </div>
 
             <div id="commentsDiv" style="overflow-y: scroll; height: 65.5%; width: 92.6%; border-style: solid; border-color: lightgray; border-top: none;
@@ -449,7 +451,7 @@
 
             <div style="padding: 0.5em 1em; display: flex; flex-direction: column; margin-top: -0.5em;">
                 <b id="postNumLikesText" style="cursor: pointer;">82,881 likes</b>
-                <small style="color: gray; cursor: pointer;">3 days ago</small>
+                <small id="relativeDateTimeOfPostText" style="color: gray; cursor: pointer;">3 days ago</small>
             </div>
 
             <div style="width: 100%; height: 6%; display: flex; align-items: center;">
@@ -474,12 +476,16 @@
         <p onclick="cancelOptionsPopupForComment()" style="cursor: pointer; font-size: 0.9em; margin-top: 0.5em; margin-bottom: 0.5em;">Cancel</p>
     </div>
 
+    <div id="accountNotFoundOrBlocksYou" class="hidden">
+        <h1>404 - Page Not Found</h1>
+        <p>Sorry, but the page you are looking for does not exist.</p>
+        <a href="http://localhost:3100">Go Back Home</a>
+    </div>
 
-    <img id="goToNextPostArrow" onclick="goToNextPost()" th:src="@{/images/showNextPostArrow.png}" style="position: absolute; top: 48%; left: 96%; cursor: pointer; z-index: 10; height: 3.5em; width: 3.5em; object-fit: contain;">
-    <img id="goToPreviousPostArrow" onclick="goToPreviousPost()" th:src="@{/images/showNextPostArrow.png}" style="transform: scaleX(-1); position: absolute; top: 48%; left: 15%; cursor: pointer; z-index: 10; height: 3.5em; width: 3.5em; object-fit: contain;">
+
     <img id="darkScreenCoveringEntirePage" th:src="@{/images/blackScreen.png}" class="" style="position: absolute; top: 0%; left: 0%; height: 100%; width: 100%; opacity: 0.75">
     <img id="darkScreenCoveringRightSideOfPage" th:src="@{/images/blackScreen.png}" class="hidden" style="position: absolute; top: 0%; left: 14.2%; height: 100%; width: 86%; opacity: 0.75">
-    <b onclick="changeBackground()" style="position: absolute; top: 3%; left: 88%; font-size: 0.7em; cursor: pointer; background-color: black;
+    <b id="changeBackgroundText" onclick="changeBackground()" style="position: absolute; top: 3%; left: 88%; font-size: 0.7em; cursor: pointer; background-color: black;
     color: white; cursor: pointer; padding: 0.5em 1em; user-select: none;">Change Background</b>
 
 

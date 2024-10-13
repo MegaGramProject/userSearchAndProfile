@@ -4,12 +4,9 @@ const darkScreenCoveringEntirePage = document.getElementById('darkScreenCovering
 const darkScreenCoveringRightSideOfPage = document.getElementById('darkScreenCoveringRightSideOfPage');
 const leftSidebar = document.getElementById('leftSidebar');
 const mainSection = document.getElementById('mainSection');
-const goToPreviousPostArrow = document.getElementById('goToPreviousPostArrow');
-const goToNextPostArrow = document.getElementById('goToNextPostArrow');
 const goToNextSlideArrow = document.getElementById('goToNextSlideArrow');
 const goToPreviousSlideArrow = document.getElementById('goToPreviousSlideArrow');
 const slideDotsDiv = document.getElementById('slideDotsDiv');
-const slideDots = slideDotsDiv.querySelectorAll('img');
 const currSlideImg = document.getElementById('currSlideImg');
 const currSlideVid = document.getElementById('currSlideVid');
 const seeTaggedAccountsIcon = document.getElementById('seeTaggedAccountsIcon');
@@ -25,6 +22,16 @@ const postIsLikedIcon = document.getElementById('postIsLikedIcon');
 const postNumLikesText = document.getElementById('postNumLikesText');
 const commentOptionsPopup = document.getElementById('commentOptionsPopup');
 const postCaption = document.getElementById('postCaption');
+const playBackgroundSoundIcon = document.getElementById('playBackgroundSoundIcon');
+const pauseBackgroundSoundIcon = document.getElementById('pauseBackgroundSoundIcon');
+const accountNotFoundOrBlocksYou = document.getElementById('accountNotFoundOrBlocksYou');
+const changeBackgroundText = document.getElementById('changeBackgroundText');
+const profileIconInLeftSidebar = document.getElementById('profileIconInLeftSidebar');
+const locationOfPostText = document.getElementById('locationOfPostText');
+const followPostAuthorText = document.getElementById('followPostAuthorText');
+const followingPostAuthorText = document.getElementById('followingPostAuthorText');
+const postAuthorOrAuthorsText = document.getElementById('postAuthorOrAuthorsText');
+const relativeDateTimeOfPostText = document.getElementById('relativeDateTimeOfPostText');
 
 let displayLeftSidebarPopup = false;
 let currBackground = 0;
@@ -33,6 +40,10 @@ let hasUserClickedOnVid = false;
 let hasUserClickedOnMainSectionRight = false;
 let commentToReplyTo = [];
 let commentSelectedForOptions = [];
+let backgroundSound = new Audio('/sounds/oneCallAway.mp3');
+let relevantUserInfo = {};
+let authUserFollowings = [];
+let slideDots = [];
 let postInfo = {
     numSlides: 4,
     numLikes: 82881,
@@ -370,31 +381,241 @@ let regularComments= [
 
 ];
 
-/*let allComments = [
-    ...commentsMadeByAuthUser,
-    ...parentCommentsOfRepliesMadeByAuthUser,
-    ...repliesMadeByAuthUser,
-    ...commentsThatMentionAuthUser,
-    ...parentCommentsOfRepliesThatMentionAuthUser,
-    ...repliesThatMentionAuthUser,
-    ...commentsMadeByAuthUserFollowing,
-    ...parentCommentsOfRepliesMadeByAuthUserFollowing,
-    ...repliesMadeByAuthUserFollowing,
-    ...commentsMadeByPostAuthor,
-    ...parentCommentsOfRepliesMadeByPostAuthor,
-    ...repliesMadeByPostAuthor,
-    ...regularComments
-];
-*/
 
 
-function authenticateUserAndFetchData() {
+async function authenticateUserAndFetchData() {
     let username = document.getElementById('authenticatedUsername').textContent;
      //insert actual user authentication code here
     authenticatedUsername = username;
     localStorage.setItem('authenticatedUsername', authenticatedUsername);
+    const postId = document.getElementById('postId').textContent;
 
+    const response0 = await fetch('http://localhost:8001/getRelevantUserInfoFromUsername/'+authenticatedUsername);
+    if(!response0.ok) {
+        mainSection.classList.add('hidden');
+        leftSidebar.classList.add('hidden');
+        changeBackgroundText.classList.add('hidden');
+        accountNotFoundOrBlocksYou.classList.remove('hidden');
+        return;
+    }
+    relevantUserInfo = await response0.json();
+
+    const response0b = await fetch('http://localhost:8003/getProfilePhoto/'+authenticatedUsername);
+    if(!response0b.ok) {
+        throw new Error('Network response not ok');
+    }
+    let profilePhotoBlob = await response0b.blob();
+    profileIconInLeftSidebar.src = URL.createObjectURL(profilePhotoBlob);
+
+    const response = await fetch('http://localhost:8003/getInDepthPostInfo/'+postId);
+    if(!response.ok) {
+        throw new Error('Network response not ok');
+    }
+    const indepthPostInfo = await response.json();
+    if(indepthPostInfo[0]===null && indepthPostInfo[1].length==0) {
+        mainSection.classList.add('hidden');
+        leftSidebar.classList.add('hidden');
+        changeBackgroundText.classList.add('hidden');
+        accountNotFoundOrBlocksYou.classList.remove('hidden');
+        return;
+    }
+
+    const [imageSlidesData, videosData] = indepthPostInfo;
+    postInfo = {};
+    if(imageSlidesData!==null) {
+        postInfo['usernames'] = imageSlidesData['usernames'];
+    }
+    else {
+        postInfo['usernames'] = videosData[0]['usernames'];
+    }
+
+    /* requires cloud mysql
+    const response2 = await fetch('http://localhost:8013/graphql', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+        query: `
+        query {
+            getAllUserBlockings(filter: { username: "${authenticatedUsername}" }) {
+                blocker
+                blockee
+            }
+        }
+        `
+        })
+    });
+    if(!response2.ok) {
+        throw new Error('Network response not ok');
+    }
+    let userBlockings = await response2.json();
+    userBlockings = userBlockings['data']['getAllUserBlockings'];
+    for(let blocking of userBlockings) {
+        if(postInfo['usernames'].includes(blocking['blockee']) || postInfo['usernames'].includes(blocking['blocker'])) {
+            mainSection.classList.add('hidden');
+            leftSidebar.classList.add('hidden');
+            changeBackgroundText.classList.add('hidden');
+            accountNotFoundOrBlocksYou.classList.remove('hidden');
+            return;
+        }
+    }
+    */
+
+    const response3 = await fetch('http://localhost:8001/getRelevantUserInfoOfMultipleUsers', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            listOfUsers: postInfo['usernames']
+        })
+    });
+    if(!response3.ok) {
+        throw new Error('Network response not ok');
+    }
+    const relevantUserInfoOfPostAuthors = await response3.json();
+    for(let username of Object.keys(relevantUserInfoOfPostAuthors)) {
+        relevantUserInfo[username] = relevantUserInfoOfPostAuthors[username];
+    }
+
+    /* requires Google Cloud MySQL
+    const response4 = await fetch('http://localhost:8013/graphql', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            query: `query {
+                getAllUserFollowings(filter: {username: "${authenticatedUsername}", justFollowersOfUser: ${false}}) {
+                    followee
+                }
+            }`
+        })
+    });
+    if(!response4.ok) {
+        throw new Error('Network response not ok');
+    }
+    */
+    authUserFollowings = [];
+
+    if(postInfo['usernames'].length==1) {
+        postAuthorOrAuthorsText.textContent = postInfo['usernames'][0];
+        if(authUserFollowings.includes(postInfo['usernames'][0])) {
+            followingPostAuthorText.classList.remove('hidden');
+        }
+        else {
+            followPostAuthorText.classList.remove('hidden');
+        }
+    }
+
+
+    for(let profileAuthor of postInfo['usernames']) {
+        if(relevantUserInfo[profileAuthor].isPrivate && !authUserFollowings.includes(profileAuthor)) {
+            mainSection.classList.add('hidden');
+            leftSidebar.classList.add('hidden');
+            changeBackgroundText.classList.add('hidden');
+            accountNotFoundOrBlocksYou.classList.remove('hidden');
+            return;
+        }
+    }
+
+    if(imageSlidesData!==null) {
+        postInfo['dateTimeOfPost'] = imageSlidesData['dateTimeOfPost'];
+        postInfo['locationOfPost'] = imageSlidesData['locationOfPost'];
+    }
+    else {
+        postInfo['dateTimeOfPost'] = videosData[0]['dateTimeOfPost'];
+        postInfo['locationOfPost'] = videosData[0]['locationOfPost'];
+    }
+    locationOfPostText.textContent = postInfo['locationOfPost'];
+    relativeDateTimeOfPostText.textContent = getRelativeDateTimeText(postInfo['dateTimeOfPost']);
+    if(imageSlidesData['slides']==null) {
+        postInfo['numSlides'] = videosData.length;
+    }
+    else {
+        postInfo['numSlides'] = imageSlidesData['slides'].length + videosData.length;
+        for(let i=0; i<imageSlidesData['slides'].length; i++) {
+            const currSlide = imageSlidesData['slides'][i];
+            postInfo[currSlide] = {};
+            postInfo[currSlide].isVideo = false;
+            postInfo[currSlide].src = 'data:image/png;base64,'+ imageSlidesData['posts'][i];
+            postInfo[currSlide].taggedAccounts = imageSlidesData['taggedAccounts'][i];
+        }
+    }
+    for(let vid of videosData) {
+        const currSlide = vid['slideNumber'];
+        postInfo[currSlide] = {};
+        postInfo[currSlide].isVideo = true;
+        postInfo[currSlide].taggedAccounts = vid['taggedAccounts'];
+        const response = await fetch('http://localhost:8004/getVideo/'+vid['videoId']);
+        if(!response.ok) {
+            throw new Error('Network response not ok');
+        }
+        const videoBlob = await response.blob();
+        const videoURL = URL.createObjectURL(videoBlob);
+        postInfo[currSlide].src = videoURL;
+    }
+
+    if(!postInfo[currSlide].isVideo) {
+        currSlideImg.src = postInfo[currSlide].src;
+        currSlideImg.classList.remove('hidden');
+    }
+    else {
+        currSlideVid.src = postInfo[currSlide].src;
+        currSlideImg.classList.add('hidden');
+        blackBackgroundForVids.classList.remove('hidden');
+        currSlideVid.classList.remove('hidden');
+    }
+    if(postInfo.numSlides>0) {
+        const currentSlideDot = document.createElement('img');
+        currentSlideDot.src = '/images/solidWhiteDot.png';
+        currentSlideDot.style.height = '1.2em';
+        currentSlideDot.style.width = '1.2em';
+        currentSlideDot.style.objectFit = 'contain';
+        currentSlideDot.style.pointerEvents = 'none';
+        slideDotsDiv.appendChild(currentSlideDot);
+        for(let i=0; i<postInfo.numSlides-1; i++) {
+            const additionalSlideDot = document.createElement('img');
+            additionalSlideDot.src = '/images/solidGrayDot.png';
+            additionalSlideDot.style.height = '1em';
+            additionalSlideDot.style.width = '1em';
+            additionalSlideDot.style.objectFit = 'contain';
+            additionalSlideDot.style.pointerEvents = 'none';
+            slideDotsDiv.appendChild(additionalSlideDot);
+        }
+        slideDots = slideDotsDiv.querySelectorAll('img');
+    }
+    else {
+        goToPreviousSlideArrow.classList.add('hidden');
+        goToNextSlideArrow.classList.add('hidden');
+    }
 }
+
+function getRelativeDateTimeText(datetimeString) {
+    const inputDate = new Date(datetimeString);
+    const now = new Date();
+    
+    const diffInMs = now - inputDate;
+    const diffInSeconds = Math.floor(diffInMs / 1000);
+    const diffInMinutes = Math.floor(diffInSeconds / 60);
+    const diffInHours = Math.floor(diffInMinutes / 60);
+    const diffInDays = Math.floor(diffInHours / 24);
+    const diffInWeeks = Math.floor(diffInDays / 7);
+    const diffInMonths = Math.floor(diffInDays / 30);
+    const diffInYears = Math.floor(diffInDays / 365);
+
+    if (diffInSeconds < 60) {
+        return `${diffInSeconds} second${diffInSeconds !== 1 ? 's' : ''} ago`;
+    } else if (diffInMinutes < 60) {
+        return `${diffInMinutes} minute${diffInMinutes !== 1 ? 's' : ''} ago`;
+    } else if (diffInHours < 24) {
+        return `${diffInHours} hour${diffInHours !== 1 ? 's' : ''} ago`;
+    } else if (diffInDays < 7) {
+        return `${diffInDays} day${diffInDays !== 1 ? 's' : ''} ago`;
+    } else if (diffInWeeks < 4) {
+        return `${diffInWeeks} week${diffInWeeks !== 1 ? 's' : ''} ago`;
+    } else if (diffInMonths < 12) {
+        return `${diffInMonths} month${diffInMonths !== 1 ? 's' : ''} ago`;
+    } else {
+        return `${diffInYears} year${diffInYears !== 1 ? 's' : ''} ago`;
+    }
+}
+
 
 function takeUserHome() {
     window.location.href = "http://localhost:3100/" + authenticatedUsername;
@@ -441,28 +662,17 @@ function changeBackground() {
         darkScreenCoveringRightSideOfPage.classList.add('hidden');
         leftSidebar.classList.add('hidden');
         mainSection.style.left = '13.5%';
-        goToPreviousPostArrow.style.left = '4%';
-        goToNextPostArrow.style.left = '94%';
         darkScreenCoveringEntirePage.classList.remove('hidden');
         currBackground=2;
     }
     else {
         leftSidebar.classList.remove('hidden');
         mainSection.style.left = '19.5%';
-        goToPreviousPostArrow.style.left = '15%';
-        goToNextPostArrow.style.left = '96%';
         darkScreenCoveringEntirePage.classList.add('hidden');
         currBackground = 0;
     }
 }
 
-function goToNextPost() {
-
-}
-
-function goToPreviousPost() {
-
-}
 
 function goToNextSlide() {
     currSlide++;
@@ -600,17 +810,11 @@ document.addEventListener('keydown', function(event) {
             if(hasUserClickedOnVid) {
                 currSlideVid.volume = Math.min(1, currSlideVid.volume+0.1);
             }
-            else {
-                goToPreviousPost();
-            }
             break;
 
         case 'ArrowDown':
             if(hasUserClickedOnVid) {
                 currSlideVid.volume = Math.max(0, currSlideVid.volume-0.1);
-            }
-            else {
-                goToNextPost();
             }
             break;
 
@@ -1762,5 +1966,16 @@ function confirmCommentEdit(commentType, commentIdx) {
     targetedMainDiv.classList.remove('hidden');
 }
 
+function playBackgroundSound() {
+    backgroundSound.play();
+    playBackgroundSoundIcon.classList.add('hidden');
+    pauseBackgroundSoundIcon.classList.remove('hidden');
+}
+
+function pauseBackgroundSound() {
+    backgroundSound.pause();
+    playBackgroundSoundIcon.classList.remove('hidden');
+    pauseBackgroundSoundIcon.classList.add('hidden');
+}
 
 authenticateUserAndFetchData();
