@@ -111,32 +111,22 @@
                 <div style="display: flex; flex-direction: column; margin-top: 1em;">
                     <b id="postAuthorOrAuthorsText" style="cursor: pointer; max-width: 10em; overflow-wrap: break-word;">hurdles</b>
                     <p id="locationOfPostText" style="font-size: 0.8em; margin-top: 0.2em; max-width: 13em; overflow-wrap: break-word;">Los Angeles, California</p>
-                    <div style="display: flex; align-items: start; gap: 0.7em;">
-                        <p style="font-size: 0.8em; margin-top: -0.4em; max-width: 13em; overflow-wrap: break-word;"><img th:src="@{/images/soundsIcon2.png}" style="pointer-events: none; object-fit: contain; height: 1em; width :1em; margin-right: 1em;">One Call Away · Charlie Puth
+                    <div id="postBackgroundMusicDiv" class="hidden" style="display: flex; align-items: center; gap: 0.7em; margin-top: -1em;">
+                        <p id="backgroundSongName" style="font-size: 0.8em; max-width: 13em; overflow-wrap: break-word;"><img th:src="@{/images/soundsIcon2.png}" style="pointer-events: none; object-fit: contain; height: 1em; width :1em; margin-right: 0.6em;">
                         </p>
-                        <img onclick="playBackgroundSound()" id="playBackgroundSoundIcon" th:src="@{/images/playIcon.png}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain;">
+                        <img id="playBackgroundSoundIcon" onclick="playBackgroundSound()" th:src="@{/images/playIcon.png}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain;">
                         <img id="pauseBackgroundSoundIcon" onclick="pauseBackgroundSound()" th:src="@{/images/pauseIcon.png}" class="hidden" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain;">
                     </div>
                 </div>
-                <b id="followPostAuthorText" class="hidden" style="position: absolute; left: 84%; top: 48%; cursor: pointer; color: #2789f2">Follow</b>
-                <b id="followingPostAuthorText" class="hidden" style="position: absolute; left: 80%; top: 48%; cursor: pointer;">Following</b>
+                <b id="followPostAuthorText" onclick="followPostAuthor()" class="hidden" style="position: absolute; left: 84%; top: 48%; cursor: pointer; color: #2789f2">Follow</b>
+                <b id="followingPostAuthorText" onclick="unfollowPostAuthor()" class="hidden" style="position: absolute; left: 80%; top: 48%; cursor: pointer;">Following</b>
             </div>
 
             <div id="commentsDiv" style="overflow-y: scroll; height: 65.5%; width: 92.6%; border-style: solid; border-color: lightgray; border-top: none;
             border-left: none; border-right: none; padding: 0.5em 1em; display: flex; flex-direction: column; gap: 1em;">
 
-                <div id="postCaption" style="display: flex; align-items: start; position: relative; gap: 0.7em; margin-top: -0.5em;
-                width: 100%;">
-                    <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain">
-                    <div style="display: flex; flex-direction: column; width: 100%;">
-                        <p style="font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;">
-                            <b style="cursor: pointer;">hurdles</b> <span ondblclick="likeComment('AuthUserFollowingReply', 0)">another day, another slay. we keep the streak alive!!!</span>
-                        </p>
-                        <p style="color: gray; font-size: 0.7em; margin-top: -1em;">3d</p>
-                    </div>
-                </div>
 
-                <div id="authUserComment0" onmouseenter="showOptionsIcon('AuthUserComment0')" onmouseleave="hideOptionsIcon('AuthUserComment0')" style="display: flex; align-items: start; width: 100%; position: relative; gap: 0.7em;">
+                <!--div id="authUserComment0" onmouseenter="showOptionsIcon('AuthUserComment0')" onmouseleave="hideOptionsIcon('AuthUserComment0')" style="display: flex; align-items: start; width: 100%; position: relative; gap: 0.7em;">
                     <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain;">
                     <div id="mainDivAuthUserComment0" style="display: flex; flex-direction: column;">
                         <p style="font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;">
@@ -160,6 +150,17 @@
                     left: 93%; top: 36%;">
                     <img id="redHeartIconAuthUserComment0" onclick="toggleLikeComment('AuthUserComment', 0)" th:src="@{/images/redHeartIcon.webp}" class="hidden" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
                     left: 93%; top: 36%;">
+                </div-->
+
+                <!--div id="postCaption" style="display: flex; align-items: start; position: relative; gap: 0.7em; margin-top: -0.5em;
+                width: 100%;">
+                    <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain">
+                    <div style="display: flex; flex-direction: column; width: 100%;">
+                        <p style="font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;">
+                            <b style="cursor: pointer;">hurdles</b> another day, another slay. we keep the streak alive!!!
+                        </p>
+                        <p style="color: gray; font-size: 0.7em; margin-top: -1em;">3d</p>
+                    </div>
                 </div>
 
                 <div id="parentOfAuthUserReply0" style="display: flex; align-items: start; width: 100%; position: relative; gap: 0.7em;">
@@ -436,26 +437,26 @@
                     left: 93%; top: 36%;">
                     <img id="redHeartIconRegularComment1" onclick="toggleLikeComment('RegularComment', 1)" th:src="@{/images/redHeartIcon.webp}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute;
                     left: 93%; top: 36%;">
-                </div>
+                </div-->
 
             </div>
 
             <div style="display: flex; align-items: center; width: 93%; height: 5%; padding: 0.5em 1em; position: relative;">
-                <img id="postIsNotLikedIcon" onclick="toggleLikePost()" th:src="@{/images/blankHeartWithSolidOutline.png}" style="height: 100%; width: 2.5em; object-fit: contain; cursor: pointer;">
+                <img id="postIsNotLikedIcon" onclick="toggleLikePost()" th:src="@{/images/blankHeartWithSolidOutline.png}" class="hidden" style="height: 100%; width: 2.5em; object-fit: contain; cursor: pointer;">
                 <img id="postIsLikedIcon" onclick="toggleLikePost()" th:src="@{/images/redHeartIcon.webp}" class="hidden" style="height: 80%; width: 2.5em; object-fit: contain; cursor: pointer;">
                 <img th:src="@{/images/commentIcon.png}" onclick="setFocusToCommentTextarea()" style="height: 88%; width: 2.5em; object-fit: contain; cursor: pointer;">
                 <img th:src="@{/images/sendPostIcon.png}" style="height: 70%; width: 2.5em; object-fit: contain; cursor: pointer;">
-                <img id="postIsNotSavedIcon" onclick="toggleSavePost()" th:src="@{/images/savePostIconWithSolidOutline.png}" style="position: absolute; left: 90%; top: 10%; height: 70%; width: 2.2em; object-fit: contain; cursor: pointer;">
+                <img id="postIsNotSavedIcon" onclick="toggleSavePost()" th:src="@{/images/savePostIconWithSolidOutline.png}" class="hidden" style="position: absolute; left: 90%; top: 10%; height: 70%; width: 2.2em; object-fit: contain; cursor: pointer;">
                 <img id="postIsSavedIcon" onclick="toggleSavePost()" th:src="@{/images/filledBlackSavedIcon.png}" class="hidden" style="position: absolute; left: 90%; top: 10%; height: 70%; width: 2.2em; object-fit: contain; cursor: pointer;">
             </div>
 
             <div style="padding: 0.5em 1em; display: flex; flex-direction: column; margin-top: -0.5em;">
-                <b id="postNumLikesText" style="cursor: pointer;">82,881 likes</b>
+                <b id="postNumLikesText" style="cursor: pointer;"></b>
                 <small id="relativeDateTimeOfPostText" style="color: gray; cursor: pointer;">3 days ago</small>
             </div>
 
-            <div style="width: 100%; height: 6%; display: flex; align-items: center;">
-                <img th:src="@{/images/profilePhoto.png}" style="cursor: pointer; height: 3em; width: 3em; object-fit: contain;">
+            <div style="width: 100%; height: 6%; display: flex; align-items: center; padding-left: 1em; gap: 0.5em;">
+                <img id="authUserProfilePhotoNextToCommentTextarea" style="cursor: pointer; height: 2em; width: 2em; object-fit: contain;">
                 <textarea id="textareaToAddComment" placeholder="Add a comment..." style="outline: none; border: none; font-family: Arial; padding-top: 1em; width: 65%; margin-left: 0.5em;"></textarea>
                 <b id="postCommentButton" onclick="postComment()" style="cursor: pointer; color: #2789f2; margin-left: 1em;" class="hidden">Post</b>
             </div>

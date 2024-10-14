@@ -32,6 +32,10 @@ const followPostAuthorText = document.getElementById('followPostAuthorText');
 const followingPostAuthorText = document.getElementById('followingPostAuthorText');
 const postAuthorOrAuthorsText = document.getElementById('postAuthorOrAuthorsText');
 const relativeDateTimeOfPostText = document.getElementById('relativeDateTimeOfPostText');
+const backgroundSongName = document.getElementById('backgroundSongName');
+const postBackgroundMusicDiv = document.getElementById('postBackgroundMusicDiv');
+const authUserProfilePhotoNextToCommentTextarea = document.getElementById('authUserProfilePhotoNextToCommentTextarea');
+const commentsDiv = document.getElementById('commentsDiv');
 
 let displayLeftSidebarPopup = false;
 let currBackground = 0;
@@ -40,57 +44,17 @@ let hasUserClickedOnVid = false;
 let hasUserClickedOnMainSectionRight = false;
 let commentToReplyTo = [];
 let commentSelectedForOptions = [];
-let backgroundSound = new Audio('/sounds/oneCallAway.mp3');
+let backgroundSound;
 let relevantUserInfo = {};
 let authUserFollowings = [];
 let slideDots = [];
-let postInfo = {
-    numSlides: 4,
-    numLikes: 82881,
-    0: {
-        isVideo: false,
-        src: '/images/sampleImg.webp',
-        taggedAccounts: [
-            [20, 40, 'rishavry'],
-            [46, 68, 'rishavry4']
-        ]
-    },
-    1: {
-        isVideo: false,
-        src: '/images/sampleImg2.jpg',
-        taggedAccounts: []
-    },
-    2: {
-        isVideo: true,
-        src: '/videos/storyOfMyLife.mp4',
-        taggedAccounts: []
-    },
-    3: {
-        isVideo: true,
-        src: '/videos/fakePilot.mp4',
-        taggedAccounts: [
-            [35, 26, 'rishavry6'],
-        ]
-    }
-};
+let postInfo = {};
+let postId = "";
+let numLikesAndIsLikedByUserForPostComments;
+let commentsOfPost = [];
+let repliesOfPost = [];
 
-
-let commentsMadeByAuthUser = [
-    {
-        id: "authUser_comment_0",
-        idOfParentComment: null,
-        isLiked: false,
-        index: 0,
-        author: "rishavry",
-        isVerified: false,
-        content: "What a random collage of slides lmao, but 10/10!",
-        numLikes: 15360,
-        date: "3d",
-        numReplies: 2,
-        isLikedByAuthor: false,
-        level: 0,
-    }
-];
+let commentsMadeByAuthUser = [];
 
 let parentCommentsOfRepliesMadeByAuthUser = [
     {
@@ -388,7 +352,7 @@ async function authenticateUserAndFetchData() {
      //insert actual user authentication code here
     authenticatedUsername = username;
     localStorage.setItem('authenticatedUsername', authenticatedUsername);
-    const postId = document.getElementById('postId').textContent;
+    postId = document.getElementById('postId').textContent;
 
     const response0 = await fetch('http://localhost:8001/getRelevantUserInfoFromUsername/'+authenticatedUsername);
     if(!response0.ok) {
@@ -405,7 +369,9 @@ async function authenticateUserAndFetchData() {
         throw new Error('Network response not ok');
     }
     let profilePhotoBlob = await response0b.blob();
-    profileIconInLeftSidebar.src = URL.createObjectURL(profilePhotoBlob);
+    const profilePhotoBlobURL = URL.createObjectURL(profilePhotoBlob);
+    profileIconInLeftSidebar.src = profilePhotoBlobURL;
+    authUserProfilePhotoNextToCommentTextarea.src = profilePhotoBlobURL;
 
     const response = await fetch('http://localhost:8003/getInDepthPostInfo/'+postId);
     if(!response.ok) {
@@ -421,7 +387,6 @@ async function authenticateUserAndFetchData() {
     }
 
     const [imageSlidesData, videosData] = indepthPostInfo;
-    postInfo = {};
     if(imageSlidesData!==null) {
         postInfo['usernames'] = imageSlidesData['usernames'];
     }
@@ -495,12 +460,16 @@ async function authenticateUserAndFetchData() {
 
     if(postInfo['usernames'].length==1) {
         postAuthorOrAuthorsText.textContent = postInfo['usernames'][0];
+        postAuthorOrAuthorsText.onclick = () => window.location.href = "http://localhost:8019/profilePage/"+postInfo['usernames'][0];
         if(authUserFollowings.includes(postInfo['usernames'][0])) {
             followingPostAuthorText.classList.remove('hidden');
         }
         else {
             followPostAuthorText.classList.remove('hidden');
         }
+    }
+    else {
+        postAuthorOrAuthorsText.textContent = formatUsernames(postInfo['usernames']);
     }
 
 
@@ -584,6 +553,409 @@ async function authenticateUserAndFetchData() {
         goToPreviousSlideArrow.classList.add('hidden');
         goToNextSlideArrow.classList.add('hidden');
     }
+
+    const response5 = await fetch('http://localhost:8006/getPostBackgroundMusic/'+postId);
+    if(!response5.ok) {
+        //post probably has no background music
+    }
+    else {
+        const backgroundSoundBlob = await response5.blob();
+        const backgroundSoundBlobURL = URL.createObjectURL(backgroundSoundBlob);
+        backgroundSound = new Audio(backgroundSoundBlobURL);
+        backgroundSongName.textContent = response5.headers.get('songName');
+        postBackgroundMusicDiv.classList.remove('hidden');
+    }
+
+    const response6 = await fetch('http://localhost:8004/isPostSavedByUser/'+postId+'/'+authenticatedUsername);
+    if(!response6.ok) {
+        throw new Error('Network response not ok');
+    }
+    let isPostSavedByUser = await response6.json();
+    isPostSavedByUser = isPostSavedByUser['isPostSavedByUser'];
+    postInfo['isPostSavedByUser'] = isPostSavedByUser;
+    if(isPostSavedByUser) {
+        postIsSavedIcon.classList.remove('hidden');
+    }
+    else {
+        postIsNotSavedIcon.classList.remove('hidden');
+    }
+
+    const response7 = await fetch('http://localhost:8004/getPostNumLikesAndIsLikedByUser/'+postId+'/'+authenticatedUsername);
+    if(!response7.ok) {
+        throw new Error('Network response not ok');
+    }
+    let postNumLikesAndIsLikedByUser = await response7.json();
+    postInfo['numLikes'] = postNumLikesAndIsLikedByUser['numLikes'];
+    postInfo['isLikedByUser'] = postNumLikesAndIsLikedByUser['isLikedByUser'];
+
+    if(postInfo['numLikes']==1) {
+        postNumLikesText.textContent = '1 like';
+    }
+    else {
+        postNumLikesText.textContent = postInfo['numLikes'] + " likes";
+    }
+    if(postInfo['isLikedByUser']) {
+        postIsLikedIcon.classList.remove('hidden');
+    }
+    else {
+        postIsNotLikedIcon.classList.remove('hidden');
+    }
+
+    const response8 = await fetch('http://localhost:5022/graphql', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            query: `query {
+                comments(where: { postid: { eq: "${postId}" } }) {
+                    commentid
+                    comment
+                    datetime
+                    iscaption
+                    isedited
+                    username
+            }
+            }
+            `
+        })
+    });
+    if(!response8.ok) {
+        throw new Error('Network response not ok');
+    }
+    commentsOfPost = await response8.json();
+    commentsOfPost = commentsOfPost['data']['comments'];
+
+    const response9 = await fetch('http://localhost:5022/graphql', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            query: `query {
+            replies(where: { postid: { eq: "${postId}" } }) {
+                commentid
+                username
+                comment
+                datetime
+                isedited
+                replyid
+            }
+            }
+            `
+        })
+    });
+    if(!response9.ok) {
+        throw new Error('Network response not ok');
+    }
+    repliesOfPost = await response9.json();
+    repliesOfPost = repliesOfPost['data']['replies'];
+
+    const response10 = await fetch('http://localhost:5022/graphql', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            query: `query {
+                numLikesAndIsLikedByUserForPostComments(postid: "${postId}", username: "${authenticatedUsername}") {
+                    commentId
+                    numLikes
+                    isLikedByUser
+                }
+            }
+            `
+        })
+    });
+    if(!response10.ok) {
+        throw new Error('Network response not ok');
+    }
+    numLikesAndIsLikedByUserForPostComments = await response10.json();
+    numLikesAndIsLikedByUserForPostComments = numLikesAndIsLikedByUserForPostComments['data']['numLikesAndIsLikedByUserForPostComments'];
+    let placeholderDict = {};
+    for(let elem of numLikesAndIsLikedByUserForPostComments) {
+        placeholderDict[elem['commentId']] = [elem['numLikes'], elem['isLikedByUser']];
+    }
+    numLikesAndIsLikedByUserForPostComments = placeholderDict;
+
+    //the list below will always include the username of the main post-author, since that person is the author of the caption comment
+    const setOfCommentAuthors = new Set();
+    for(let comment of commentsOfPost) {
+        setOfCommentAuthors.add(comment['username']);
+    }
+    for(let reply of repliesOfPost) {
+        setOfCommentAuthors.add(reply['username']);
+    }
+
+    const listOfCommentAuthors = Array.from(setOfCommentAuthors);
+
+    const response11 = await fetch('http://localhost:8001/getRelevantUserInfoOfMultipleUsers', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                listOfUsers: listOfCommentAuthors
+            })
+        });
+    if(!response11.ok) {
+        throw new Error('Network response not ok');
+    }
+    const relevantInfoOfMultipleUsers = await response11.json();
+    for(let username of Object.keys(relevantInfoOfMultipleUsers)) {
+        relevantUserInfo[username] = relevantInfoOfMultipleUsers[username];
+    }
+
+    const response12 = await fetch('http://localhost:8003/getProfilePhotosOfMultipleUsers', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            listOfUsers: listOfCommentAuthors
+        })
+    });
+    if(!response12.ok) {
+        throw new Error('Network response not ok');
+    }
+    const profilePhotoInfoMappings = await response12.json();
+    for(let username of Object.keys(profilePhotoInfoMappings)) {
+        relevantUserInfo[username]['profilePhotoString'] = 'data:image/png;base64,'+profilePhotoInfoMappings[username];
+    }
+    createDOMElementsForComments();
+}
+
+function createDOMElementsForComments() {
+    createDOMElementsForCaption();
+    createDOMElementsForAuthUserComments();
+}
+
+function createDOMElementsForCaption() {
+    let captionComment;
+    for(let i=0; i<commentsOfPost.length; i++) {
+        if(commentsOfPost[i].iscaption) {
+            captionComment = commentsOfPost[i];
+            break;
+        }
+    }
+    const postCaption = document.createElement('div');
+    postCaption.id = 'postCaption';
+    postCaption.style.display = 'flex';
+    postCaption.style.alignItems = 'center';
+    postCaption.style.position = 'relative';
+    postCaption.style.gap = '0.7em';
+    postCaption.style.marginTop = '-0.5em';
+    postCaption.style.width = '100%';
+
+    const profileImage = document.createElement('img');
+    profileImage.src = relevantUserInfo[captionComment.username]['profilePhotoString'];
+    profileImage.style.cursor = 'pointer';
+    profileImage.style.height = '2em';
+    profileImage.style.width = '2em';
+    profileImage.style.objectFit = 'contain';
+    profileImage.onclick = () => takeToProfile(captionComment.username);
+
+    const innerDiv = document.createElement('div');
+    innerDiv.style.display = 'flex';
+    innerDiv.style.flexDirection = 'column';
+    innerDiv.style.width = '100%';
+
+    const p1 = document.createElement('p');
+    p1.style.fontSize = '0.8em';
+    p1.style.maxWidth = '80%';
+    p1.style.overflowWrap = 'break-word';
+
+    const boldText = document.createElement('b');
+    boldText.style.cursor = 'pointer';
+    boldText.textContent = captionComment.username;
+    boldText.onclick = () => takeToProfile(captionComment.username);
+
+    p1.appendChild(boldText);
+    p1.appendChild(document.createTextNode(' ' + captionComment.comment));
+
+    const p2 = document.createElement('p');
+    p2.style.color = 'gray';
+    p2.style.fontSize = '0.7em';
+    p2.style.marginTop = '-0.8em';
+    p2.textContent = getRelativeDateTimeText(captionComment.datetime);
+    if(captionComment.isedited) {
+        p2.textContent+= " · Edited";
+    }
+
+    innerDiv.appendChild(p1);
+    innerDiv.appendChild(p2);
+
+    postCaption.appendChild(profileImage);
+    postCaption.appendChild(innerDiv);
+
+    commentsDiv.appendChild(postCaption);
+}
+
+function createDOMElementsForAuthUserComments() {
+    for(let i=0; i<commentsOfPost.length; i++) {
+        if(commentsOfPost[i].username===authenticatedUsername && !commentsOfPost[i].iscaption) {
+            const currComment = commentsOfPost[i];
+            commentsMadeByAuthUser.push({
+                id: currComment.commentid,
+                idOfParentComment: null,
+                isLiked: currComment.commentid in numLikesAndIsLikedByUserForPostComments ? numLikesAndIsLikedByUserForPostComments[currComment.commentid][1] : false,
+                index: commentsMadeByAuthUser.length,
+                author: currComment.username,
+                isVerified: relevantUserInfo[authenticatedUsername].isVerified,
+                content: currComment.comment,
+                numLikes: currComment.commentid in numLikesAndIsLikedByUserForPostComments ? numLikesAndIsLikedByUserForPostComments[currComment.commentid][0] : 0,
+                date: getRelativeDateTimeText(currComment.datetime),
+                numReplies: 0, //work on soon
+                isLikedByAuthor: false, //work on later
+                level: 0,
+            })
+        }
+    }
+    for(let authUserComment of commentsMadeByAuthUser) {
+        const commentIdx = authUserComment.index;
+        const mainDiv = document.createElement("div");
+        mainDiv.id = "authUserComment"+commentIdx;
+        mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+        mainDiv.onmouseenter = () => showOptionsIcon("AuthUserComment"+commentIdx);
+        mainDiv.onmouseleave = () => hideOptionsIcon("AuthUserComment"+commentIdx);
+
+        const profileImg = document.createElement("img");
+        profileImg.src = relevantUserInfo[authUserComment.author]['profilePhotoString'];
+        profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+        profileImg.onclick = () => takeToProfile(authUserComment.author);
+        mainDiv.appendChild(profileImg);
+
+        const textContentDiv = document.createElement("div");
+        textContentDiv.id = "mainDivAuthUserComment"+commentIdx;
+        textContentDiv.style = "display: flex; flex-direction: column;";
+
+        const commentParagraph = document.createElement("p");
+        commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+
+        const usernameBold = document.createElement("b");
+        usernameBold.style = "cursor: pointer;";
+        usernameBold.textContent = authenticatedUsername;
+        usernameBold.onclick = () => takeToProfile(authUserComment.author);
+
+        if(relevantUserInfo[authUserComment.author].isVerified) {
+            const verifiedCheck = document.createElement('img');
+            verifiedCheck.src = '/images/verifiedCheck.png';
+            verifiedCheck.style.pointerEvents = 'none';
+            verifiedCheck.style.height = '1.1em';
+            verifiedCheck.style.width = '1.1em';
+            verifiedCheck.style.objectFit = 'contain';
+            usernameBold.appendChild(verifiedCheck);
+        }
+        
+        const commentSpan = document.createElement("span");
+        commentSpan.id = "contentAuthUserComment"+commentIdx;
+        commentSpan.ondblclick = () => likeComment("AuthUserComment", commentIdx);
+        commentSpan.textContent = authUserComment.content;
+        
+        commentParagraph.appendChild(usernameBold);
+        commentParagraph.append(" ");
+        commentParagraph.appendChild(commentSpan);
+        textContentDiv.appendChild(commentParagraph);
+
+        const metaDiv = document.createElement("div");
+        metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+
+        const dateText = document.createElement("p");
+        dateText.id = "dateTextAuthUserComment"+commentIdx;
+        dateText.textContent = authUserComment.date;
+
+        const likesText = document.createElement("b");
+        likesText.id = "numLikesTextAuthUserComment"+commentIdx;
+        likesText.style = "cursor: pointer;";
+        if(authUserComment.numLikes==1) {
+            likesText.textContent = "1 like";
+        }
+        else {
+            likesText.textContent = `${authUserComment.numLikes} likes`;
+        }
+        if(authUserComment.numLikes==0) {
+            likesText.classList.add('hidden');
+        }
+
+        const replyButton = document.createElement("b");
+        replyButton.style = "cursor: pointer;";
+        replyButton.textContent = "Reply";
+        replyButton.onclick = () => startReplyToComment("AuthUserComment", commentIdx);
+
+        const optionsIcon = document.createElement("img");
+        optionsIcon.id = "optionsIconForAuthUserComment"+commentIdx;
+        optionsIcon.className = "hidden";
+        optionsIcon.src = "/images/optionsDots.png";
+        optionsIcon.style = "height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;";
+        optionsIcon.onclick = () => showOptionsPopupForComment("AuthUserComment", commentIdx);
+
+        metaDiv.append(dateText, likesText, replyButton, optionsIcon);
+        textContentDiv.appendChild(metaDiv);
+
+        const viewRepliesText = document.createElement("b");
+        viewRepliesText.id = "viewRepliesTextAuthUserComment"+commentIdx;
+        viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        viewRepliesText.onclick = () => toggleRepliesText("AuthUserComment", commentIdx);
+        viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${authUserComment.numReplies})</span>`;
+        if(authUserComment.numReplies==0) {
+            viewRepliesText.classList.add('hidden');
+        }
+
+        const hideRepliesText = document.createElement("b");
+        hideRepliesText.id = "hideRepliesTextAuthUserComment"+commentIdx;
+        hideRepliesText.className = "hidden";
+        hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        hideRepliesText.onclick = () => toggleRepliesText("AuthUserComment", commentIdx);
+        hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+
+        textContentDiv.append(viewRepliesText, hideRepliesText);
+
+        const editModeDiv = document.createElement("div");
+        editModeDiv.id = "editModeDivAuthUserComment"+commentIdx;
+        editModeDiv.className = "hidden";
+        editModeDiv.style = "display: flex; align-items: center; gap: 0.5em; width: 100%;";
+
+        const textarea = document.createElement("textarea");
+        textarea.id = "textareaForEditingAuthUserComment"+commentIdx;
+        textarea.placeholder = "";
+        textarea.style = "outline: none; width:77%; resize: none; font-family: Arial; padding: 0.5em 1em;";
+        textarea.oninput = () => onInputOfTextareaForEditingComment("AuthUserComment"+commentIdx);
+
+        const cancelButton = document.createElement("button");
+        cancelButton.textContent = "Cancel";
+        cancelButton.type = "button";
+        cancelButton.style = "border-radius:1em; color: white; padding: 0.5em 1em; cursor: pointer; background-color: black; font-size: 0.7em;";
+        cancelButton.onclick = () => cancelCommentEdit("AuthUserComment", commentIdx);
+
+        const confirmButton = document.createElement("button");
+        confirmButton.id = "confirmEditButtonAuthUserComment"+commentIdx;
+        confirmButton.className = "blueButton hidden";
+        confirmButton.textContent = "Ok";
+        confirmButton.type = "button";
+        confirmButton.style = "font-size: 0.7em;";
+        confirmButton.onclick = () => confirmCommentEdit("AuthUserComment", commentIdx);
+
+        editModeDiv.append(textarea, cancelButton, confirmButton);
+        textContentDiv.appendChild(editModeDiv);
+
+        const blankHeartIcon = document.createElement("img");
+        blankHeartIcon.id = "blankHeartIconAuthUserComment"+commentIdx;
+        blankHeartIcon.className = "hidden";
+        blankHeartIcon.src = "/images/blankHeart.png";
+        blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        blankHeartIcon.onclick = () => toggleLikeComment("AuthUserComment", commentIdx);
+
+        const redHeartIcon = document.createElement("img");
+        redHeartIcon.id = "redHeartIconAuthUserComment"+commentIdx;
+        redHeartIcon.className = "hidden";
+        redHeartIcon.src = "/images/redHeartIcon.webp";
+        redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        redHeartIcon.onclick = () => toggleLikeComment("AuthUserComment", commentIdx);
+
+        if(authUserComment.isLiked) {
+            redHeartIcon.classList.remove('hidden');
+        }
+        else {
+            blankHeartIcon.classList.remove('hidden');
+        }
+
+        mainDiv.appendChild(textContentDiv);
+        mainDiv.appendChild(editModeDiv);
+        mainDiv.appendChild(blankHeartIcon);
+        mainDiv.appendChild(redHeartIcon);
+
+        commentsDiv.appendChild(mainDiv);
+    }
 }
 
 function getRelativeDateTimeText(datetimeString) {
@@ -614,6 +986,17 @@ function getRelativeDateTimeText(datetimeString) {
     } else {
         return `${diffInYears} year${diffInYears !== 1 ? 's' : ''} ago`;
     }
+}
+
+function formatUsernames(listOfUsernames) {
+    const length = listOfUsernames.length;
+
+    if (length === 2) return `${listOfUsernames[0]} & ${listOfUsernames[1]}`;
+
+    const allExceptLast = listOfUsernames.slice(0, -1).join(", ");
+    const last = listOfUsernames[length - 1];
+
+    return `${allExceptLast}, & ${last}`;
 }
 
 
@@ -1020,8 +1403,7 @@ function createDOMElementsForNewAuthUserReply(newAuthUserReply, parentCommentTyp
     usernameBold.style = "cursor: pointer;";
     usernameBold.textContent = authenticatedUsername;
 
-    //placeholder code assumes that authenticatatedUsername is verified
-    if(2==2) {
+    if(relevantUserInfo[authenticatedUsername].isVerified) {
         const verifiedCheck = document.createElement('img');
         verifiedCheck.src = '/images/verifiedCheck.png';
         verifiedCheck.style.pointerEvents = 'none';
@@ -1159,8 +1541,7 @@ function createDOMElementsForNewAuthUserComment(commentContent) {
     usernameBold.style = "cursor: pointer;";
     usernameBold.textContent = authenticatedUsername;
 
-    //placeholder code assumes that authenticatatedUsername is verified
-    if(2==2) {
+    if(relevantUserInfo[authenticatedUsername].isVerified==2) {
         const verifiedCheck = document.createElement('img');
         verifiedCheck.src = '/images/verifiedCheck.png';
         verifiedCheck.style.pointerEvents = 'none';
@@ -1273,19 +1654,49 @@ function createDOMElementsForNewAuthUserComment(commentContent) {
     postCaption.insertAdjacentElement('afterend', mainDiv);
 }
 
-function toggleSavePost() {
-    if(postIsSavedIcon.classList.contains('hidden')) {
-        postIsSavedIcon.classList.remove('hidden');
-        postIsNotSavedIcon.classList.add('hidden');
-    }
-    else {
+async function toggleSavePost() {
+    if(postInfo['isPostSavedByUser']) {
+        const response = await fetch('http://localhost:8004/removeSave/'+postId, {
+            method: 'DELETE',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                username: authenticatedUsername
+            })
+        });
+        if(!response.ok) {
+            throw new Error('Network response not ok');
+        }
         postIsSavedIcon.classList.add('hidden');
         postIsNotSavedIcon.classList.remove('hidden');
     }
+    else {
+        const response = await fetch('http://localhost:8004/addSave/'+postId, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                username: authenticatedUsername
+            })
+        });
+        if(!response.ok) {
+            throw new Error('Network response not ok');
+        }
+        postIsSavedIcon.classList.remove('hidden');
+        postIsNotSavedIcon.classList.add('hidden');
+    }
 }
 
-function toggleLikePost() {
-    if(postIsLikedIcon.classList.contains('hidden')) {
+async function toggleLikePost() {
+    if(!postInfo['isLikedByUser']) {
+        const response = await fetch('http://localhost:8004/addLike/'+postId, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                username: authenticatedUsername
+            })
+        });
+        if(!response.ok) {
+            throw new Error('Network response not ok');
+        }
         postIsLikedIcon.classList.remove('hidden');
         postIsNotLikedIcon.classList.add('hidden');
         postInfo.numLikes++;
@@ -1295,8 +1706,19 @@ function toggleLikePost() {
         else {
             postNumLikesText.textContent = postInfo.numLikes.toLocaleString() + " likes";
         }
+        postInfo['isLikedByUser'] = true;
     }
     else {
+        const response = await fetch('http://localhost:8004/removeLike/'+postId, {
+            method: 'DELETE',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                username: authenticatedUsername
+            })
+        });
+        if(!response.ok) {
+            throw new Error('Network response not ok');
+        }
         postIsLikedIcon.classList.add('hidden');
         postIsNotLikedIcon.classList.remove('hidden');
         postInfo.numLikes--;
@@ -1306,11 +1728,22 @@ function toggleLikePost() {
         else {
             postNumLikesText.textContent = postInfo.numLikes.toLocaleString() + " likes";
         }
+        postInfo['isLikedByUser'] = false;
     }
 }
 
-function likePost() {
-    if(postIsLikedIcon.classList.contains('hidden')) {
+async function likePost() {
+    if(!postInfo['isLikedByUser']) {
+        const response = await fetch('http://localhost:8004/addLike/'+postId, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                username: authenticatedUsername
+            })
+        });
+        if(!response.ok) {
+            throw new Error('Network response not ok');
+        }
         postIsLikedIcon.classList.remove('hidden');
         postIsNotLikedIcon.classList.add('hidden');
         postInfo.numLikes++;
@@ -1320,6 +1753,7 @@ function likePost() {
         else {
             postNumLikesText.textContent = postInfo.numLikes.toLocaleString() + " likes";
         }
+        postInfo['isLikedByUser'] = true;
     }
 }
 
@@ -1327,7 +1761,7 @@ function setFocusToCommentTextarea() {
     textareaToAddComment.focus();
 }
 
-function toggleLikeComment(commentType, commentIdx) {
+async function toggleLikeComment(commentType, commentIdx) {
     const idSuffix = commentType+commentIdx;
     const targetedBlankHeartIcon = document.getElementById('blankHeartIcon'+idSuffix);
     const targetedRedHeartIcon = document.getElementById('redHeartIcon'+idSuffix);
@@ -1374,6 +1808,18 @@ function toggleLikeComment(commentType, commentIdx) {
     }
 
     if(targetedComment.isLiked) {
+        const response =  await fetch('http://localhost:5022/graphql', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                query: `mutation {
+                    removeCommentLike(commentid: "${targetedComment.id}", username: "${authenticatedUsername}")
+                }`
+            })
+        });
+        if(!response.ok) {
+            throw new Error('Network response not ok');
+        }
         targetedComment.numLikes--;
         if(targetedComment.numLikes==1) {
             targetedNumLikesText.textContent = "1 like";
@@ -1388,6 +1834,22 @@ function toggleLikeComment(commentType, commentIdx) {
         targetedRedHeartIcon.classList.add('hidden');
     }
     else {
+        const response =  await fetch('http://localhost:5022/graphql', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                query: `mutation {
+                    addCommentLike(commentid: "${targetedComment.id}", username: "${authenticatedUsername}", postid: "${postId}") {
+                        commentid
+                        username
+                }
+                }
+                `
+            })
+        });
+        if(!response.ok) {
+            throw new Error('Network response not ok');
+        }
         targetedComment.numLikes++;
         if(targetedComment.numLikes==1) {
             targetedNumLikesText.textContent = "1 like";
@@ -1402,7 +1864,7 @@ function toggleLikeComment(commentType, commentIdx) {
     targetedComment.isLiked = !targetedComment.isLiked;
 }
 
-function likeComment(commentType, commentIdx) {
+async function likeComment(commentType, commentIdx) {
     const idSuffix = commentType+commentIdx;
     const targetedBlankHeartIcon = document.getElementById('blankHeartIcon'+idSuffix);
     const targetedRedHeartIcon = document.getElementById('redHeartIcon'+idSuffix);
@@ -1449,6 +1911,22 @@ function likeComment(commentType, commentIdx) {
     }
     
     if(!targetedComment.isLiked) {
+        const response =  await fetch('http://localhost:5022/graphql', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                query: `mutation {
+                    addCommentLike(commentid: "${targetedComment.id}", username: "${authenticatedUsername}", postid: "${postId}") {
+                        commentid
+                        username
+                }
+                }
+                `
+            })
+        });
+        if(!response.ok) {
+            throw new Error('Network response not ok');
+        }
         targetedComment.numLikes++;
         if(targetedComment.numLikes==1) {
             targetedNumLikesText.textContent = "1 like";
@@ -1976,6 +2454,40 @@ function pauseBackgroundSound() {
     backgroundSound.pause();
     playBackgroundSoundIcon.classList.remove('hidden');
     pauseBackgroundSoundIcon.classList.add('hidden');
+}
+
+async function followPostAuthor() {
+    const response = await fetch('http://localhost:8013/graphql', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            query: `
+            mutation {
+                addUserFollowing(newUserFollowing: { follower: "${authenticatedUsername}", followee: "${postInfo['usernames'][0]}" })
+            }
+            `
+            })
+    });
+    if(!response.ok) {
+        throw new Error('Network response not ok');
+    }
+}
+
+async function unfollowPostAuthor() {
+    const response = await fetch('http://localhost:8013/graphql', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            query: `
+            mutation {
+                removeUserFollowing(userFollowingToRemove: { follower: "${authenticatedUsername}", followee: "${postInfo['usernames'][0]}" })
+            }
+            `
+            })
+    });
+    if(!response.ok) {
+        throw new Error('Network response not ok');
+    }
 }
 
 authenticateUserAndFetchData();
