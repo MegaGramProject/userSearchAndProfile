@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("aspNetCoreWebsocket")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+78ce0d53652a92cdfde7df875a7a0f18b8326c35")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+f103d9a52042d06925a3899ffb50cb92e0421b52")]
 [assembly: System.Reflection.AssemblyProductAttribute("aspNetCoreWebsocket")]
 [assembly: System.Reflection.AssemblyTitleAttribute("aspNetCoreWebsocket")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

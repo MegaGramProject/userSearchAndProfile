@@ -62,160 +62,27 @@ let repliesMadeByAuthUser = [];
 
 let setOfIdsOfUniqueRepliesAlreadyDone = new Set();
 
+let setOfIdsOfCommentsAlreadyDone = new Set();
+
 let repliesOfCommentMappings = {}; //key: commentid, value: listOfRepliesOfComment
 
-let commentsThatMentionAuthUser = [
-    {
-        id: "authUser_mention_comment_0",
-        idOfParentComment: null,
-        isLiked: true,
-        index: 0,
-        author: "rishavry6",
-        isVerified: false,
-        content: "Welcome to the jungle, we've got fun and games don't we @rishavry?",
-        numLikes: 5,
-        date: "1d",
-        numReplies: 0,
-        isLikedByAuthor: false,
-        level: 0,
-    }
-];
+let commentsThatMentionAuthUser = [];
 
-let parentCommentsOfRepliesThatMentionAuthUser = [
-    {
-        id: "parent_comment_of_reply_that_mentions_authUser_0",
-        idOfParentComment: null,
-        isLiked: false,
-        index: 0,
-        author: "rishavry5",
-        isVerified: false,
-        content: "That pilot prank would've given me a heart attack if I was the passenger...",
-        numLikes: 199,
-        date: "5h",
-        numReplies: 0,
-        isLikedByAuthor: false,
-        level: 0,
-    }
-];
+let parentCommentsOfRepliesThatMentionAuthUser = [];
 
-let repliesThatMentionAuthUser = [
-    {
-        id: "reply_that_mentions_authUser_0",
-        idOfParentComment: "parent_comment_of_reply_that_mentions_authUser_0",
-        isLiked: false,
-        index: 0,
-        author: "rishavry6",
-        isVerified: false,
-        content: "@rishavry & I were thinking the exact same thing. $$$ lawsuits!",
-        numLikes: 0,
-        date: "44s",
-        numReplies: 0,
-        isLikedByAuthor: false,
-        level: 1,
-    }
-];
+let repliesThatMentionAuthUser = [];
 
-let commentsMadeByAuthUserFollowing = [
-    {
-        id: "authUser_following_comment_0",
-        idOfParentComment: null,
-        isLiked: false,
-        index: 0,
-        author: "rishavry4",
-        isVerified: false,
-        content: "This post reminds me of good times I had earlier",
-        numLikes: 0,
-        date: "2h",
-        numReplies: 0,
-        isLikedByAuthor: false,
-        level: 0,
-    },
-];
+let commentsMadeByAuthUserFollowing = [];
 
-let parentCommentsOfRepliesMadeByAuthUserFollowing = [
-    {
-        id: "parent_comment_of_authUser_following_0",
-        idOfParentComment: null,
-        isLiked: false,
-        index: 0,
-        author: "rishavry3",
-        isVerified: true,
-        content: "dude pick a genre",
-        numLikes: 10,
-        date: "18m",
-        numReplies: 13,
-        isLikedByAuthor: false,
-        level: 0,
-    }
-]
+let parentCommentsOfRepliesMadeByAuthUserFollowing = []
 
-let repliesMadeByAuthUserFollowing = [
-    {
-        id: "authUser_following_reply_0",
-        idOfParentComment: "parent_comment_of_authUser_following_0",
-        isLiked: true,
-        index: 0,
-        author: "rishavry9",
-        isVerified: false,
-        content: "dude pick a life",
-        numLikes: 5,
-        date: "1m",
-        numReplies: 20,
-        isLikedByAuthor: false,
-        level: 1,
-    }
-];
+let repliesMadeByAuthUserFollowing = [];
 
-let commentsMadeByPostAuthor = [
-    {
-        id: "post_author_comment_0",
-        idOfParentComment: null,
-        isLiked: false,
-        index: 0,
-        author: "hurdles",
-        isVerified: true,
-        content: "i dont normally post this ik, but i thought it would be a nice change of pace lol",
-        numLikes: 65,
-        date: "52s",
-        numReplies: 6,
-        isLikedByAuthor: false,
-        level: 0,
-    },
-];
+let commentsMadeByPostAuthor = [];
 
-let parentCommentsOfRepliesMadeByPostAuthor = [
-    {
-        id: "parent_comment_of_post_author_reply_0",
-        idOfParentComment: null,
-        isLiked: false,
-        index: 0,
-        author: "uncertifiedhater",
-        isVerified: false,
-        content: "L post, hate everything about it",
-        numLikes: 1400,
-        date: "2d",
-        numReplies: 50,
-        isLikedByAuthor: false,
-        level: 0,
-    }
-];
+let parentCommentsOfRepliesMadeByPostAuthor = [];
 
-let repliesMadeByPostAuthor = [
-    {
-        id: "post_author_reply_0",
-        idOfParentComment: "parent_comment_of_post_author_reply_0",
-        isLiked: false,
-        index: 0,
-        author: "hurdles",
-        isVerified: true,
-        content: "ratio",
-        numLikes: 1401,
-        date: "15m",
-        numReplies: 27,
-        isLikedByAuthor: false,
-        level: 1,
-    }
-];
+let repliesMadeByPostAuthor = [];
 
 let regularComments= [];
 
@@ -330,7 +197,7 @@ async function authenticateUserAndFetchData() {
         throw new Error('Network response not ok');
     }
     */
-    authUserFollowings = [];
+    authUserFollowings = ['rishavry6'];
 
     if(postInfo['usernames'].length==1) {
         postAuthorOrAuthorsText.textContent = postInfo['usernames'][0];
@@ -499,6 +366,7 @@ async function authenticateUserAndFetchData() {
     }
     commentsOfPost = await response8.json();
     commentsOfPost = commentsOfPost['data']['comments'];
+   // commentsOfPost = commentsOfPost.filter(x=>!userBlockings.includes(x.username));
 
     const response9 = await fetch('http://localhost:5022/graphql', {
         method: 'POST',
@@ -522,6 +390,7 @@ async function authenticateUserAndFetchData() {
     }
     repliesOfPost = await response9.json();
     repliesOfPost = repliesOfPost['data']['replies'];
+    // repliesOfPost = repliesOfPost.filter(x=>!userBlockings.includes(x.username));
 
     const formattedUsernames = `[${postInfo['usernames'].map(name => `"${name}"`).join(", ")}]`;
     const response10 = await fetch('http://localhost:5022/graphql', {
@@ -591,13 +460,21 @@ async function authenticateUserAndFetchData() {
         relevantUserInfo[username]['profilePhotoString'] = 'data:image/png;base64,'+profilePhotoInfoMappings[username];
     }
     mainPostAuthorProfilePhoto.src = relevantUserInfo[postInfo['usernames'][0]]['profilePhotoString'];
+    mainPostAuthorProfilePhoto.onclick = () => takeUserToOwnProfile();
     createDOMElementsForComments();
 }
 
 function createDOMElementsForComments() {
     createDOMElementsForCaption();
     createDOMElementsForAuthUserComments();
-    //createDOMElementsForAuthUserReplies();
+    createDOMElementsForAuthUserReplies();
+    createDOMElementsForCommentsMentioningAuthUser();
+    createDOMElementsForRepliesMentioningAuthUser();
+    createDOMElementsForCommentsMadeByAuthUserFollowing();
+    createDOMElementsForRepliesMadeByAuthUserFollowing();
+    createDOMElementsForCommentsMadeByPostAuthor();
+    createDOMElementsForRepliesMadeByPostAuthor();
+    createDOMElementsForRegularCommentsThatArentReplies();
 }
 
 function createDOMElementsForCaption() {
@@ -659,6 +536,8 @@ function createDOMElementsForCaption() {
     postCaption.appendChild(innerDiv);
 
     commentsDiv.appendChild(postCaption);
+
+    setOfIdsOfCommentsAlreadyDone.add(captionComment.commentid);
 }
 
 function createDOMElementsForAuthUserComments() {
@@ -715,6 +594,7 @@ function createDOMElementsForAuthUserComments() {
             }
 
             uniqueRepliesOfCurrComment.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+
             commentsMadeByAuthUser.push({
                 id: currComment.commentid,
                 idOfParentComment: null,
@@ -732,12 +612,13 @@ function createDOMElementsForAuthUserComments() {
                 uniqueReplies: uniqueRepliesOfCurrComment,
                 isEdited: currComment.isedited
             });
+            setOfIdsOfCommentsAlreadyDone.add(currComment.commentid);
         }
     }
 
-    commentsMadeByAuthUser.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+    const sortedCommentsMadeByAuthUser = [...commentsMadeByAuthUser].sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
 
-    for(let authUserComment of commentsMadeByAuthUser) {
+    for(let authUserComment of sortedCommentsMadeByAuthUser) {
         const commentIdx = authUserComment.index;
         const mainDiv = document.createElement("div");
         mainDiv.id = "authUserComment"+commentIdx;
@@ -776,7 +657,7 @@ function createDOMElementsForAuthUserComments() {
         const commentSpan = document.createElement("span");
         commentSpan.id = "contentAuthUserComment"+commentIdx;
         commentSpan.ondblclick = () => likeComment("AuthUserComment", commentIdx);
-        commentSpan.textContent = authUserComment.content;
+        commentSpan.innerHTML = parseMentionsToSpans(authUserComment.content);
         
         commentParagraph.appendChild(usernameBold);
         commentParagraph.append(" ");
@@ -941,7 +822,7 @@ function createDOMElementsForAuthUserComments() {
 
             const usernameBold = document.createElement("b");
             usernameBold.style = "cursor: pointer;";
-            usernameBold.textContent = authenticatedUsername;
+            usernameBold.textContent = uniqueReply.author;
             usernameBold.onclick = () => takeToProfile(uniqueReply.author);
 
             if(relevantUserInfo[uniqueReply.author].isVerified) {
@@ -954,12 +835,28 @@ function createDOMElementsForAuthUserComments() {
                 usernameBold.appendChild(verifiedCheck);
             }
 
-            //code to add Following span or Author span
+            if(authUserFollowings.includes(uniqueReply.author)) {
+                const followingSpan = document.createElement('span');
+                followingSpan.textContent = " · Following";
+                followingSpan.style.color = "gray";
+                followingSpan.style.fontSize = '0.9em';
+                followingSpan.style.marginRight = '0.7em';
+                usernameBold.appendChild(followingSpan);
+
+            }
+            else if(postInfo['usernames'].includes(uniqueReply.author)) {
+                const authorSpan = document.createElement('span');
+                authorSpan.textContent = " · Author";
+                authorSpan.style.color = "gray";
+                authorSpan.style.fontSize = '0.9em';
+                authorSpan.style.marginRight = '0.7em';
+                usernameBold.appendChild(authorSpan);
+            }
             
             const commentSpan = document.createElement("span");
             commentSpan.id = "contentRegularComment"+commentIdx;
             commentSpan.ondblclick = () => likeComment("RegularComment", commentIdx);
-            commentSpan.textContent = uniqueReply.content;
+            commentSpan.innerHTML = parseMentionsToSpans(uniqueReply.content);
             
             commentParagraph.appendChild(usernameBold);
             commentParagraph.append(" ");
@@ -1103,6 +1000,3539 @@ function createDOMElementsForAuthUserComments() {
     }
 }
 
+function createDOMElementsForAuthUserReplies() {
+    for(let i=0; i<repliesOfPost.length; i++) {
+        const currReply = repliesOfPost[i];
+        if(currReply.username===authenticatedUsername && !(setOfIdsOfUniqueRepliesAlreadyDone.has(currReply.replyid))) {
+            let parentComment = commentsOfPost.filter(x=>x.commentid===currReply.commentid);
+            if (parentComment.length==0) {
+                continue; //only replies of comments are to be dealt with, not replies of replies
+            }
+            parentComment = parentComment[0];
+            let uniqueRepliesOfParentComment = [];
+            let authUserRepliesOfParentComment = [];
+            let parentCommentNumReplies = 0;
+
+            for(let j=0; j<repliesOfPost.length; j++) {
+                const currentReply = repliesOfPost[j];
+                if(currentReply.commentid === parentComment.commentid) {
+                    if(currentReply.username===authenticatedUsername) {
+                        authUserRepliesOfParentComment.push({
+                            id: currentReply.replyid,
+                            idOfParentComment: currentReply.commentid,
+                            isLiked: currentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currentReply.replyid][1] : false,
+                            index: repliesMadeByAuthUser.length,
+                            author: currentReply.username,
+                            isVerified: relevantUserInfo[currentReply.username].isVerified,
+                            content: currentReply.comment,
+                            numLikes: currentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currentReply.replyid][0] : 0,
+                            date: getRelativeDateTimeText(currentReply.datetime),
+                            numReplies: repliesOfPost.filter(x=>x.commentid===currentReply.replyid).length,
+                            isLikedByAuthor: currentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currentReply.replyid][2] : false,
+                            level: 1,
+                            datetime: currentReply.datetime,
+                            isEdited: currentReply.isedited
+                        });
+                        repliesMadeByAuthUser.push({
+                            id: currentReply.replyid,
+                            idOfParentComment: currentReply.commentid,
+                            isLiked: currentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currentReply.replyid][1] : false,
+                            index: repliesMadeByAuthUser.length,
+                            author: currentReply.username,
+                            isVerified: relevantUserInfo[currentReply.username].isVerified,
+                            content: currentReply.comment,
+                            numLikes: currentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currentReply.replyid][0] : 0,
+                            date: getRelativeDateTimeText(currentReply.datetime),
+                            numReplies: repliesOfPost.filter(x=>x.commentid===currentReply.replyid).length,
+                            isLikedByAuthor: currentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currentReply.replyid][2] : false,
+                            level: 1,
+                            datetime: currentReply.datetime,
+                            isEdited: currentReply.isedited
+                        });
+                        setOfIdsOfUniqueRepliesAlreadyDone.add(currentReply.replyid);
+                    }
+                    else if(currentReply.comment.includes("@"+authenticatedUsername) || postInfo['usernames'].includes(currentReply.username) ||
+                    authUserFollowings.includes(currentReply.username)) {
+                        uniqueRepliesOfParentComment.push({
+                            id: currentReply.replyid,
+                            idOfParentComment: currentReply.commentid,
+                            isLiked: currentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currentReply.replyid][1] : false,
+                            index: regularComments.length,
+                            author: currentReply.username,
+                            isVerified: relevantUserInfo[currentReply.username].isVerified,
+                            content: currentReply.comment,
+                            numLikes: currentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currentReply.replyid][0] : 0,
+                            date: getRelativeDateTimeText(currentReply.datetime),
+                            numReplies: repliesOfPost.filter(x=>x.commentid===currentReply.replyid).length,
+                            isLikedByAuthor: currentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currentReply.replyid][2] : false,
+                            level: 1,
+                            datetime: currentReply.datetime,
+                            isEdited: currentReply.isedited
+                        });
+                        regularComments.push({
+                            id: currentReply.replyid,
+                            idOfParentComment: currentReply.commentid,
+                            isLiked: currentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currentReply.replyid][1] : false,
+                            index: regularComments.length,
+                            author: currentReply.username,
+                            isVerified: relevantUserInfo[currentReply.username].isVerified,
+                            content: currentReply.comment,
+                            numLikes: currentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currentReply.replyid][0] : 0,
+                            date: getRelativeDateTimeText(currentReply.datetime),
+                            numReplies: repliesOfPost.filter(x=>x.commentid===currentReply.replyid).length,
+                            isLikedByAuthor: currentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currentReply.replyid][2] : false,
+                            level: 1,
+                            datetime: currentReply.datetime,
+                            isEdited: currentReply.isedited
+                        });
+                        setOfIdsOfUniqueRepliesAlreadyDone.add(currentReply.replyid);
+                    }
+                    else {
+                        parentCommentNumReplies++;
+                    }
+                }
+            }
+
+            uniqueRepliesOfParentComment.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+            authUserRepliesOfParentComment.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+
+            parentCommentsOfRepliesMadeByAuthUser.push({
+                id: parentComment.commentid,
+                idOfParentComment: null,
+                isLiked: parentComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentComment.commentid][1] : false,
+                index: parentCommentsOfRepliesMadeByAuthUser.length,
+                author: parentComment.username,
+                isVerified: relevantUserInfo[parentComment.username].isVerified,
+                content: parentComment.comment,
+                numLikes: parentComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentComment.commentid][0] : 0,
+                date: getRelativeDateTimeText(parentComment.datetime),
+                numReplies: parentCommentNumReplies, //work on
+                isLikedByAuthor: parentComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentComment.commentid][2] : false,
+                level: 0,
+                datetime: parentComment.datetime,
+                isEdited: parentComment.isedited,
+                uniqueReplies: uniqueRepliesOfParentComment,
+                authUserReplies: authUserRepliesOfParentComment
+            });
+            setOfIdsOfCommentsAlreadyDone.add(parentComment.commentid);
+            
+        }
+    }
+
+    const sortedRepliesMadeByAuthUser = [...repliesMadeByAuthUser].sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+
+    const setOfIdsOfAuthUserRepliesWhoseDOMElementsHaveBeenCreated = new Set();
+
+    for(let i=0; i<sortedRepliesMadeByAuthUser.length; i++) {
+        const authUserReply = repliesMadeByAuthUser[i];
+        if(!(setOfIdsOfAuthUserRepliesWhoseDOMElementsHaveBeenCreated.has(authUserReply.id))) {
+            const parentComment = parentCommentsOfRepliesMadeByAuthUser.filter(x=>x.id===authUserReply.idOfParentComment)[0];
+            const parentCommentIdx = parentComment.index;
+            const mainDiv = document.createElement("div");
+            mainDiv.id = "parentOfAuthUserReply"+parentCommentIdx;
+            mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+
+            const profileImg = document.createElement("img");
+            profileImg.src = relevantUserInfo[parentComment.author]['profilePhotoString'];
+            profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+            profileImg.onclick = () => takeToProfile(parentComment.author);
+            mainDiv.appendChild(profileImg);
+
+            const textContentDiv = document.createElement("div");
+            textContentDiv.id = "mainDivParentOfAuthUserReply"+parentCommentIdx;
+            textContentDiv.style = "display: flex; flex-direction: column;";
+
+            const commentParagraph = document.createElement("p");
+            commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+
+            const usernameBold = document.createElement("b");
+            usernameBold.style = "cursor: pointer;";
+            usernameBold.textContent = parentComment.author;
+            usernameBold.onclick = () => takeToProfile(parentComment.author);
+
+            if(relevantUserInfo[parentComment.author].isVerified) {
+                const verifiedCheck = document.createElement('img');
+                verifiedCheck.src = '/images/verifiedCheck.png';
+                verifiedCheck.style.pointerEvents = 'none';
+                verifiedCheck.style.height = '1.1em';
+                verifiedCheck.style.width = '1.1em';
+                verifiedCheck.style.objectFit = 'contain';
+                usernameBold.appendChild(verifiedCheck);
+            }
+
+            if(authUserFollowings.includes(parentComment.author)) {
+                const followingSpan = document.createElement('span');
+                followingSpan.textContent = " · Following";
+                followingSpan.style.color = "gray";
+                followingSpan.style.fontSize = '0.9em';
+                followingSpan.style.marginRight = '0.7em';
+                usernameBold.appendChild(followingSpan);
+
+            }
+            else if(postInfo['usernames'].includes(parentComment.author)) {
+                const authorSpan = document.createElement('span');
+                authorSpan.textContent = " · Author";
+                authorSpan.style.color = "gray";
+                authorSpan.style.fontSize = '0.9em';
+                authorSpan.style.marginRight = '0.7em';
+                usernameBold.appendChild(authorSpan);
+            }
+            
+            const commentSpan = document.createElement("span");
+            commentSpan.id = "contentParentOfAuthUserReply"+parentCommentIdx;
+            commentSpan.ondblclick = () => likeComment("ParentOfAuthUserReply", parentCommentIdx);
+            commentSpan.innerHTML = parseMentionsToSpans(parentComment.content);
+            
+            commentParagraph.appendChild(usernameBold);
+            commentParagraph.append(" ");
+            commentParagraph.appendChild(commentSpan);
+            textContentDiv.appendChild(commentParagraph);
+
+            const metaDiv = document.createElement("div");
+            metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+
+            const dateText = document.createElement("p");
+            dateText.id = "dateTextParentOfAuthUserReply"+parentCommentIdx;
+            dateText.textContent = parentComment.date;
+            if(parentComment.isEdited) {
+                dateText.textContent+= " · Edited";
+            }
+
+            const likesText = document.createElement("b");
+            likesText.id = "numLikesTextParentOfAuthUserReply"+parentCommentIdx;
+            likesText.style = "cursor: pointer;";
+            if(parentComment.numLikes==1) {
+                likesText.textContent = "1 like";
+            }
+            else {
+                likesText.textContent = `${parentComment.numLikes} likes`;
+            }
+            if(parentComment.numLikes==0) {
+                likesText.classList.add('hidden');
+            }
+
+            const replyButton = document.createElement("b");
+            replyButton.style = "cursor: pointer;";
+            replyButton.textContent = "Reply";
+            replyButton.onclick = () => startReplyToComment("ParentOfAuthUserReply", parentCommentIdx);
+
+            metaDiv.append(dateText, likesText, replyButton);
+
+            if(parentComment.isLikedByAuthor && !postInfo['usernames'].includes(parentComment.author)) {
+                const authorDiv = document.createElement('div');
+                authorDiv.style.display = 'flex';
+                authorDiv.style.alignItems = 'center';
+                authorDiv.style.gap = '0.35em';
+
+                const redHeartIcon = document.createElement('img');
+                redHeartIcon.src = '/images/redHeartIcon.webp';
+                redHeartIcon.style.height = '1.2em';
+                redHeartIcon.style.width = '1.2em';
+                redHeartIcon.style.objectFit = 'contain';
+                redHeartIcon.style.pointerEvents = 'none';
+                authorDiv.appendChild(redHeartIcon);
+
+                const byAuthorText = document.createElement('small');
+                byAuthorText.textContent = 'by author';
+                authorDiv.appendChild(byAuthorText);
+
+                metaDiv.appendChild(authorDiv);
+            }
+
+            textContentDiv.appendChild(metaDiv);
+
+            const viewRepliesText = document.createElement("b");
+            viewRepliesText.id = "viewRepliesTextParentOfAuthUserReply"+parentCommentIdx;
+            viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+            viewRepliesText.onclick = () => toggleRepliesText("ParentOfAuthUserReply", parentCommentIdx);
+            viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${parentComment.numReplies})</span>`;
+            if(parentComment.numReplies==0) {
+                viewRepliesText.classList.add('hidden');
+            }
+
+            const hideRepliesText = document.createElement("b");
+            hideRepliesText.id = "hideRepliesTextParentOfAuthUserReply"+parentCommentIdx;
+            hideRepliesText.className = "hidden";
+            hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+            hideRepliesText.onclick = () => toggleRepliesText("ParentOfAuthUserReply", parentCommentIdx);
+            hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+
+            textContentDiv.append(viewRepliesText, hideRepliesText);
+
+            const blankHeartIcon = document.createElement("img");
+            blankHeartIcon.id = "blankHeartIconParentOfAuthUserReply"+parentCommentIdx;
+            blankHeartIcon.className = "hidden";
+            blankHeartIcon.src = "/images/blankHeart.png";
+            blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+            blankHeartIcon.onclick = () => toggleLikeComment("ParentOfAuthUserReply", parentCommentIdx);
+
+            const redHeartIcon = document.createElement("img");
+            redHeartIcon.id = "redHeartIconParentOfAuthUserReply"+parentCommentIdx;
+            redHeartIcon.className = "hidden";
+            redHeartIcon.src = "/images/redHeartIcon.webp";
+            redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+            redHeartIcon.onclick = () => toggleLikeComment("ParentOfAuthUserReply", parentCommentIdx);
+
+            if(parentComment.isLiked) {
+                redHeartIcon.classList.remove('hidden');
+            }
+            else {
+                blankHeartIcon.classList.remove('hidden');
+            }
+
+            mainDiv.appendChild(textContentDiv);
+            mainDiv.appendChild(blankHeartIcon);
+            mainDiv.appendChild(redHeartIcon);
+            commentsDiv.appendChild(mainDiv);
+
+            for(let authUserReplyOfParentComment of parentComment.authUserReplies) {
+                const replyIndex = authUserReplyOfParentComment.index;
+                const mainDiv = document.createElement("div");
+                mainDiv.id = "authUserReply"+replyIndex;
+                mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+                mainDiv.style.marginLeft = `${authUserReplyOfParentComment.level*5}em`;
+                mainDiv.onmouseenter = () => showOptionsIcon("AuthUserReply"+replyIndex);
+                mainDiv.onmouseleave = () => hideOptionsIcon("AuthUserReply"+replyIndex);
+            
+                const profileImg = document.createElement("img");
+                profileImg.src = relevantUserInfo[authenticatedUsername]['profilePhotoString'];
+                profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+                mainDiv.appendChild(profileImg);
+            
+                const textContentDiv = document.createElement("div");
+                textContentDiv.id = "mainDivAuthUserReply"+replyIndex;
+                textContentDiv.style = "display: flex; flex-direction: column;";
+            
+                const commentParagraph = document.createElement("p");
+                commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+            
+                const usernameBold = document.createElement("b");
+                usernameBold.style = "cursor: pointer;";
+                usernameBold.textContent = authenticatedUsername;
+            
+                if(relevantUserInfo[authenticatedUsername].isVerified) {
+                    const verifiedCheck = document.createElement('img');
+                    verifiedCheck.src = '/images/verifiedCheck.png';
+                    verifiedCheck.style.pointerEvents = 'none';
+                    verifiedCheck.style.height = '1.1em';
+                    verifiedCheck.style.width = '1.1em';
+                    verifiedCheck.style.objectFit = 'contain';
+                    usernameBold.appendChild(verifiedCheck);
+                }
+                
+                const commentSpan = document.createElement("span");
+                commentSpan.id = "contentAuthUserReply"+replyIndex;
+                commentSpan.ondblclick = () => likeComment("AuthUserReply", replyIndex);
+                commentSpan.innerHTML = parseMentionsToSpans(authUserReplyOfParentComment.content);
+                
+                commentParagraph.appendChild(usernameBold);
+                commentParagraph.append(" ");
+                commentParagraph.appendChild(commentSpan);
+                textContentDiv.appendChild(commentParagraph);
+            
+                const metaDiv = document.createElement("div");
+                metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+            
+                const dateText = document.createElement("p");
+                dateText.id = "dateTextAuthUserReply"+replyIndex;
+                dateText.textContent = authUserReplyOfParentComment.date;
+                if(authUserReplyOfParentComment.isEdited) {
+                    dateText.textContent+= " · Edited";
+                }
+            
+                const likesText = document.createElement("b");
+                likesText.id = "numLikesTextAuthUserReply"+replyIndex;
+                likesText.style = "cursor: pointer;";
+                if(authUserReplyOfParentComment.numLikes==1) {
+                    likesText.textContent = "1 like";
+                }
+                else {
+                    likesText.textContent = `${authUserReplyOfParentComment.numLikes} likes`;
+                }
+                if(authUserReplyOfParentComment.numLikes==0) {
+                    likesText.classList.add('hidden');
+                }
+            
+                const replyButton = document.createElement("b");
+                replyButton.style = "cursor: pointer;";
+                replyButton.textContent = "Reply";
+                replyButton.onclick = () => startReplyToComment("AuthUserReply", replyIndex);
+            
+                const optionsIcon = document.createElement("img");
+                optionsIcon.id = "optionsIconForAuthUserReply"+replyIndex;
+                optionsIcon.className = "hidden";
+                optionsIcon.src = "/images/optionsDots.png";
+                optionsIcon.style = "height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;";
+                optionsIcon.onclick = () => showOptionsPopupForComment("AuthUserReply", replyIndex);
+            
+                metaDiv.append(dateText, likesText, replyButton, optionsIcon);
+                textContentDiv.appendChild(metaDiv);
+            
+                const viewRepliesText = document.createElement("b");
+                viewRepliesText.id = "viewRepliesTextAuthUserReply"+replyIndex;
+                viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+                viewRepliesText.onclick = () => toggleRepliesText("AuthUserReply", replyIndex);
+                viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${authUserReplyOfParentComment.numReplies})</span>`;
+                if(authUserReplyOfParentComment.numReplies==0) {
+                    viewRepliesText.classList.add('hidden');
+                }
+            
+                const hideRepliesText = document.createElement("b");
+                hideRepliesText.id = "hideRepliesTextAuthUserReply"+replyIndex;
+                hideRepliesText.className = "hidden";
+                hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+                hideRepliesText.onclick = () => toggleRepliesText("AuthUserReply", replyIndex);
+                hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+            
+                textContentDiv.append(viewRepliesText, hideRepliesText);
+            
+                const editModeDiv = document.createElement("div");
+                editModeDiv.id = "editModeDivAuthUserReply"+replyIndex;
+                editModeDiv.className = "hidden";
+                editModeDiv.style = "display: flex; align-items: center; gap: 0.5em; width: 100%;";
+            
+                const textarea = document.createElement("textarea");
+                textarea.id = "textareaForEditingAuthUserReply"+replyIndex;
+                textarea.placeholder = "";
+                textarea.style = "outline: none; width:77%; resize: none; font-family: Arial; padding: 0.5em 1em;";
+                textarea.oninput = () => onInputOfTextareaForEditingComment("AuthUserReply"+replyIndex);
+            
+                const cancelButton = document.createElement("button");
+                cancelButton.textContent = "Cancel";
+                cancelButton.type = "button";
+                cancelButton.style = "border-radius:1em; color: white; padding: 0.5em 1em; cursor: pointer; background-color: black; font-size: 0.7em;";
+                cancelButton.onclick = () => cancelCommentEdit("AuthUserReply", replyIndex);
+            
+                const confirmButton = document.createElement("button");
+                confirmButton.id = "confirmEditButtonAuthUserReply"+replyIndex;
+                confirmButton.className = "blueButton hidden";
+                confirmButton.textContent = "Ok";
+                confirmButton.type = "button";
+                confirmButton.style = "font-size: 0.7em;";
+                confirmButton.onclick = () => confirmCommentEdit("AuthUserReply", replyIndex);
+            
+                editModeDiv.append(textarea, cancelButton, confirmButton);
+                textContentDiv.appendChild(editModeDiv);
+            
+                const blankHeartIcon = document.createElement("img");
+                blankHeartIcon.id = "blankHeartIconAuthUserReply"+replyIndex;
+                blankHeartIcon.src = "/images/blankHeart.png";
+                blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+                blankHeartIcon.onclick = () => toggleLikeComment("AuthUserReply", replyIndex);
+            
+                const redHeartIcon = document.createElement("img");
+                redHeartIcon.id = "redHeartIconAuthUserReply"+replyIndex;
+                redHeartIcon.className = "hidden";
+                redHeartIcon.src = "/images/redHeartIcon.webp";
+                redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+                redHeartIcon.onclick = () => toggleLikeComment("AuthUserReply", replyIndex);
+            
+                mainDiv.appendChild(textContentDiv);
+                mainDiv.appendChild(editModeDiv);
+                mainDiv.appendChild(blankHeartIcon);
+                mainDiv.appendChild(redHeartIcon);
+                commentsDiv.appendChild(mainDiv);
+                setOfIdsOfAuthUserRepliesWhoseDOMElementsHaveBeenCreated.add(authUserReplyOfParentComment.id);
+            }
+
+            for(let uniqueReplyOfParentComment of parentComment.uniqueReplies) {
+                const commentIdx = uniqueReplyOfParentComment.index;
+                const mainDiv = document.createElement("div");
+                mainDiv.id = "regularComment"+commentIdx;
+                mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+                mainDiv.style.marginLeft = `${uniqueReplyOfParentComment.level*5}em`;
+
+                const profileImg = document.createElement("img");
+                profileImg.src = relevantUserInfo[uniqueReplyOfParentComment.author]['profilePhotoString'];
+                profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+                profileImg.onclick = () => takeToProfile(uniqueReplyOfParentComment.author);
+                mainDiv.appendChild(profileImg);
+
+                const textContentDiv = document.createElement("div");
+                textContentDiv.id = "mainDivRegularComment"+commentIdx;
+                textContentDiv.style = "display: flex; flex-direction: column;";
+
+                const commentParagraph = document.createElement("p");
+                commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+
+                const usernameBold = document.createElement("b");
+                usernameBold.style = "cursor: pointer;";
+                usernameBold.textContent = uniqueReplyOfParentComment.author;
+                usernameBold.onclick = () => takeToProfile(uniqueReplyOfParentComment.author);
+
+                if(relevantUserInfo[uniqueReplyOfParentComment.author].isVerified) {
+                    const verifiedCheck = document.createElement('img');
+                    verifiedCheck.src = '/images/verifiedCheck.png';
+                    verifiedCheck.style.pointerEvents = 'none';
+                    verifiedCheck.style.height = '1.1em';
+                    verifiedCheck.style.width = '1.1em';
+                    verifiedCheck.style.objectFit = 'contain';
+                    usernameBold.appendChild(verifiedCheck);
+                }
+
+                if(authUserFollowings.includes(uniqueReplyOfParentComment.author)) {
+                    const followingSpan = document.createElement('span');
+                    followingSpan.textContent = " · Following";
+                    followingSpan.style.color = "gray";
+                    followingSpan.style.fontSize = '0.9em';
+                    followingSpan.style.marginRight = '0.7em';
+                    usernameBold.appendChild(followingSpan);
+    
+                }
+                else if(postInfo['usernames'].includes(uniqueReplyOfParentComment.author)) {
+                    const authorSpan = document.createElement('span');
+                    authorSpan.textContent = " · Author";
+                    authorSpan.style.color = "gray";
+                    authorSpan.style.fontSize = '0.9em';
+                    authorSpan.style.marginRight = '0.7em';
+                    usernameBold.appendChild(authorSpan);
+                }
+                
+                const commentSpan = document.createElement("span");
+                commentSpan.id = "contentRegularComment"+commentIdx;
+                commentSpan.ondblclick = () => likeComment("RegularComment", commentIdx);
+                commentSpan.innerHTML = parseMentionsToSpans(uniqueReplyOfParentComment.content);
+                
+                commentParagraph.appendChild(usernameBold);
+                commentParagraph.append(" ");
+                commentParagraph.appendChild(commentSpan);
+                textContentDiv.appendChild(commentParagraph);
+
+                const metaDiv = document.createElement("div");
+                metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+
+                const dateText = document.createElement("p");
+                dateText.id = "dateTextRegularComment"+commentIdx;
+                dateText.textContent = uniqueReplyOfParentComment.date;
+                if(uniqueReplyOfParentComment.isEdited) {
+                    dateText.textContent+= " · Edited";
+                }
+
+                const likesText = document.createElement("b");
+                likesText.id = "numLikesTextRegularComment"+commentIdx;
+                likesText.style = "cursor: pointer;";
+                if(uniqueReplyOfParentComment.numLikes==1) {
+                    likesText.textContent = "1 like";
+                }
+                else {
+                    likesText.textContent = `${uniqueReplyOfParentComment.numLikes} likes`;
+                }
+                if(uniqueReplyOfParentComment.numLikes==0) {
+                    likesText.classList.add('hidden');
+                }
+
+                const replyButton = document.createElement("b");
+                replyButton.style = "cursor: pointer;";
+                replyButton.textContent = "Reply";
+                replyButton.onclick = () => startReplyToComment("RegularComment", commentIdx);
+
+                const optionsIcon = document.createElement("img");
+                optionsIcon.id = "optionsIconForRegularComment"+commentIdx;
+                optionsIcon.className = "hidden";
+                optionsIcon.src = "/images/optionsDots.png";
+                optionsIcon.style = "height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;";
+                optionsIcon.onclick = () => showOptionsPopupForComment("RegularComment", commentIdx);
+                metaDiv.append(dateText, likesText, replyButton, optionsIcon);
+
+                if(uniqueReplyOfParentComment.isLikedByAuthor && !postInfo['usernames'].includes(uniqueReplyOfParentComment.author)) {
+                    const authorDiv = document.createElement('div');
+                    authorDiv.style.display = 'flex';
+                    authorDiv.style.alignItems = 'center';
+                    authorDiv.style.gap = '0.35em';
+
+                    const redHeartIcon = document.createElement('img');
+                    redHeartIcon.src = '/images/redHeartIcon.webp';
+                    redHeartIcon.style.height = '1.2em';
+                    redHeartIcon.style.width = '1.2em';
+                    redHeartIcon.style.objectFit = 'contain';
+                    redHeartIcon.style.pointerEvents = 'none';
+                    authorDiv.appendChild(redHeartIcon);
+
+                    const byAuthorText = document.createElement('small');
+                    byAuthorText.textContent = 'by author';
+                    authorDiv.appendChild(byAuthorText);
+
+                    metaDiv.appendChild(authorDiv);
+                }
+
+                textContentDiv.appendChild(metaDiv);
+
+                const viewRepliesText = document.createElement("b");
+                viewRepliesText.id = "viewRepliesTextRegularComment"+commentIdx;
+                viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+                viewRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+                viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${uniqueReplyOfParentComment.numReplies})</span>`;
+                if(uniqueReplyOfParentComment.numReplies==0) {
+                    viewRepliesText.classList.add('hidden');
+                }
+
+                const hideRepliesText = document.createElement("b");
+                hideRepliesText.id = "hideRepliesTextRegularComment"+commentIdx;
+                hideRepliesText.className = "hidden";
+                hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+                hideRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+                hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+
+                textContentDiv.append(viewRepliesText, hideRepliesText);
+
+                const blankHeartIcon = document.createElement("img");
+                blankHeartIcon.id = "blankHeartIconRegularComment"+commentIdx;
+                blankHeartIcon.className = "hidden";
+                blankHeartIcon.src = "/images/blankHeart.png";
+                blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+                blankHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
+
+                const redHeartIcon = document.createElement("img");
+                redHeartIcon.id = "redHeartIconRegularComment"+commentIdx;
+                redHeartIcon.className = "hidden";
+                redHeartIcon.src = "/images/redHeartIcon.webp";
+                redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+                redHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
+
+                if(uniqueReplyOfParentComment.isLiked) {
+                    redHeartIcon.classList.remove('hidden');
+                }
+                else {
+                    blankHeartIcon.classList.remove('hidden');
+                }
+
+                mainDiv.appendChild(textContentDiv);
+                mainDiv.appendChild(blankHeartIcon);
+                mainDiv.appendChild(redHeartIcon);
+                commentsDiv.appendChild(mainDiv);
+            }
+        }
+    }
+}
+
+function parseMentionsToSpans(comment) {
+    const usernameRegex = /@([a-z0-9._]{1,30})\b/g;
+    const hashtagRegex = /#(\w{1,30})\b/g;
+
+    // Replace hashtags
+    let result = comment.replace(hashtagRegex, (match, hashtag) => {
+        return `<span onclick="takeToHashtagPage('${hashtag}')"
+                    style="cursor: pointer; color:#2789f2;">
+                ${match}
+                </span>`;
+    });
+
+    // Replace mentions
+    result = result.replace(usernameRegex, (match, username) => {
+        return `<span onclick="takeToProfile('${username}')"
+                    style="cursor: pointer; color:#2789f2;">
+                ${match}
+                </span>`;
+    });
+
+    return result;
+}
+
+function createDOMElementsForCommentsMentioningAuthUser() {
+    for(let i=0; i<commentsOfPost.length; i++) {
+        const currComment = commentsOfPost[i];
+        if(currComment.comment.includes("@"+authenticatedUsername) && !(setOfIdsOfCommentsAlreadyDone.has(currComment.commentid))) {
+            let currCommentNumReplies = 0;
+            let uniqueRepliesOfCurrComment = [];
+            for(let j=0; j<repliesOfPost.length; j++) {
+                const currReply = repliesOfPost[j];
+                if(currReply.commentid === currComment.commentid) {
+                    if(currReply.comment.includes("@"+authenticatedUsername) || authUserFollowings.includes(currReply.username) || postInfo['usernames'].includes(currReply.username)) {
+                        const currReplyNumReplies = repliesOfPost.filter(x=>x.commentid === currReply.replyid).length;
+                        uniqueRepliesOfCurrComment.push({
+                            id: currReply.replyid,
+                            idOfParentComment: currReply.commentid,
+                            isLiked: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][1] : false,
+                            index: regularComments.length,
+                            author: currReply.username,
+                            isVerified: relevantUserInfo[currReply.username].isVerified,
+                            content: currReply.comment,
+                            numLikes: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][0] : 0,
+                            date: getRelativeDateTimeText(currReply.datetime),
+                            numReplies: currReplyNumReplies,
+                            isLikedByAuthor: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][2] : false,
+                            level: 1,
+                            datetime: currReply.datetime,
+                            isEdited: currReply.isedited
+                        });
+                        regularComments.push({
+                            id: currReply.replyid,
+                            idOfParentComment: currReply.commentid,
+                            isLiked: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][1] : false,
+                            index: regularComments.length,
+                            author: currReply.username,
+                            isVerified: relevantUserInfo[currReply.username].isVerified,
+                            content: currReply.comment,
+                            numLikes: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][0] : 0,
+                            date: getRelativeDateTimeText(currReply.datetime),
+                            numReplies: currReplyNumReplies,
+                            isLikedByAuthor: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][2] : false,
+                            level: 1,
+                            datetime: currReply.datetime,
+                            isEdited: currReply.isedited
+                        });
+                        setOfIdsOfUniqueRepliesAlreadyDone.add(currReply.replyid);
+                    }
+                    else {
+                        currCommentNumReplies++;
+                    }
+                }
+            }
+            uniqueRepliesOfCurrComment.sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+            commentsThatMentionAuthUser.push({
+                id: currComment.commentid,
+                idOfParentComment: null,
+                isLiked: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][1] : false,
+                index: commentsThatMentionAuthUser.length,
+                author: currComment.username,
+                isVerified: relevantUserInfo[currComment.username].isVerified,
+                content: currComment.comment,
+                numLikes: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][0] : 0,
+                date: getRelativeDateTimeText(currComment.datetime),
+                numReplies: currCommentNumReplies,
+                isLikedByAuthor: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][2] : false,
+                level: 0,
+                datetime: currComment.datetime,
+                isEdited: currComment.isedited,
+                uniqueReplies: uniqueRepliesOfCurrComment
+            });
+            setOfIdsOfCommentsAlreadyDone.add(currComment.commentid);
+        }
+    }
+
+    const sortedCommentsThatMentionAuthUser = [...commentsThatMentionAuthUser].sort((a, b) => new Date(b.datetime) - new Date(a.datetime));
+    for(let authUserMentionComment of sortedCommentsThatMentionAuthUser) {
+        const commentIdx = authUserMentionComment.index;
+        const mainDiv = document.createElement("div");
+        mainDiv.id = "authUserMentionComment"+commentIdx;
+        mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+
+        const profileImg = document.createElement("img");
+        profileImg.src = relevantUserInfo[authUserMentionComment.author]['profilePhotoString'];
+        profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+        profileImg.onclick = () => takeToProfile(authUserMentionComment.author);
+        mainDiv.appendChild(profileImg);
+
+        const textContentDiv = document.createElement("div");
+        textContentDiv.id = "mainDivAuthUserMentionComment"+commentIdx;
+        textContentDiv.style = "display: flex; flex-direction: column;";
+
+        const commentParagraph = document.createElement("p");
+        commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+
+        const usernameBold = document.createElement("b");
+        usernameBold.style = "cursor: pointer;";
+        usernameBold.textContent = authUserMentionComment.author;
+        usernameBold.onclick = () => takeToProfile(authUserMentionComment.author);
+
+        if(relevantUserInfo[authUserMentionComment.author].isVerified) {
+            const verifiedCheck = document.createElement('img');
+            verifiedCheck.src = '/images/verifiedCheck.png';
+            verifiedCheck.style.pointerEvents = 'none';
+            verifiedCheck.style.height = '1.1em';
+            verifiedCheck.style.width = '1.1em';
+            verifiedCheck.style.objectFit = 'contain';
+            usernameBold.appendChild(verifiedCheck);
+        }
+
+        if(authUserFollowings.includes(authUserMentionComment.author)) {
+            const followingSpan = document.createElement('span');
+            followingSpan.textContent = " · Following";
+            followingSpan.style.color = "gray";
+            followingSpan.style.fontSize = '0.9em';
+            followingSpan.style.marginRight = '0.7em';
+            usernameBold.appendChild(followingSpan);
+
+        }
+        else if(postInfo['usernames'].includes(authUserMentionComment.author)) {
+            const authorSpan = document.createElement('span');
+            authorSpan.textContent = " · Author";
+            authorSpan.style.color = "gray";
+            authorSpan.style.fontSize = '0.9em';
+            authorSpan.style.marginRight = '0.7em';
+            usernameBold.appendChild(authorSpan);
+        }
+        
+        const commentSpan = document.createElement("span");
+        commentSpan.id = "contentAuthUserMentionComment"+commentIdx;
+        commentSpan.ondblclick = () => likeComment("AuthUserMentionComment", commentIdx);
+        commentSpan.innerHTML = parseMentionsToSpans(authUserMentionComment.content);
+        
+        commentParagraph.appendChild(usernameBold);
+        commentParagraph.append(" ");
+        commentParagraph.appendChild(commentSpan);
+        textContentDiv.appendChild(commentParagraph);
+
+        const metaDiv = document.createElement("div");
+        metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+
+        const dateText = document.createElement("p");
+        dateText.id = "dateTextAuthUserMentionComment"+commentIdx;
+        dateText.textContent = authUserMentionComment.date;
+        if(authUserMentionComment.isEdited) {
+            dateText.textContent+= " · Edited";
+        }
+
+        const likesText = document.createElement("b");
+        likesText.id = "numLikesTextAuthUserMentionComment"+commentIdx;
+        likesText.style = "cursor: pointer;";
+        if(authUserMentionComment.numLikes==1) {
+            likesText.textContent = "1 like";
+        }
+        else {
+            likesText.textContent = `${authUserMentionComment.numLikes} likes`;
+        }
+        if(authUserMentionComment.numLikes==0) {
+            likesText.classList.add('hidden');
+        }
+
+        const replyButton = document.createElement("b");
+        replyButton.style = "cursor: pointer;";
+        replyButton.textContent = "Reply";
+        replyButton.onclick = () => startReplyToComment("AuthUserMentionComment", commentIdx);
+
+
+        metaDiv.append(dateText, likesText, replyButton);
+
+        if(authUserMentionComment.isLikedByAuthor && !postInfo['usernames'].includes(authUserMentionComment.author)) {
+            const authorDiv = document.createElement('div');
+            authorDiv.style.display = 'flex';
+            authorDiv.style.alignItems = 'center';
+            authorDiv.style.gap = '0.35em';
+
+            const redHeartIcon = document.createElement('img');
+            redHeartIcon.src = '/images/redHeartIcon.webp';
+            redHeartIcon.style.height = '1.2em';
+            redHeartIcon.style.width = '1.2em';
+            redHeartIcon.style.objectFit = 'contain';
+            redHeartIcon.style.pointerEvents = 'none';
+            authorDiv.appendChild(redHeartIcon);
+
+            const byAuthorText = document.createElement('small');
+            byAuthorText.textContent = 'by author';
+            authorDiv.appendChild(byAuthorText);
+
+            metaDiv.appendChild(authorDiv);
+        }
+
+        textContentDiv.appendChild(metaDiv);
+
+        const viewRepliesText = document.createElement("b");
+        viewRepliesText.id = "viewRepliesTextAuthUserMentionComment"+commentIdx;
+        viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        viewRepliesText.onclick = () => toggleRepliesText("AuthUserMentionComment", commentIdx);
+        viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${authUserMentionComment.numReplies})</span>`;
+        if(authUserMentionComment.numReplies==0) {
+            viewRepliesText.classList.add('hidden');
+        }
+
+        const hideRepliesText = document.createElement("b");
+        hideRepliesText.id = "hideRepliesTextAuthUserMentionComment"+commentIdx;
+        hideRepliesText.className = "hidden";
+        hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        hideRepliesText.onclick = () => toggleRepliesText("AuthUserMentionComment", commentIdx);
+        hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+
+        textContentDiv.append(viewRepliesText, hideRepliesText);
+
+        const blankHeartIcon = document.createElement("img");
+        blankHeartIcon.id = "blankHeartIconAuthUserMentionComment"+commentIdx;
+        blankHeartIcon.className = "hidden";
+        blankHeartIcon.src = "/images/blankHeart.png";
+        blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        blankHeartIcon.onclick = () => toggleLikeComment("AuthUserMentionComment", commentIdx);
+
+        const redHeartIcon = document.createElement("img");
+        redHeartIcon.id = "redHeartIconAuthUserMentionComment"+commentIdx;
+        redHeartIcon.className = "hidden";
+        redHeartIcon.src = "/images/redHeartIcon.webp";
+        redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        redHeartIcon.onclick = () => toggleLikeComment("AuthUserMentionComment", commentIdx);
+
+        if(authUserMentionComment.isLiked) {
+            redHeartIcon.classList.remove('hidden');
+        }
+        else {
+            blankHeartIcon.classList.remove('hidden');
+        }
+
+        mainDiv.appendChild(textContentDiv);
+        mainDiv.appendChild(blankHeartIcon);
+        mainDiv.appendChild(redHeartIcon);
+        commentsDiv.appendChild(mainDiv);
+
+        for(let uniqueReply of authUserMentionComment.uniqueReplies) {
+            const commentIdx = uniqueReply.index;
+            const mainDiv = document.createElement("div");
+            mainDiv.id = "regularComment"+commentIdx;
+            mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+            mainDiv.style.marginLeft = `${uniqueReply.level*5}em`;
+
+            const profileImg = document.createElement("img");
+            profileImg.src = relevantUserInfo[uniqueReply.author]['profilePhotoString'];
+            profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+            profileImg.onclick = () => takeToProfile(uniqueReply.author);
+            mainDiv.appendChild(profileImg);
+
+            const textContentDiv = document.createElement("div");
+            textContentDiv.id = "mainDivRegularComment"+commentIdx;
+            textContentDiv.style = "display: flex; flex-direction: column;";
+
+            const commentParagraph = document.createElement("p");
+            commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+
+            const usernameBold = document.createElement("b");
+            usernameBold.style = "cursor: pointer;";
+            usernameBold.textContent = uniqueReply.author;
+            usernameBold.onclick = () => takeToProfile(uniqueReply.author);
+
+            if(relevantUserInfo[uniqueReply.author].isVerified) {
+                const verifiedCheck = document.createElement('img');
+                verifiedCheck.src = '/images/verifiedCheck.png';
+                verifiedCheck.style.pointerEvents = 'none';
+                verifiedCheck.style.height = '1.1em';
+                verifiedCheck.style.width = '1.1em';
+                verifiedCheck.style.objectFit = 'contain';
+                usernameBold.appendChild(verifiedCheck);
+            }
+
+            if(authUserFollowings.includes(uniqueReply.author)) {
+                const followingSpan = document.createElement('span');
+                followingSpan.textContent = " · Following";
+                followingSpan.style.color = "gray";
+                followingSpan.style.fontSize = '0.9em';
+                followingSpan.style.marginRight = '0.7em';
+                usernameBold.appendChild(followingSpan);
+
+            }
+            else if(postInfo['usernames'].includes(uniqueReply.author)) {
+                const authorSpan = document.createElement('span');
+                authorSpan.textContent = " · Author";
+                authorSpan.style.color = "gray";
+                authorSpan.style.fontSize = '0.9em';
+                authorSpan.style.marginRight = '0.7em';
+                usernameBold.appendChild(authorSpan);
+            }
+            
+            const commentSpan = document.createElement("span");
+            commentSpan.id = "contentRegularComment"+commentIdx;
+            commentSpan.ondblclick = () => likeComment("RegularComment", commentIdx);
+            commentSpan.innerHTML = parseMentionsToSpans(uniqueReply.content);
+            
+            commentParagraph.appendChild(usernameBold);
+            commentParagraph.append(" ");
+            commentParagraph.appendChild(commentSpan);
+            textContentDiv.appendChild(commentParagraph);
+
+            const metaDiv = document.createElement("div");
+            metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+
+            const dateText = document.createElement("p");
+            dateText.id = "dateTextRegularComment"+commentIdx;
+            dateText.textContent = uniqueReply.date;
+            if(uniqueReply.isEdited) {
+                dateText.textContent+= " · Edited";
+            }
+
+            const likesText = document.createElement("b");
+            likesText.id = "numLikesTextRegularComment"+commentIdx;
+            likesText.style = "cursor: pointer;";
+            if(uniqueReply.numLikes==1) {
+                likesText.textContent = "1 like";
+            }
+            else {
+                likesText.textContent = `${uniqueReply.numLikes} likes`;
+            }
+            if(uniqueReply.numLikes==0) {
+                likesText.classList.add('hidden');
+            }
+
+            const replyButton = document.createElement("b");
+            replyButton.style = "cursor: pointer;";
+            replyButton.textContent = "Reply";
+            replyButton.onclick = () => startReplyToComment("RegularComment", commentIdx);
+
+            const optionsIcon = document.createElement("img");
+            optionsIcon.id = "optionsIconForRegularComment"+commentIdx;
+            optionsIcon.className = "hidden";
+            optionsIcon.src = "/images/optionsDots.png";
+            optionsIcon.style = "height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;";
+            optionsIcon.onclick = () => showOptionsPopupForComment("RegularComment", commentIdx);
+            metaDiv.append(dateText, likesText, replyButton, optionsIcon);
+
+            if(uniqueReply.isLikedByAuthor && !postInfo['usernames'].includes(uniqueReply.author)) {
+                const authorDiv = document.createElement('div');
+                authorDiv.style.display = 'flex';
+                authorDiv.style.alignItems = 'center';
+                authorDiv.style.gap = '0.35em';
+
+                const redHeartIcon = document.createElement('img');
+                redHeartIcon.src = '/images/redHeartIcon.webp';
+                redHeartIcon.style.height = '1.2em';
+                redHeartIcon.style.width = '1.2em';
+                redHeartIcon.style.objectFit = 'contain';
+                redHeartIcon.style.pointerEvents = 'none';
+                authorDiv.appendChild(redHeartIcon);
+
+                const byAuthorText = document.createElement('small');
+                byAuthorText.textContent = 'by author';
+                authorDiv.appendChild(byAuthorText);
+
+                metaDiv.appendChild(authorDiv);
+            }
+
+            textContentDiv.appendChild(metaDiv);
+
+            const viewRepliesText = document.createElement("b");
+            viewRepliesText.id = "viewRepliesTextRegularComment"+commentIdx;
+            viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+            viewRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+            viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${uniqueReply.numReplies})</span>`;
+            if(uniqueReply.numReplies==0) {
+                viewRepliesText.classList.add('hidden');
+            }
+
+            const hideRepliesText = document.createElement("b");
+            hideRepliesText.id = "hideRepliesTextRegularComment"+commentIdx;
+            hideRepliesText.className = "hidden";
+            hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+            hideRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+            hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+
+            textContentDiv.append(viewRepliesText, hideRepliesText);
+
+            const blankHeartIcon = document.createElement("img");
+            blankHeartIcon.id = "blankHeartIconRegularComment"+commentIdx;
+            blankHeartIcon.className = "hidden";
+            blankHeartIcon.src = "/images/blankHeart.png";
+            blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+            blankHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
+
+            const redHeartIcon = document.createElement("img");
+            redHeartIcon.id = "redHeartIconRegularComment"+commentIdx;
+            redHeartIcon.className = "hidden";
+            redHeartIcon.src = "/images/redHeartIcon.webp";
+            redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+            redHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
+
+            if(uniqueReply.isLiked) {
+                redHeartIcon.classList.remove('hidden');
+            }
+            else {
+                blankHeartIcon.classList.remove('hidden');
+            }
+
+            mainDiv.appendChild(textContentDiv);
+            mainDiv.appendChild(blankHeartIcon);
+            mainDiv.appendChild(redHeartIcon);
+
+            commentsDiv.appendChild(mainDiv);
+        }
+    }
+}
+
+function createDOMElementsForRepliesMentioningAuthUser() {
+    for(let i=0; i<repliesOfPost.length; i++) {
+        const currReply = repliesOfPost[i];
+        if(currReply.comment.includes("@"+authenticatedUsername) && !setOfIdsOfUniqueRepliesAlreadyDone.has(currReply.replyid)) {
+            let parentComment = commentsOfPost.filter(x=>x.commentid===currReply.commentid);
+            if(parentComment.length==0) {
+                continue;
+            }
+            parentComment = parentComment[0];
+            const authUserMentionRepliesOfParentComment = [];
+            const uniqueRepliesOfParentComment = [];
+            let numRepliesOfParentComment = 0;
+            for(let j=0; j<repliesOfPost.length; j++) {
+                if(repliesOfPost[j].commentid!==parentComment.commentid) {
+                    continue;
+                }
+                const parentCommentReply = repliesOfPost[j];
+
+                if(parentCommentReply.comment.includes("@"+authenticatedUsername)) {
+                    const numRepliesOfParentCommentReply = repliesOfPost.filter(x=>x.commentid===parentCommentReply.replyid).length;
+                    authUserMentionRepliesOfParentComment.push({
+                        id: parentCommentReply.replyid,
+                        idOfParentComment: parentCommentReply.commentid,
+                        isLiked: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][1] : false,
+                        index: repliesThatMentionAuthUser.length,
+                        author: parentCommentReply.username,
+                        isVerified: relevantUserInfo[parentCommentReply.username].isVerified,
+                        content: parentCommentReply.comment,
+                        numLikes: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][0] : 0,
+                        date: getRelativeDateTimeText(parentComment.datetime),
+                        numReplies: numRepliesOfParentCommentReply,
+                        isLikedByAuthor: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][2] : false,
+                        level: 1,
+                        datetime: parentCommentReply.datetime,
+                        isEdited: parentCommentReply.isedited
+                    });
+                    repliesThatMentionAuthUser.push({
+                        id: parentCommentReply.replyid,
+                        idOfParentComment: parentCommentReply.commentid,
+                        isLiked: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][1] : false,
+                        index: repliesThatMentionAuthUser.length,
+                        author: parentCommentReply.username,
+                        isVerified: relevantUserInfo[parentCommentReply.username].isVerified,
+                        content: parentCommentReply.comment,
+                        numLikes: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][0] : 0,
+                        date: getRelativeDateTimeText(parentComment.datetime),
+                        numReplies: numRepliesOfParentCommentReply,
+                        isLikedByAuthor: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][2] : false,
+                        level: 1,
+                        datetime: parentCommentReply.datetime,
+                        isEdited: parentCommentReply.isedited
+                    });
+                    setOfIdsOfUniqueRepliesAlreadyDone.add(parentCommentReply.replyid);
+                }
+                else if(authUserFollowings.includes(parentCommentReply.username) || postInfo['usernames'].includes(parentCommentReply.username)) {
+                    const numRepliesOfParentCommentReply = repliesOfPost.filter(x=>x.commentid===parentCommentReply.replyid).length;
+                    uniqueRepliesOfParentComment.push({
+                        id: parentCommentReply.replyid,
+                        idOfParentComment: parentCommentReply.commentid,
+                        isLiked: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][1] : false,
+                        index: regularComments.length,
+                        author: parentCommentReply.username,
+                        isVerified: relevantUserInfo[parentCommentReply.username].isVerified,
+                        content: parentCommentReply.comment,
+                        numLikes: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][0] : 0,
+                        date: getRelativeDateTimeText(parentComment.datetime),
+                        numReplies: numRepliesOfParentCommentReply,
+                        isLikedByAuthor: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][2] : false,
+                        level: 1,
+                        datetime: parentCommentReply.datetime,
+                        isEdited: parentCommentReply.isedited
+                    });
+                    regularComments.push({
+                        id: parentCommentReply.replyid,
+                        idOfParentComment: parentCommentReply.commentid,
+                        isLiked: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][1] : false,
+                        index: regularComments.length,
+                        author: parentCommentReply.username,
+                        isVerified: relevantUserInfo[parentCommentReply.username].isVerified,
+                        content: parentCommentReply.comment,
+                        numLikes: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][0] : 0,
+                        date: getRelativeDateTimeText(parentComment.datetime),
+                        numReplies: numRepliesOfParentCommentReply,
+                        isLikedByAuthor: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][2] : false,
+                        level: 1,
+                        datetime: parentCommentReply.datetime,
+                        isEdited: parentCommentReply.isedited
+                    });
+                    setOfIdsOfUniqueRepliesAlreadyDone.add(parentCommentReply.replyid);
+                }
+                else {
+                    numRepliesOfParentComment++;
+                }
+            }
+            parentCommentsOfRepliesThatMentionAuthUser.push({
+                id: parentComment.commentid,
+                idOfParentComment: null,
+                isLiked: parentComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentComment.commentid][1] : false,
+                index: parentCommentsOfRepliesThatMentionAuthUser.length,
+                author: parentComment.username,
+                isVerified: relevantUserInfo[parentComment.username].isVerified,
+                content: parentComment.comment,
+                numLikes: parentComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentComment.commentid][0] : 0,
+                date: getRelativeDateTimeText(parentComment.datetime),
+                numReplies: numRepliesOfParentComment,
+                isLikedByAuthor: parentComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentComment.commentid][2] : false,
+                level: 0,
+                datetime: parentComment.datetime,
+                isEdited: parentComment.isedited,
+                uniqueReplies: uniqueRepliesOfParentComment,
+                authUserMentionReplies: authUserMentionRepliesOfParentComment
+            });
+            setOfIdsOfCommentsAlreadyDone.add(parentComment.commentid);
+
+        }
+    }
+    repliesThatMentionAuthUser.sort((a,b) => new Date(b.datetime) - new Date(a.datetime));
+    const setOfAuthUserMentionReplyIDsWhoseDOMElementsHaveBeenCreated = new Set();
+
+    for(let authUserMentionReply of repliesThatMentionAuthUser) {
+        if(setOfAuthUserMentionReplyIDsWhoseDOMElementsHaveBeenCreated.has(authUserMentionReply.id)) {
+            continue;
+        }
+        let parentComment = parentCommentsOfRepliesThatMentionAuthUser.filter(x=>x.id===authUserMentionReply.idOfParentComment);
+        parentComment = parentComment[0];
+        let commentIdx = parentComment.index;
+
+        const mainDiv = document.createElement("div");
+        mainDiv.id = "parentOfAuthUserMentionReply"+commentIdx;
+        mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+
+        const profileImg = document.createElement("img");
+        profileImg.src = relevantUserInfo[parentComment.author]['profilePhotoString'];
+        profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+        profileImg.onclick = () => takeToProfile(parentComment.author);
+        mainDiv.appendChild(profileImg);
+
+        const textContentDiv = document.createElement("div");
+        textContentDiv.id = "mainDivParentOfAuthUserMentionReply"+commentIdx;
+        textContentDiv.style = "display: flex; flex-direction: column;";
+
+        const commentParagraph = document.createElement("p");
+        commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+
+        const usernameBold = document.createElement("b");
+        usernameBold.style = "cursor: pointer;";
+        usernameBold.textContent = parentComment.author;
+        usernameBold.onclick = () => takeToProfile(parentComment.author);
+
+        if(relevantUserInfo[parentComment.author].isVerified) {
+            const verifiedCheck = document.createElement('img');
+            verifiedCheck.src = '/images/verifiedCheck.png';
+            verifiedCheck.style.pointerEvents = 'none';
+            verifiedCheck.style.height = '1.1em';
+            verifiedCheck.style.width = '1.1em';
+            verifiedCheck.style.objectFit = 'contain';
+            usernameBold.appendChild(verifiedCheck);
+        }
+
+        if(authUserFollowings.includes(parentComment.author)) {
+            const followingSpan = document.createElement('span');
+            followingSpan.textContent = " · Following";
+            followingSpan.style.color = "gray";
+            followingSpan.style.fontSize = '0.9em';
+            followingSpan.style.marginRight = '0.7em';
+            usernameBold.appendChild(followingSpan);
+
+        }
+        else if(postInfo['usernames'].includes(parentComment.author)) {
+            const authorSpan = document.createElement('span');
+            authorSpan.textContent = " · Author";
+            authorSpan.style.color = "gray";
+            authorSpan.style.fontSize = '0.9em';
+            authorSpan.style.marginRight = '0.7em';
+            usernameBold.appendChild(authorSpan);
+        }
+        
+        const commentSpan = document.createElement("span");
+        commentSpan.id = "contentParentOfAuthUserMentionReply"+commentIdx;
+        commentSpan.ondblclick = () => likeComment("ParentOfAuthUserMentionReply", commentIdx);
+        commentSpan.innerHTML = parseMentionsToSpans(parentComment.content);
+        
+        commentParagraph.appendChild(usernameBold);
+        commentParagraph.append(" ");
+        commentParagraph.appendChild(commentSpan);
+        textContentDiv.appendChild(commentParagraph);
+
+        const metaDiv = document.createElement("div");
+        metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+
+        const dateText = document.createElement("p");
+        dateText.id = "dateTextParentOfAuthUserMentionReply"+commentIdx;
+        dateText.textContent = parentComment.date;
+        if(parentComment.isEdited) {
+            dateText.textContent+= " · Edited";
+        }
+
+        const likesText = document.createElement("b");
+        likesText.id = "numLikesTextParentOfAuthUserMentionReply"+commentIdx;
+        likesText.style = "cursor: pointer;";
+        if(parentComment.numLikes==1) {
+            likesText.textContent = "1 like";
+        }
+        else {
+            likesText.textContent = `${parentComment.numLikes} likes`;
+        }
+        if(parentComment.numLikes==0) {
+            likesText.classList.add('hidden');
+        }
+
+        const replyButton = document.createElement("b");
+        replyButton.style = "cursor: pointer;";
+        replyButton.textContent = "Reply";
+        replyButton.onclick = () => startReplyToComment("ParentOfAuthUserMentionReply", commentIdx);
+
+        metaDiv.appendChild(dateText);
+        metaDiv.appendChild(likesText);
+        metaDiv.appendChild(replyButton);
+
+        if(parentComment.isLikedByAuthor && !postInfo['usernames'].includes(parentComment.author)) {
+            const authorDiv = document.createElement('div');
+            authorDiv.style.display = 'flex';
+            authorDiv.style.alignItems = 'center';
+            authorDiv.style.gap = '0.35em';
+
+            const redHeartIcon = document.createElement('img');
+            redHeartIcon.src = '/images/redHeartIcon.webp';
+            redHeartIcon.style.height = '1.2em';
+            redHeartIcon.style.width = '1.2em';
+            redHeartIcon.style.objectFit = 'contain';
+            redHeartIcon.style.pointerEvents = 'none';
+            authorDiv.appendChild(redHeartIcon);
+
+            const byAuthorText = document.createElement('small');
+            byAuthorText.textContent = 'by author';
+            authorDiv.appendChild(byAuthorText);
+
+            metaDiv.appendChild(authorDiv);
+        }
+
+        textContentDiv.appendChild(metaDiv);
+
+        const viewRepliesText = document.createElement("b");
+        viewRepliesText.id = "viewRepliesTextParentOfAuthUserMentionReply"+commentIdx;
+        viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        viewRepliesText.onclick = () => toggleRepliesText("ParentOfAuthUserMentionReply", commentIdx);
+        viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${parentComment.numReplies})</span>`;
+        if(parentComment.numReplies==0) {
+            viewRepliesText.classList.add('hidden');
+        }
+
+        const hideRepliesText = document.createElement("b");
+        hideRepliesText.id = "hideRepliesTextParentOfAuthUserMentionReply"+commentIdx;
+        hideRepliesText.className = "hidden";
+        hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        hideRepliesText.onclick = () => toggleRepliesText("ParentOfAuthUserMentionReply", commentIdx);
+        hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+
+        textContentDiv.append(viewRepliesText, hideRepliesText);
+
+        const blankHeartIcon = document.createElement("img");
+        blankHeartIcon.id = "blankHeartIconParentOfAuthUserMentionReply"+commentIdx;
+        blankHeartIcon.className = "hidden";
+        blankHeartIcon.src = "/images/blankHeart.png";
+        blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        blankHeartIcon.onclick = () => toggleLikeComment("ParentOfAuthUserMentionReply", commentIdx);
+
+        const redHeartIcon = document.createElement("img");
+        redHeartIcon.id = "redHeartIconParentOfAuthUserMentionReply"+commentIdx;
+        redHeartIcon.className = "hidden";
+        redHeartIcon.src = "/images/redHeartIcon.webp";
+        redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        redHeartIcon.onclick = () => toggleLikeComment("ParentOfAuthUserMentionReply", commentIdx);
+
+        if(parentComment.isLiked) {
+            redHeartIcon.classList.remove('hidden');
+        }
+        else {
+            blankHeartIcon.classList.remove('hidden');
+        }
+
+        mainDiv.appendChild(textContentDiv);
+        mainDiv.appendChild(blankHeartIcon);
+        mainDiv.appendChild(redHeartIcon);
+        commentsDiv.appendChild(mainDiv);
+
+        for(let authUserMentionReplyOfParentComment of parentComment.authUserMentionReplies) {
+            commentIdx = authUserMentionReplyOfParentComment.index;
+    
+            const mainDiv = document.createElement("div");
+            mainDiv.id = "authUserMentionReply"+commentIdx;
+            mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+            mainDiv.style.marginLeft = `${authUserMentionReplyOfParentComment.level*5}em`;
+    
+            const profileImg = document.createElement("img");
+            profileImg.src = relevantUserInfo[authUserMentionReplyOfParentComment.author]['profilePhotoString'];
+            profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+            profileImg.onclick = () => takeToProfile(authUserMentionReplyOfParentComment.author);
+            mainDiv.appendChild(profileImg);
+    
+            const textContentDiv = document.createElement("div");
+            textContentDiv.id = "mainDivAuthUserMentionReply"+commentIdx;
+            textContentDiv.style = "display: flex; flex-direction: column;";
+    
+            const commentParagraph = document.createElement("p");
+            commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+    
+            const usernameBold = document.createElement("b");
+            usernameBold.style = "cursor: pointer;";
+            usernameBold.textContent = authUserMentionReplyOfParentComment.author;
+            usernameBold.onclick = () => takeToProfile(authUserMentionReplyOfParentComment.author);
+    
+            if(relevantUserInfo[authUserMentionReplyOfParentComment.author].isVerified) {
+                const verifiedCheck = document.createElement('img');
+                verifiedCheck.src = '/images/verifiedCheck.png';
+                verifiedCheck.style.pointerEvents = 'none';
+                verifiedCheck.style.height = '1.1em';
+                verifiedCheck.style.width = '1.1em';
+                verifiedCheck.style.objectFit = 'contain';
+                usernameBold.appendChild(verifiedCheck);
+            }
+    
+            if(authUserFollowings.includes(authUserMentionReplyOfParentComment.author)) {
+                const followingSpan = document.createElement('span');
+                followingSpan.textContent = " · Following";
+                followingSpan.style.color = "gray";
+                followingSpan.style.fontSize = '0.9em';
+                followingSpan.style.marginRight = '0.7em';
+                usernameBold.appendChild(followingSpan);
+
+            }
+            else if(postInfo['usernames'].includes(authUserMentionReplyOfParentComment.author)) {
+                const authorSpan = document.createElement('span');
+                authorSpan.textContent = " · Author";
+                authorSpan.style.color = "gray";
+                authorSpan.style.fontSize = '0.9em';
+                authorSpan.style.marginRight = '0.7em';
+                usernameBold.appendChild(authorSpan);
+            }
+            
+            const commentSpan = document.createElement("span");
+            commentSpan.id = "contentAuthUserMentionReply"+commentIdx;
+            commentSpan.ondblclick = () => likeComment("AuthUserMentionReply", commentIdx);
+            commentSpan.innerHTML = parseMentionsToSpans(authUserMentionReplyOfParentComment.content);
+            
+            commentParagraph.appendChild(usernameBold);
+            commentParagraph.append(" ");
+            commentParagraph.appendChild(commentSpan);
+            textContentDiv.appendChild(commentParagraph);
+    
+            const metaDiv = document.createElement("div");
+            metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+    
+            const dateText = document.createElement("p");
+            dateText.id = "dateTextAuthUserMentionReply"+commentIdx;
+            dateText.textContent = authUserMentionReplyOfParentComment.date;
+            if(authUserMentionReplyOfParentComment.isEdited) {
+                dateText.textContent+= " · Edited";
+            }
+    
+            const likesText = document.createElement("b");
+            likesText.id = "numLikesTextAuthUserMentionReply"+commentIdx;
+            likesText.style = "cursor: pointer;";
+            if(authUserMentionReplyOfParentComment.numLikes==1) {
+                likesText.textContent = "1 like";
+            }
+            else {
+                likesText.textContent = `${authUserMentionReplyOfParentComment.numLikes} likes`;
+            }
+            if(authUserMentionReplyOfParentComment.numLikes==0) {
+                likesText.classList.add('hidden');
+            }
+    
+            const replyButton = document.createElement("b");
+            replyButton.style = "cursor: pointer;";
+            replyButton.textContent = "Reply";
+            replyButton.onclick = () => startReplyToComment("AuthUserMentionReply", commentIdx);
+
+            metaDiv.appendChild(dateText);
+            metaDiv.appendChild(likesText);
+            metaDiv.appendChild(replyButton);
+    
+            if(authUserMentionReplyOfParentComment.isLikedByAuthor && !postInfo['usernames'].includes(authUserMentionReplyOfParentComment.author)) {
+                const authorDiv = document.createElement('div');
+                authorDiv.style.display = 'flex';
+                authorDiv.style.alignItems = 'center';
+                authorDiv.style.gap = '0.35em';
+    
+                const redHeartIcon = document.createElement('img');
+                redHeartIcon.src = '/images/redHeartIcon.webp';
+                redHeartIcon.style.height = '1.2em';
+                redHeartIcon.style.width = '1.2em';
+                redHeartIcon.style.objectFit = 'contain';
+                redHeartIcon.style.pointerEvents = 'none';
+                authorDiv.appendChild(redHeartIcon);
+    
+                const byAuthorText = document.createElement('small');
+                byAuthorText.textContent = 'by author';
+                authorDiv.appendChild(byAuthorText);
+    
+                metaDiv.appendChild(authorDiv);
+            }
+    
+            textContentDiv.appendChild(metaDiv);
+    
+            const viewRepliesText = document.createElement("b");
+            viewRepliesText.id = "viewRepliesTextAuthUserMentionReply"+commentIdx;
+            viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+            viewRepliesText.onclick = () => toggleRepliesText("AuthUserMentionReply", commentIdx);
+            viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${authUserMentionReplyOfParentComment.numReplies})</span>`;
+            if(authUserMentionReplyOfParentComment.numReplies==0) {
+                viewRepliesText.classList.add('hidden');
+            }
+    
+            const hideRepliesText = document.createElement("b");
+            hideRepliesText.id = "hideRepliesTextAuthUserMentionReply"+commentIdx;
+            hideRepliesText.className = "hidden";
+            hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+            hideRepliesText.onclick = () => toggleRepliesText("AuthUserMentionReply", commentIdx);
+            hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+    
+            textContentDiv.append(viewRepliesText, hideRepliesText);
+    
+            const blankHeartIcon = document.createElement("img");
+            blankHeartIcon.id = "blankHeartIconAuthUserMentionReply"+commentIdx;
+            blankHeartIcon.className = "hidden";
+            blankHeartIcon.src = "/images/blankHeart.png";
+            blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+            blankHeartIcon.onclick = () => toggleLikeComment("AuthUserMentionReply", commentIdx);
+    
+            const redHeartIcon = document.createElement("img");
+            redHeartIcon.id = "redHeartIconAuthUserMentionReply"+commentIdx;
+            redHeartIcon.className = "hidden";
+            redHeartIcon.src = "/images/redHeartIcon.webp";
+            redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+            redHeartIcon.onclick = () => toggleLikeComment("AuthUserMentionReply", commentIdx);
+    
+            if(authUserMentionReplyOfParentComment.isLiked) {
+                redHeartIcon.classList.remove('hidden');
+            }
+            else {
+                blankHeartIcon.classList.remove('hidden');
+            }
+    
+            mainDiv.appendChild(textContentDiv);
+            mainDiv.appendChild(blankHeartIcon);
+            mainDiv.appendChild(redHeartIcon);
+            commentsDiv.appendChild(mainDiv);
+            setOfAuthUserMentionReplyIDsWhoseDOMElementsHaveBeenCreated.add(authUserMentionReplyOfParentComment.id);
+        }
+
+        for(let uniqueReply of parentComment.uniqueReplies) {
+            commentIdx = uniqueReply.index;
+    
+            const mainDiv = document.createElement("div");
+            mainDiv.id = "regularComment"+commentIdx;
+            mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+            mainDiv.style.marginLeft = `${uniqueReply.level*5}em`;
+    
+            const profileImg = document.createElement("img");
+            profileImg.src = relevantUserInfo[uniqueReply.author]['profilePhotoString'];
+            profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+            profileImg.onclick = () => takeToProfile(uniqueReply.author);
+            mainDiv.appendChild(profileImg);
+    
+            const textContentDiv = document.createElement("div");
+            textContentDiv.id = "mainDivRegularComment"+commentIdx;
+            textContentDiv.style = "display: flex; flex-direction: column;";
+    
+            const commentParagraph = document.createElement("p");
+            commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+    
+            const usernameBold = document.createElement("b");
+            usernameBold.style = "cursor: pointer;";
+            usernameBold.textContent = uniqueReply.author;
+            usernameBold.onclick = () => takeToProfile(uniqueReply.author);
+    
+            if(relevantUserInfo[uniqueReply.author].isVerified) {
+                const verifiedCheck = document.createElement('img');
+                verifiedCheck.src = '/images/verifiedCheck.png';
+                verifiedCheck.style.pointerEvents = 'none';
+                verifiedCheck.style.height = '1.1em';
+                verifiedCheck.style.width = '1.1em';
+                verifiedCheck.style.objectFit = 'contain';
+                usernameBold.appendChild(verifiedCheck);
+            }
+    
+            if(authUserFollowings.includes(uniqueReply.author)) {
+                const followingSpan = document.createElement('span');
+                followingSpan.textContent = " · Following";
+                followingSpan.style.color = "gray";
+                followingSpan.style.fontSize = '0.9em';
+                followingSpan.style.marginRight = '0.7em';
+                usernameBold.appendChild(followingSpan);
+
+            }
+            else if(postInfo['usernames'].includes(uniqueReply.author)) {
+                const authorSpan = document.createElement('span');
+                authorSpan.textContent = " · Author";
+                authorSpan.style.color = "gray";
+                authorSpan.style.fontSize = '0.9em';
+                authorSpan.style.marginRight = '0.7em';
+                usernameBold.appendChild(authorSpan);
+            }
+            
+            const commentSpan = document.createElement("span");
+            commentSpan.id = "contentRegularComment"+commentIdx;
+            commentSpan.ondblclick = () => likeComment("RegularComment", commentIdx);
+            commentSpan.innerHTML = parseMentionsToSpans(uniqueReply.content);
+            
+            commentParagraph.appendChild(usernameBold);
+            commentParagraph.append(" ");
+            commentParagraph.appendChild(commentSpan);
+            textContentDiv.appendChild(commentParagraph);
+    
+            const metaDiv = document.createElement("div");
+            metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+    
+            const dateText = document.createElement("p");
+            dateText.id = "dateTextRegularComment"+commentIdx;
+            dateText.textContent = uniqueReply.date;
+            if(uniqueReply.isEdited) {
+                dateText.textContent+= " · Edited";
+            }
+    
+            const likesText = document.createElement("b");
+            likesText.id = "numLikesTextRegularComment"+commentIdx;
+            likesText.style = "cursor: pointer;";
+            if(uniqueReply.numLikes==1) {
+                likesText.textContent = "1 like";
+            }
+            else {
+                likesText.textContent = `${uniqueReply.numLikes} likes`;
+            }
+            if(uniqueReply.numLikes==0) {
+                likesText.classList.add('hidden');
+            }
+    
+            const replyButton = document.createElement("b");
+            replyButton.style = "cursor: pointer;";
+            replyButton.textContent = "Reply";
+            replyButton.onclick = () => startReplyToComment("RegularComment", commentIdx);
+
+            metaDiv.appendChild(dateText);
+            metaDiv.appendChild(likesText);
+            metaDiv.appendChild(replyButton);
+    
+            if(uniqueReply.isLikedByAuthor && !postInfo['usernames'].includes(uniqueReply.author)) {
+                const authorDiv = document.createElement('div');
+                authorDiv.style.display = 'flex';
+                authorDiv.style.alignItems = 'center';
+                authorDiv.style.gap = '0.35em';
+    
+                const redHeartIcon = document.createElement('img');
+                redHeartIcon.src = '/images/redHeartIcon.webp';
+                redHeartIcon.style.height = '1.2em';
+                redHeartIcon.style.width = '1.2em';
+                redHeartIcon.style.objectFit = 'contain';
+                redHeartIcon.style.pointerEvents = 'none';
+                authorDiv.appendChild(redHeartIcon);
+    
+                const byAuthorText = document.createElement('small');
+                byAuthorText.textContent = 'by author';
+                authorDiv.appendChild(byAuthorText);
+    
+                metaDiv.appendChild(authorDiv);
+            }
+    
+            textContentDiv.appendChild(metaDiv);
+    
+            const viewRepliesText = document.createElement("b");
+            viewRepliesText.id = "viewRepliesTextRegularComment"+commentIdx;
+            viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+            viewRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+            viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${uniqueReply.numReplies})</span>`;
+            if(uniqueReply.numReplies==0) {
+                viewRepliesText.classList.add('hidden');
+            }
+    
+            const hideRepliesText = document.createElement("b");
+            hideRepliesText.id = "hideRepliesTextRegularComment"+commentIdx;
+            hideRepliesText.className = "hidden";
+            hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+            hideRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+            hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+    
+            textContentDiv.append(viewRepliesText, hideRepliesText);
+    
+            const blankHeartIcon = document.createElement("img");
+            blankHeartIcon.id = "blankHeartIconRegularComment"+commentIdx;
+            blankHeartIcon.className = "hidden";
+            blankHeartIcon.src = "/images/blankHeart.png";
+            blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+            blankHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
+    
+            const redHeartIcon = document.createElement("img");
+            redHeartIcon.id = "redHeartIconRegularComment"+commentIdx;
+            redHeartIcon.className = "hidden";
+            redHeartIcon.src = "/images/redHeartIcon.webp";
+            redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+            redHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
+    
+            if(uniqueReply.isLiked) {
+                redHeartIcon.classList.remove('hidden');
+            }
+            else {
+                blankHeartIcon.classList.remove('hidden');
+            }
+    
+            mainDiv.appendChild(textContentDiv);
+            mainDiv.appendChild(blankHeartIcon);
+            mainDiv.appendChild(redHeartIcon);
+            commentsDiv.appendChild(mainDiv);
+        }
+    }
+}
+
+function createDOMElementsForCommentsMadeByAuthUserFollowing() {
+    for(let i=0; i<commentsOfPost.length; i++) {
+        const currComment = commentsOfPost[i];
+        if(authUserFollowings.includes(currComment.username) && !setOfIdsOfCommentsAlreadyDone.has(currComment.commentid)) {
+            let numRepliesOfCurrComment = 0;
+            const uniqueRepliesOfCurrComment = [];
+            for(let j=0; j<repliesOfPost.length; j++) {
+                const currReply = repliesOfPost[j];
+                if(currReply.commentid!==currComment.commentid) {
+                    continue;
+                }
+                if(authUserFollowings.includes(currReply.username) || postInfo['usernames'].includes(currReply.username)) {
+                    const numRepliesOfCurrReply = repliesOfPost.filter(x=>x.commentid===currReply.replyid).length;
+                    uniqueRepliesOfCurrComment.push({
+                        id: currReply.replyid,
+                        idOfParentComment: currReply.commentid,
+                        isLiked: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][1] : false,
+                        index: regularComments.length,
+                        author: currReply.username,
+                        isVerified: relevantUserInfo[currReply.username].isVerified,
+                        content: currReply.comment,
+                        numLikes: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][0] : 0,
+                        date: getRelativeDateTimeText(currReply.datetime),
+                        numReplies: numRepliesOfCurrReply,
+                        isLikedByAuthor: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][2] : false,
+                        level: 1,
+                        datetime: currReply.datetime,
+                        isEdited: currReply.isedited,
+                    });
+                    regularComments.push({
+                        id: currReply.replyid,
+                        idOfParentComment: currReply.commentid,
+                        isLiked: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][1] : false,
+                        index: regularComments.length,
+                        author: currReply.username,
+                        isVerified: relevantUserInfo[currReply.username].isVerified,
+                        content: currReply.comment,
+                        numLikes: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][0] : 0,
+                        date: getRelativeDateTimeText(currReply.datetime),
+                        numReplies: numRepliesOfCurrReply,
+                        isLikedByAuthor: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][2] : false,
+                        level: 1,
+                        datetime: currReply.datetime,
+                        isEdited: currReply.isedited,
+                    });
+                    setOfIdsOfUniqueRepliesAlreadyDone.add(currReply.replyid);
+                }
+                else {
+                    numRepliesOfCurrComment++;
+                }
+            }
+            commentsMadeByAuthUserFollowing.push({
+                id: currComment.commentid,
+                idOfParentComment: null,
+                isLiked: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][1] : false,
+                index: commentsMadeByAuthUserFollowing.length,
+                author: currComment.username,
+                isVerified: relevantUserInfo[currComment.username].isVerified,
+                content: currComment.comment,
+                numLikes: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][0] : 0,
+                date: getRelativeDateTimeText(currComment.datetime),
+                numReplies: numRepliesOfCurrComment,
+                isLikedByAuthor: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][2] : false,
+                level: 0,
+                datetime: currComment.datetime,
+                isEdited: currComment.isedited,
+                uniqueReplies: uniqueRepliesOfCurrComment
+            });
+            setOfIdsOfCommentsAlreadyDone.add(currComment.commentid);
+        }
+    }
+    commentsMadeByAuthUserFollowing.sort((a,b)=> new Date(b.datetime)-new Date(a.datetime));
+
+    for(let authUserFollowingComment of commentsMadeByAuthUserFollowing) {
+        const commentIdx = authUserFollowingComment.index;
+        const mainDiv = document.createElement("div");
+        mainDiv.id = "authUserFollowingComment"+commentIdx;
+        mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+
+        const profileImg = document.createElement("img");
+        profileImg.src = relevantUserInfo[authUserFollowingComment.author]['profilePhotoString'];
+        profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+        profileImg.onclick = () => takeToProfile(authUserFollowingComment.author);
+        mainDiv.appendChild(profileImg);
+
+        const textContentDiv = document.createElement("div");
+        textContentDiv.id = "mainDivAuthUserFollowingComment"+commentIdx;
+        textContentDiv.style = "display: flex; flex-direction: column;";
+
+        const commentParagraph = document.createElement("p");
+        commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+
+        const usernameBold = document.createElement("b");
+        usernameBold.style = "cursor: pointer;";
+        usernameBold.textContent = authUserFollowingComment.author;
+        usernameBold.onclick = () => takeToProfile(authUserFollowingComment.author);
+
+        if(relevantUserInfo[authUserFollowingComment.author].isVerified) {
+            const verifiedCheck = document.createElement('img');
+            verifiedCheck.src = '/images/verifiedCheck.png';
+            verifiedCheck.style.pointerEvents = 'none';
+            verifiedCheck.style.height = '1.1em';
+            verifiedCheck.style.width = '1.1em';
+            verifiedCheck.style.objectFit = 'contain';
+            usernameBold.appendChild(verifiedCheck);
+        }
+
+        const followingSpan = document.createElement('span');
+        followingSpan.textContent = " · Following";
+        followingSpan.style.color = "gray";
+        followingSpan.style.fontSize = '0.9em';
+        followingSpan.style.marginRight = '0.7em';
+        usernameBold.appendChild(followingSpan);
+        
+        const commentSpan = document.createElement("span");
+        commentSpan.id = "contentAuthUserFollowingComment"+commentIdx;
+        commentSpan.ondblclick = () => likeComment("AuthUserFollowingComment", commentIdx);
+        commentSpan.innerHTML = parseMentionsToSpans(authUserFollowingComment.content);
+        
+        commentParagraph.appendChild(usernameBold);
+        commentParagraph.append(" ");
+        commentParagraph.appendChild(commentSpan);
+        textContentDiv.appendChild(commentParagraph);
+
+        const metaDiv = document.createElement("div");
+        metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+
+        const dateText = document.createElement("p");
+        dateText.id = "dateTextAuthUserFollowingComment"+commentIdx;
+        dateText.textContent = authUserFollowingComment.date;
+        if(authUserFollowingComment.isEdited) {
+            dateText.textContent+= " · Edited";
+        }
+
+        const likesText = document.createElement("b");
+        likesText.id = "numLikesTextAuthUserFollowingComment"+commentIdx;
+        likesText.style = "cursor: pointer;";
+        if(authUserFollowingComment.numLikes==1) {
+            likesText.textContent = "1 like";
+        }
+        else {
+            likesText.textContent = `${authUserFollowingComment.numLikes} likes`;
+        }
+        if(authUserFollowingComment.numLikes==0) {
+            likesText.classList.add('hidden');
+        }
+
+        const replyButton = document.createElement("b");
+        replyButton.style = "cursor: pointer;";
+        replyButton.textContent = "Reply";
+        replyButton.onclick = () => startReplyToComment("AuthUserFollowingComment", commentIdx);
+
+        metaDiv.append(dateText, likesText, replyButton);
+
+        if(authUserFollowingComment.isLikedByAuthor && !postInfo['usernames'].includes(authUserFollowingComment.author)) {
+            const authorDiv = document.createElement('div');
+            authorDiv.style.display = 'flex';
+            authorDiv.style.alignItems = 'center';
+            authorDiv.style.gap = '0.35em';
+
+            const redHeartIcon = document.createElement('img');
+            redHeartIcon.src = '/images/redHeartIcon.webp';
+            redHeartIcon.style.height = '1.2em';
+            redHeartIcon.style.width = '1.2em';
+            redHeartIcon.style.objectFit = 'contain';
+            redHeartIcon.style.pointerEvents = 'none';
+            authorDiv.appendChild(redHeartIcon);
+
+            const byAuthorText = document.createElement('small');
+            byAuthorText.textContent = 'by author';
+            authorDiv.appendChild(byAuthorText);
+
+            metaDiv.appendChild(authorDiv);
+        }
+
+        textContentDiv.appendChild(metaDiv);
+
+        const viewRepliesText = document.createElement("b");
+        viewRepliesText.id = "viewRepliesTextAuthUserFollowingComment"+commentIdx;
+        viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        viewRepliesText.onclick = () => toggleRepliesText("AuthUserFollowingComment", commentIdx);
+        viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${authUserFollowingComment.numReplies})</span>`;
+        if(authUserFollowingComment.numReplies==0) {
+            viewRepliesText.classList.add('hidden');
+        }
+
+        const hideRepliesText = document.createElement("b");
+        hideRepliesText.id = "hideRepliesTextAuthUserFollowingComment"+commentIdx;
+        hideRepliesText.className = "hidden";
+        hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        hideRepliesText.onclick = () => toggleRepliesText("AuthUserFollowingComment", commentIdx);
+        hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+
+        textContentDiv.append(viewRepliesText, hideRepliesText);
+
+        const blankHeartIcon = document.createElement("img");
+        blankHeartIcon.id = "blankHeartIconAuthUserFollowingComment"+commentIdx;
+        blankHeartIcon.className = "hidden";
+        blankHeartIcon.src = "/images/blankHeart.png";
+        blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        blankHeartIcon.onclick = () => toggleLikeComment("AuthUserFollowingComment", commentIdx);
+
+        const redHeartIcon = document.createElement("img");
+        redHeartIcon.id = "redHeartIconAuthUserFollowingComment"+commentIdx;
+        redHeartIcon.className = "hidden";
+        redHeartIcon.src = "/images/redHeartIcon.webp";
+        redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        redHeartIcon.onclick = () => toggleLikeComment("AuthUserFollowingComment", commentIdx);
+
+        if(authUserFollowingComment.isLiked) {
+            redHeartIcon.classList.remove('hidden');
+        }
+        else {
+            blankHeartIcon.classList.remove('hidden');
+        }
+
+        mainDiv.appendChild(textContentDiv);
+        mainDiv.appendChild(blankHeartIcon);
+        mainDiv.appendChild(redHeartIcon);
+        commentsDiv.appendChild(mainDiv);
+
+        for(let uniqueReply of authUserFollowingComment.uniqueReplies) {
+            const commentIdx = uniqueReply.index;
+            const mainDiv = document.createElement("div");
+            mainDiv.id = "regularComment"+commentIdx;
+            mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+            mainDiv.style.marginLeft = `${uniqueReply.level*5}em`;
+
+            const profileImg = document.createElement("img");
+            profileImg.src = relevantUserInfo[uniqueReply.author]['profilePhotoString'];
+            profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+            profileImg.onclick = () => takeToProfile(uniqueReply.author);
+            mainDiv.appendChild(profileImg);
+
+            const textContentDiv = document.createElement("div");
+            textContentDiv.id = "mainDivRegularComment"+commentIdx;
+            textContentDiv.style = "display: flex; flex-direction: column;";
+
+            const commentParagraph = document.createElement("p");
+            commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+
+            const usernameBold = document.createElement("b");
+            usernameBold.style = "cursor: pointer;";
+            usernameBold.textContent = uniqueReply.author;
+            usernameBold.onclick = () => takeToProfile(uniqueReply.author);
+
+            if(relevantUserInfo[uniqueReply.author].isVerified) {
+                const verifiedCheck = document.createElement('img');
+                verifiedCheck.src = '/images/verifiedCheck.png';
+                verifiedCheck.style.pointerEvents = 'none';
+                verifiedCheck.style.height = '1.1em';
+                verifiedCheck.style.width = '1.1em';
+                verifiedCheck.style.objectFit = 'contain';
+                usernameBold.appendChild(verifiedCheck);
+            }
+
+            if(authUserFollowings.includes(uniqueReply.author)) {
+                const followingSpan = document.createElement('span');
+                followingSpan.textContent = " · Following";
+                followingSpan.style.color = "gray";
+                followingSpan.style.fontSize = '0.9em';
+                followingSpan.style.marginRight = '0.7em';
+                usernameBold.appendChild(followingSpan);
+
+            }
+            else if(postInfo['usernames'].includes(uniqueReply.author)) {
+                const authorSpan = document.createElement('span');
+                authorSpan.textContent = " · Author";
+                authorSpan.style.color = "gray";
+                authorSpan.style.fontSize = '0.9em';
+                authorSpan.style.marginRight = '0.7em';
+                usernameBold.appendChild(authorSpan);
+            }
+            
+            const commentSpan = document.createElement("span");
+            commentSpan.id = "contentRegularComment"+commentIdx;
+            commentSpan.ondblclick = () => likeComment("RegularComment", commentIdx);
+            commentSpan.innerHTML = parseMentionsToSpans(uniqueReply.content);
+            
+            commentParagraph.appendChild(usernameBold);
+            commentParagraph.append(" ");
+            commentParagraph.appendChild(commentSpan);
+            textContentDiv.appendChild(commentParagraph);
+
+            const metaDiv = document.createElement("div");
+            metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+
+            const dateText = document.createElement("p");
+            dateText.id = "dateTextRegularComment"+commentIdx;
+            dateText.textContent = uniqueReply.date;
+            if(uniqueReply.isEdited) {
+                dateText.textContent+= " · Edited";
+            }
+
+            const likesText = document.createElement("b");
+            likesText.id = "numLikesTextRegularComment"+commentIdx;
+            likesText.style = "cursor: pointer;";
+            if(uniqueReply.numLikes==1) {
+                likesText.textContent = "1 like";
+            }
+            else {
+                likesText.textContent = `${uniqueReply.numLikes} likes`;
+            }
+            if(uniqueReply.numLikes==0) {
+                likesText.classList.add('hidden');
+            }
+
+            const replyButton = document.createElement("b");
+            replyButton.style = "cursor: pointer;";
+            replyButton.textContent = "Reply";
+            replyButton.onclick = () => startReplyToComment("RegularComment", commentIdx);
+
+            metaDiv.append(dateText, likesText, replyButton);
+
+            if(uniqueReply.isLikedByAuthor && !postInfo['usernames'].includes(uniqueReply.author)) {
+                const authorDiv = document.createElement('div');
+                authorDiv.style.display = 'flex';
+                authorDiv.style.alignItems = 'center';
+                authorDiv.style.gap = '0.35em';
+
+                const redHeartIcon = document.createElement('img');
+                redHeartIcon.src = '/images/redHeartIcon.webp';
+                redHeartIcon.style.height = '1.2em';
+                redHeartIcon.style.width = '1.2em';
+                redHeartIcon.style.objectFit = 'contain';
+                redHeartIcon.style.pointerEvents = 'none';
+                authorDiv.appendChild(redHeartIcon);
+
+                const byAuthorText = document.createElement('small');
+                byAuthorText.textContent = 'by author';
+                authorDiv.appendChild(byAuthorText);
+
+                metaDiv.appendChild(authorDiv);
+            }
+
+            textContentDiv.appendChild(metaDiv);
+
+            const viewRepliesText = document.createElement("b");
+            viewRepliesText.id = "viewRepliesTextRegularComment"+commentIdx;
+            viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+            viewRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+            viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${uniqueReply.numReplies})</span>`;
+            if(uniqueReply.numReplies==0) {
+                viewRepliesText.classList.add('hidden');
+            }
+
+            const hideRepliesText = document.createElement("b");
+            hideRepliesText.id = "hideRepliesTextRegularComment"+commentIdx;
+            hideRepliesText.className = "hidden";
+            hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+            hideRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+            hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+
+            textContentDiv.append(viewRepliesText, hideRepliesText);
+
+            const blankHeartIcon = document.createElement("img");
+            blankHeartIcon.id = "blankHeartIconRegularComment"+commentIdx;
+            blankHeartIcon.className = "hidden";
+            blankHeartIcon.src = "/images/blankHeart.png";
+            blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+            blankHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
+
+            const redHeartIcon = document.createElement("img");
+            redHeartIcon.id = "redHeartIconRegularComment"+commentIdx;
+            redHeartIcon.className = "hidden";
+            redHeartIcon.src = "/images/redHeartIcon.webp";
+            redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+            redHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
+
+            if(uniqueReply.isLiked) {
+                redHeartIcon.classList.remove('hidden');
+            }
+            else {
+                blankHeartIcon.classList.remove('hidden');
+            }
+
+            mainDiv.appendChild(textContentDiv);
+            mainDiv.appendChild(blankHeartIcon);
+            mainDiv.appendChild(redHeartIcon);
+            commentsDiv.appendChild(mainDiv);
+        }
+    }
+}
+
+function createDOMElementsForRepliesMadeByAuthUserFollowing() {
+    for(let i=0; i<repliesOfPost.length; i++) {
+        const currReply = repliesOfPost[i];
+        if(authUserFollowings.includes(currReply.username) && !setOfIdsOfUniqueRepliesAlreadyDone.has(currReply.replyid)) {
+            let parentComment = commentsOfPost.filter(x=>x.commentid===currReply.commentid);
+            if(parentComment.length==0) {
+                continue;
+            }
+            parentComment = parentComment[0];
+            const authUserFollowingRepliesOfParentComment = [];
+            const uniqueRepliesOfParentComment = [];
+            let numRepliesOfParentComment = 0;
+            for(let j=0; j<repliesOfPost.length; j++) {
+                if(repliesOfPost[j].commentid!==parentComment.commentid) {
+                    continue;
+                }
+                const parentCommentReply = repliesOfPost[j];
+
+                if(authUserFollowings.includes(parentCommentReply.username)) {
+                    const numRepliesOfParentCommentReply = repliesOfPost.filter(x=>x.commentid===parentCommentReply.replyid).length;
+                    authUserFollowingRepliesOfParentComment.push({
+                        id: parentCommentReply.replyid,
+                        idOfParentComment: parentCommentReply.commentid,
+                        isLiked: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][1] : false,
+                        index: repliesMadeByAuthUserFollowing.length,
+                        author: parentCommentReply.username,
+                        isVerified: relevantUserInfo[parentCommentReply.username].isVerified,
+                        content: parentCommentReply.comment,
+                        numLikes: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][0] : 0,
+                        date: getRelativeDateTimeText(parentComment.datetime),
+                        numReplies: numRepliesOfParentCommentReply,
+                        isLikedByAuthor: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][2] : false,
+                        level: 1,
+                        datetime: parentCommentReply.datetime,
+                        isEdited: parentCommentReply.isedited
+                    });
+                    repliesMadeByAuthUserFollowing.push({
+                        id: parentCommentReply.replyid,
+                        idOfParentComment: parentCommentReply.commentid,
+                        isLiked: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][1] : false,
+                        index: repliesMadeByAuthUserFollowing.length,
+                        author: parentCommentReply.username,
+                        isVerified: relevantUserInfo[parentCommentReply.username].isVerified,
+                        content: parentCommentReply.comment,
+                        numLikes: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][0] : 0,
+                        date: getRelativeDateTimeText(parentComment.datetime),
+                        numReplies: numRepliesOfParentCommentReply,
+                        isLikedByAuthor: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][2] : false,
+                        level: 1,
+                        datetime: parentCommentReply.datetime,
+                        isEdited: parentCommentReply.isedited
+                    });
+                    setOfIdsOfUniqueRepliesAlreadyDone.add(parentCommentReply.replyid);
+                }
+                else if(postInfo['usernames'].includes(parentCommentReply.username)) {
+                    const numRepliesOfParentCommentReply = repliesOfPost.filter(x=>x.commentid===parentCommentReply.replyid).length;
+                    uniqueRepliesOfParentComment.push({
+                        id: parentCommentReply.replyid,
+                        idOfParentComment: parentCommentReply.commentid,
+                        isLiked: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][1] : false,
+                        index: regularComments.length,
+                        author: parentCommentReply.username,
+                        isVerified: relevantUserInfo[parentCommentReply.username].isVerified,
+                        content: parentCommentReply.comment,
+                        numLikes: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][0] : 0,
+                        date: getRelativeDateTimeText(parentComment.datetime),
+                        numReplies: numRepliesOfParentCommentReply,
+                        isLikedByAuthor: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][2] : false,
+                        level: 1,
+                        datetime: parentCommentReply.datetime,
+                        isEdited: parentCommentReply.isedited
+                    });
+                    regularComments.push({
+                        id: parentCommentReply.replyid,
+                        idOfParentComment: parentCommentReply.commentid,
+                        isLiked: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][1] : false,
+                        index: regularComments.length,
+                        author: parentCommentReply.username,
+                        isVerified: relevantUserInfo[parentCommentReply.username].isVerified,
+                        content: parentCommentReply.comment,
+                        numLikes: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][0] : 0,
+                        date: getRelativeDateTimeText(parentComment.datetime),
+                        numReplies: numRepliesOfParentCommentReply,
+                        isLikedByAuthor: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][2] : false,
+                        level: 1,
+                        datetime: parentCommentReply.datetime,
+                        isEdited: parentCommentReply.isedited
+                    });
+                    setOfIdsOfUniqueRepliesAlreadyDone.add(parentCommentReply.replyid);
+                }
+                else {
+                    numRepliesOfParentComment++;
+                }
+            }
+            parentCommentsOfRepliesMadeByAuthUserFollowing.push({
+                id: parentComment.commentid,
+                idOfParentComment: null,
+                isLiked: parentComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentComment.commentid][1] : false,
+                index: parentCommentsOfRepliesThatMentionAuthUser.length,
+                author: parentComment.username,
+                isVerified: relevantUserInfo[parentComment.username].isVerified,
+                content: parentComment.comment,
+                numLikes: parentComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentComment.commentid][0] : 0,
+                date: getRelativeDateTimeText(parentComment.datetime),
+                numReplies: numRepliesOfParentComment,
+                isLikedByAuthor: parentComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentComment.commentid][2] : false,
+                level: 0,
+                datetime: parentComment.datetime,
+                isEdited: parentComment.isedited,
+                uniqueReplies: uniqueRepliesOfParentComment,
+                authUserFollowingReplies: authUserFollowingRepliesOfParentComment
+            });
+            setOfIdsOfCommentsAlreadyDone.add(parentComment.commentid);
+
+        }
+    }
+    repliesMadeByAuthUserFollowing.sort((a,b) => new Date(b.datetime) - new Date(a.datetime));
+    const setOfAuthUserFollowingReplyIDsWhoseDOMElementsHaveBeenCreated = new Set();
+
+    for(let authUserFollowingReply of repliesMadeByAuthUserFollowing) {
+        if(setOfAuthUserFollowingReplyIDsWhoseDOMElementsHaveBeenCreated.has(authUserFollowingReply.id)) {
+            continue;
+        }
+        let parentComment = parentCommentsOfRepliesMadeByAuthUserFollowing.filter(x=>x.id===authUserFollowingReply.idOfParentComment);
+        parentComment = parentComment[0];
+        let commentIdx = parentComment.index;
+
+        const mainDiv = document.createElement("div");
+        mainDiv.id = "parentOfAuthUserFollowingReply"+commentIdx;
+        mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+
+        const profileImg = document.createElement("img");
+        profileImg.src = relevantUserInfo[parentComment.author]['profilePhotoString'];
+        profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+        profileImg.onclick = () => takeToProfile(parentComment.author);
+        mainDiv.appendChild(profileImg);
+
+        const textContentDiv = document.createElement("div");
+        textContentDiv.id = "mainDivParentOfAuthUserFollowingReply"+commentIdx;
+        textContentDiv.style = "display: flex; flex-direction: column;";
+
+        const commentParagraph = document.createElement("p");
+        commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+
+        const usernameBold = document.createElement("b");
+        usernameBold.style = "cursor: pointer;";
+        usernameBold.textContent = parentComment.author;
+        usernameBold.onclick = () => takeToProfile(parentComment.author);
+
+        if(relevantUserInfo[parentComment.author].isVerified) {
+            const verifiedCheck = document.createElement('img');
+            verifiedCheck.src = '/images/verifiedCheck.png';
+            verifiedCheck.style.pointerEvents = 'none';
+            verifiedCheck.style.height = '1.1em';
+            verifiedCheck.style.width = '1.1em';
+            verifiedCheck.style.objectFit = 'contain';
+            usernameBold.appendChild(verifiedCheck);
+        }
+
+        if(postInfo['usernames'].includes(parentComment.author)) {
+            const authorSpan = document.createElement('span');
+            authorSpan.textContent = " · Author";
+            authorSpan.style.color = "gray";
+            authorSpan.style.fontSize = '0.9em';
+            authorSpan.style.marginRight = '0.7em';
+            usernameBold.appendChild(authorSpan);
+        }
+        
+        const commentSpan = document.createElement("span");
+        commentSpan.id = "contentParentOfAuthUserFollowingReply"+commentIdx;
+        commentSpan.ondblclick = () => likeComment("ParentOfAuthUserFollowingReply", commentIdx);
+        commentSpan.innerHTML = parseMentionsToSpans(parentComment.content);
+        
+        commentParagraph.appendChild(usernameBold);
+        commentParagraph.append(" ");
+        commentParagraph.appendChild(commentSpan);
+        textContentDiv.appendChild(commentParagraph);
+
+        const metaDiv = document.createElement("div");
+        metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+
+        const dateText = document.createElement("p");
+        dateText.id = "dateTextParentOfAuthUserFollowingReply"+commentIdx;
+        dateText.textContent = parentComment.date;
+        if(parentComment.isEdited) {
+            dateText.textContent+= " · Edited";
+        }
+
+        const likesText = document.createElement("b");
+        likesText.id = "numLikesTextParentOfAuthUserFollowingReply"+commentIdx;
+        likesText.style = "cursor: pointer;";
+        if(parentComment.numLikes==1) {
+            likesText.textContent = "1 like";
+        }
+        else {
+            likesText.textContent = `${parentComment.numLikes} likes`;
+        }
+        if(parentComment.numLikes==0) {
+            likesText.classList.add('hidden');
+        }
+
+        const replyButton = document.createElement("b");
+        replyButton.style = "cursor: pointer;";
+        replyButton.textContent = "Reply";
+        replyButton.onclick = () => startReplyToComment("ParentOfAuthUserFollowingReply", commentIdx);
+
+        metaDiv.appendChild(dateText);
+        metaDiv.appendChild(likesText);
+        metaDiv.appendChild(replyButton);
+
+        if(parentComment.isLikedByAuthor && !postInfo['usernames'].includes(parentComment.author)) {
+            const authorDiv = document.createElement('div');
+            authorDiv.style.display = 'flex';
+            authorDiv.style.alignItems = 'center';
+            authorDiv.style.gap = '0.35em';
+
+            const redHeartIcon = document.createElement('img');
+            redHeartIcon.src = '/images/redHeartIcon.webp';
+            redHeartIcon.style.height = '1.2em';
+            redHeartIcon.style.width = '1.2em';
+            redHeartIcon.style.objectFit = 'contain';
+            redHeartIcon.style.pointerEvents = 'none';
+            authorDiv.appendChild(redHeartIcon);
+
+            const byAuthorText = document.createElement('small');
+            byAuthorText.textContent = 'by author';
+            authorDiv.appendChild(byAuthorText);
+
+            metaDiv.appendChild(authorDiv);
+        }
+
+        textContentDiv.appendChild(metaDiv);
+
+        const viewRepliesText = document.createElement("b");
+        viewRepliesText.id = "viewRepliesTextParentOfAuthUserFollowingReply"+commentIdx;
+        viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        viewRepliesText.onclick = () => toggleRepliesText("ParentOfAuthUserFollowingReply", commentIdx);
+        viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${parentComment.numReplies})</span>`;
+        if(parentComment.numReplies==0) {
+            viewRepliesText.classList.add('hidden');
+        }
+
+        const hideRepliesText = document.createElement("b");
+        hideRepliesText.id = "hideRepliesTextParentOfAuthUserFollowingReply"+commentIdx;
+        hideRepliesText.className = "hidden";
+        hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        hideRepliesText.onclick = () => toggleRepliesText("ParentOfAuthUserFollowingReply", commentIdx);
+        hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+
+        textContentDiv.append(viewRepliesText, hideRepliesText);
+
+        const blankHeartIcon = document.createElement("img");
+        blankHeartIcon.id = "blankHeartIconParentOfAuthUserFollowingReply"+commentIdx;
+        blankHeartIcon.className = "hidden";
+        blankHeartIcon.src = "/images/blankHeart.png";
+        blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        blankHeartIcon.onclick = () => toggleLikeComment("ParentOfAuthUserFollowingReply", commentIdx);
+
+        const redHeartIcon = document.createElement("img");
+        redHeartIcon.id = "redHeartIconParentOfAuthUserFollowingReply"+commentIdx;
+        redHeartIcon.className = "hidden";
+        redHeartIcon.src = "/images/redHeartIcon.webp";
+        redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        redHeartIcon.onclick = () => toggleLikeComment("ParentOfAuthUserFollowingReply", commentIdx);
+
+        if(parentComment.isLiked) {
+            redHeartIcon.classList.remove('hidden');
+        }
+        else {
+            blankHeartIcon.classList.remove('hidden');
+        }
+
+        mainDiv.appendChild(textContentDiv);
+        mainDiv.appendChild(blankHeartIcon);
+        mainDiv.appendChild(redHeartIcon);
+        commentsDiv.appendChild(mainDiv);
+
+        for(let authUserFollowingReplyOfParentComment of parentComment.authUserFollowingReplies) {
+            commentIdx = authUserFollowingReplyOfParentComment.index;
+    
+            const mainDiv = document.createElement("div");
+            mainDiv.id = "authUserFollowingReply"+commentIdx;
+            mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+            mainDiv.style.marginLeft = `${authUserFollowingReplyOfParentComment.level*5}em`;
+    
+            const profileImg = document.createElement("img");
+            profileImg.src = relevantUserInfo[authUserFollowingReplyOfParentComment.author]['profilePhotoString'];
+            profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+            profileImg.onclick = () => takeToProfile(authUserFollowingReplyOfParentComment.author);
+            mainDiv.appendChild(profileImg);
+    
+            const textContentDiv = document.createElement("div");
+            textContentDiv.id = "mainDivAuthUserFollowingReply"+commentIdx;
+            textContentDiv.style = "display: flex; flex-direction: column;";
+    
+            const commentParagraph = document.createElement("p");
+            commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+    
+            const usernameBold = document.createElement("b");
+            usernameBold.style = "cursor: pointer;";
+            usernameBold.textContent = authUserFollowingReplyOfParentComment.author;
+            usernameBold.onclick = () => takeToProfile(authUserFollowingReplyOfParentComment.author);
+    
+            if(relevantUserInfo[authUserFollowingReplyOfParentComment.author].isVerified) {
+                const verifiedCheck = document.createElement('img');
+                verifiedCheck.src = '/images/verifiedCheck.png';
+                verifiedCheck.style.pointerEvents = 'none';
+                verifiedCheck.style.height = '1.1em';
+                verifiedCheck.style.width = '1.1em';
+                verifiedCheck.style.objectFit = 'contain';
+                usernameBold.appendChild(verifiedCheck);
+            }
+
+            const followingSpan = document.createElement('span');
+            followingSpan.textContent = " · Following";
+            followingSpan.style.color = "gray";
+            followingSpan.style.fontSize = '0.9em';
+            followingSpan.style.marginRight = '0.7em';
+            usernameBold.appendChild(followingSpan);
+            
+            const commentSpan = document.createElement("span");
+            commentSpan.id = "contentAuthUserFollowingReply"+commentIdx;
+            commentSpan.ondblclick = () => likeComment("AuthUserFollowingReply", commentIdx);
+            commentSpan.innerHTML = parseMentionsToSpans(authUserFollowingReplyOfParentComment.content);
+            
+            commentParagraph.appendChild(usernameBold);
+            commentParagraph.append(" ");
+            commentParagraph.appendChild(commentSpan);
+            textContentDiv.appendChild(commentParagraph);
+    
+            const metaDiv = document.createElement("div");
+            metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+    
+            const dateText = document.createElement("p");
+            dateText.id = "dateTextAuthUserFollowingReply"+commentIdx;
+            dateText.textContent = authUserFollowingReplyOfParentComment.date;
+            if(authUserFollowingReplyOfParentComment.isEdited) {
+                dateText.textContent+= " · Edited";
+            }
+    
+            const likesText = document.createElement("b");
+            likesText.id = "numLikesTextAuthUserFollowingReply"+commentIdx;
+            likesText.style = "cursor: pointer;";
+            if(authUserFollowingReplyOfParentComment.numLikes==1) {
+                likesText.textContent = "1 like";
+            }
+            else {
+                likesText.textContent = `${authUserFollowingReplyOfParentComment.numLikes} likes`;
+            }
+            if(authUserFollowingReplyOfParentComment.numLikes==0) {
+                likesText.classList.add('hidden');
+            }
+    
+            const replyButton = document.createElement("b");
+            replyButton.style = "cursor: pointer;";
+            replyButton.textContent = "Reply";
+            replyButton.onclick = () => startReplyToComment("AuthUserFollowingReply", commentIdx);
+
+            metaDiv.appendChild(dateText);
+            metaDiv.appendChild(likesText);
+            metaDiv.appendChild(replyButton);
+    
+            if(authUserFollowingReplyOfParentComment.isLikedByAuthor && !postInfo['usernames'].includes(authUserFollowingReplyOfParentComment.author)) {
+                const authorDiv = document.createElement('div');
+                authorDiv.style.display = 'flex';
+                authorDiv.style.alignItems = 'center';
+                authorDiv.style.gap = '0.35em';
+    
+                const redHeartIcon = document.createElement('img');
+                redHeartIcon.src = '/images/redHeartIcon.webp';
+                redHeartIcon.style.height = '1.2em';
+                redHeartIcon.style.width = '1.2em';
+                redHeartIcon.style.objectFit = 'contain';
+                redHeartIcon.style.pointerEvents = 'none';
+                authorDiv.appendChild(redHeartIcon);
+    
+                const byAuthorText = document.createElement('small');
+                byAuthorText.textContent = 'by author';
+                authorDiv.appendChild(byAuthorText);
+    
+                metaDiv.appendChild(authorDiv);
+            }
+    
+            textContentDiv.appendChild(metaDiv);
+    
+            const viewRepliesText = document.createElement("b");
+            viewRepliesText.id = "viewRepliesTextAuthUserFollowingReply"+commentIdx;
+            viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+            viewRepliesText.onclick = () => toggleRepliesText("AuthUserFollowingReply", commentIdx);
+            viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${authUserFollowingReplyOfParentComment.numReplies})</span>`;
+            if(authUserFollowingReplyOfParentComment.numReplies==0) {
+                viewRepliesText.classList.add('hidden');
+            }
+    
+            const hideRepliesText = document.createElement("b");
+            hideRepliesText.id = "hideRepliesTextAuthUserFollowingReply"+commentIdx;
+            hideRepliesText.className = "hidden";
+            hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+            hideRepliesText.onclick = () => toggleRepliesText("AuthUserFollowingReply", commentIdx);
+            hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+    
+            textContentDiv.append(viewRepliesText, hideRepliesText);
+    
+            const blankHeartIcon = document.createElement("img");
+            blankHeartIcon.id = "blankHeartIconAuthUserFollowingReply"+commentIdx;
+            blankHeartIcon.className = "hidden";
+            blankHeartIcon.src = "/images/blankHeart.png";
+            blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+            blankHeartIcon.onclick = () => toggleLikeComment("AuthUserFollowingReply", commentIdx);
+    
+            const redHeartIcon = document.createElement("img");
+            redHeartIcon.id = "redHeartIconAuthUserFollowingReply"+commentIdx;
+            redHeartIcon.className = "hidden";
+            redHeartIcon.src = "/images/redHeartIcon.webp";
+            redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+            redHeartIcon.onclick = () => toggleLikeComment("AuthUserFollowingReply", commentIdx);
+    
+            if(authUserFollowingReplyOfParentComment.isLiked) {
+                redHeartIcon.classList.remove('hidden');
+            }
+            else {
+                blankHeartIcon.classList.remove('hidden');
+            }
+    
+            mainDiv.appendChild(textContentDiv);
+            mainDiv.appendChild(blankHeartIcon);
+            mainDiv.appendChild(redHeartIcon);
+            commentsDiv.appendChild(mainDiv);
+            setOfAuthUserFollowingReplyIDsWhoseDOMElementsHaveBeenCreated.add(authUserFollowingReplyOfParentComment.id);
+        }
+
+        for(let uniqueReply of parentComment.uniqueReplies) {
+            commentIdx = uniqueReply.index;
+    
+            const mainDiv = document.createElement("div");
+            mainDiv.id = "regularComment"+commentIdx;
+            mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+            mainDiv.style.marginLeft = `${uniqueReply.level*5}em`;
+    
+            const profileImg = document.createElement("img");
+            profileImg.src = relevantUserInfo[uniqueReply.author]['profilePhotoString'];
+            profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+            profileImg.onclick = () => takeToProfile(uniqueReply.author);
+            mainDiv.appendChild(profileImg);
+    
+            const textContentDiv = document.createElement("div");
+            textContentDiv.id = "mainDivRegularComment"+commentIdx;
+            textContentDiv.style = "display: flex; flex-direction: column;";
+    
+            const commentParagraph = document.createElement("p");
+            commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+    
+            const usernameBold = document.createElement("b");
+            usernameBold.style = "cursor: pointer;";
+            usernameBold.textContent = uniqueReply.author;
+            usernameBold.onclick = () => takeToProfile(uniqueReply.author);
+    
+            if(relevantUserInfo[uniqueReply.author].isVerified) {
+                const verifiedCheck = document.createElement('img');
+                verifiedCheck.src = '/images/verifiedCheck.png';
+                verifiedCheck.style.pointerEvents = 'none';
+                verifiedCheck.style.height = '1.1em';
+                verifiedCheck.style.width = '1.1em';
+                verifiedCheck.style.objectFit = 'contain';
+                usernameBold.appendChild(verifiedCheck);
+            }
+    
+            if(postInfo['usernames'].includes(authUserMentionReplyOfParentComment.author)) {
+                const authorSpan = document.createElement('span');
+                authorSpan.textContent = " · Author";
+                authorSpan.style.color = "gray";
+                authorSpan.style.fontSize = '0.9em';
+                authorSpan.style.marginRight = '0.7em';
+                usernameBold.appendChild(authorSpan);
+            }
+            
+            const commentSpan = document.createElement("span");
+            commentSpan.id = "contentRegularComment"+commentIdx;
+            commentSpan.ondblclick = () => likeComment("RegularComment", commentIdx);
+            commentSpan.innerHTML = parseMentionsToSpans(uniqueReply.content);
+            
+            commentParagraph.appendChild(usernameBold);
+            commentParagraph.append(" ");
+            commentParagraph.appendChild(commentSpan);
+            textContentDiv.appendChild(commentParagraph);
+    
+            const metaDiv = document.createElement("div");
+            metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+    
+            const dateText = document.createElement("p");
+            dateText.id = "dateTextRegularComment"+commentIdx;
+            dateText.textContent = uniqueReply.date;
+            if(uniqueReply.isEdited) {
+                dateText.textContent+= " · Edited";
+            }
+    
+            const likesText = document.createElement("b");
+            likesText.id = "numLikesTextRegularComment"+commentIdx;
+            likesText.style = "cursor: pointer;";
+            if(uniqueReply.numLikes==1) {
+                likesText.textContent = "1 like";
+            }
+            else {
+                likesText.textContent = `${uniqueReply.numLikes} likes`;
+            }
+            if(uniqueReply.numLikes==0) {
+                likesText.classList.add('hidden');
+            }
+    
+            const replyButton = document.createElement("b");
+            replyButton.style = "cursor: pointer;";
+            replyButton.textContent = "Reply";
+            replyButton.onclick = () => startReplyToComment("RegularComment", commentIdx);
+
+            metaDiv.appendChild(dateText);
+            metaDiv.appendChild(likesText);
+            metaDiv.appendChild(replyButton);
+    
+            if(uniqueReply.isLikedByAuthor && !postInfo['usernames'].includes(uniqueReply.author)) {
+                const authorDiv = document.createElement('div');
+                authorDiv.style.display = 'flex';
+                authorDiv.style.alignItems = 'center';
+                authorDiv.style.gap = '0.35em';
+    
+                const redHeartIcon = document.createElement('img');
+                redHeartIcon.src = '/images/redHeartIcon.webp';
+                redHeartIcon.style.height = '1.2em';
+                redHeartIcon.style.width = '1.2em';
+                redHeartIcon.style.objectFit = 'contain';
+                redHeartIcon.style.pointerEvents = 'none';
+                authorDiv.appendChild(redHeartIcon);
+    
+                const byAuthorText = document.createElement('small');
+                byAuthorText.textContent = 'by author';
+                authorDiv.appendChild(byAuthorText);
+    
+                metaDiv.appendChild(authorDiv);
+            }
+    
+            textContentDiv.appendChild(metaDiv);
+    
+            const viewRepliesText = document.createElement("b");
+            viewRepliesText.id = "viewRepliesTextRegularComment"+commentIdx;
+            viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+            viewRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+            viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${uniqueReply.numReplies})</span>`;
+            if(uniqueReply.numReplies==0) {
+                viewRepliesText.classList.add('hidden');
+            }
+    
+            const hideRepliesText = document.createElement("b");
+            hideRepliesText.id = "hideRepliesTextRegularComment"+commentIdx;
+            hideRepliesText.className = "hidden";
+            hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+            hideRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+            hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+    
+            textContentDiv.append(viewRepliesText, hideRepliesText);
+    
+            const blankHeartIcon = document.createElement("img");
+            blankHeartIcon.id = "blankHeartIconRegularComment"+commentIdx;
+            blankHeartIcon.className = "hidden";
+            blankHeartIcon.src = "/images/blankHeart.png";
+            blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+            blankHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
+    
+            const redHeartIcon = document.createElement("img");
+            redHeartIcon.id = "redHeartIconRegularComment"+commentIdx;
+            redHeartIcon.className = "hidden";
+            redHeartIcon.src = "/images/redHeartIcon.webp";
+            redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+            redHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
+    
+            if(uniqueReply.isLiked) {
+                redHeartIcon.classList.remove('hidden');
+            }
+            else {
+                blankHeartIcon.classList.remove('hidden');
+            }
+    
+            mainDiv.appendChild(textContentDiv);
+            mainDiv.appendChild(blankHeartIcon);
+            mainDiv.appendChild(redHeartIcon);
+            commentsDiv.appendChild(mainDiv);
+        }
+    }
+}
+
+function createDOMElementsForCommentsMadeByPostAuthor() {
+    for(let i=0; i<commentsOfPost.length; i++) {
+        const currComment = commentsOfPost[i];
+        if(postInfo['usernames'].includes(currComment.username) && !setOfIdsOfCommentsAlreadyDone.has(currComment.commentid)) {
+            let numRepliesOfCurrComment = 0;
+            const uniqueRepliesOfCurrComment = [];
+            for(let j=0; j<repliesOfPost.length; j++) {
+                const currReply = repliesOfPost[j];
+                if(currReply.commentid!==currComment.commentid) {
+                    continue;
+                }
+                if(postInfo['usernames'].includes(currReply.username)) {
+                    const numRepliesOfCurrReply = repliesOfPost.filter(x=>x.commentid===currReply.replyid).length;
+                    uniqueRepliesOfCurrComment.push({
+                        id: currReply.replyid,
+                        idOfParentComment: currReply.commentid,
+                        isLiked: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][1] : false,
+                        index: regularComments.length,
+                        author: currReply.username,
+                        isVerified: relevantUserInfo[currReply.username].isVerified,
+                        content: currReply.comment,
+                        numLikes: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][0] : 0,
+                        date: getRelativeDateTimeText(currReply.datetime),
+                        numReplies: numRepliesOfCurrReply,
+                        isLikedByAuthor: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][2] : false,
+                        level: 1,
+                        datetime: currReply.datetime,
+                        isEdited: currReply.isedited,
+                    });
+                    regularComments.push({
+                        id: currReply.replyid,
+                        idOfParentComment: currReply.commentid,
+                        isLiked: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][1] : false,
+                        index: regularComments.length,
+                        author: currReply.username,
+                        isVerified: relevantUserInfo[currReply.username].isVerified,
+                        content: currReply.comment,
+                        numLikes: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][0] : 0,
+                        date: getRelativeDateTimeText(currReply.datetime),
+                        numReplies: numRepliesOfCurrReply,
+                        isLikedByAuthor: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][2] : false,
+                        level: 1,
+                        datetime: currReply.datetime,
+                        isEdited: currReply.isedited,
+                    });
+                    setOfIdsOfUniqueRepliesAlreadyDone.add(currReply.replyid);
+                }
+                else {
+                    numRepliesOfCurrComment++;
+                }
+            }
+            commentsMadeByPostAuthor.push({
+                id: currComment.commentid,
+                idOfParentComment: null,
+                isLiked: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][1] : false,
+                index: commentsMadeByPostAuthor.length,
+                author: currComment.username,
+                isVerified: relevantUserInfo[currComment.username].isVerified,
+                content: currComment.comment,
+                numLikes: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][0] : 0,
+                date: getRelativeDateTimeText(currComment.datetime),
+                numReplies: numRepliesOfCurrComment,
+                isLikedByAuthor: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][2] : false,
+                level: 0,
+                datetime: currComment.datetime,
+                isEdited: currComment.isedited,
+                uniqueReplies: uniqueRepliesOfCurrComment
+            });
+            setOfIdsOfCommentsAlreadyDone.add(currComment.commentid);
+        }
+    }
+    commentsMadeByPostAuthor.sort((a,b)=> new Date(b.datetime)-new Date(a.datetime));
+
+    for(let postAuthorComment of commentsMadeByPostAuthor) {
+        const commentIdx = postAuthorComment.index;
+        const mainDiv = document.createElement("div");
+        mainDiv.id = "postAuthorComment"+commentIdx;
+        mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+
+        const profileImg = document.createElement("img");
+        profileImg.src = relevantUserInfo[postAuthorComment.author]['profilePhotoString'];
+        profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+        profileImg.onclick = () => takeToProfile(postAuthorComment.author);
+        mainDiv.appendChild(profileImg);
+
+        const textContentDiv = document.createElement("div");
+        textContentDiv.id = "mainDivPostAuthorComment"+commentIdx;
+        textContentDiv.style = "display: flex; flex-direction: column;";
+
+        const commentParagraph = document.createElement("p");
+        commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+
+        const usernameBold = document.createElement("b");
+        usernameBold.style = "cursor: pointer;";
+        usernameBold.textContent = postAuthorComment.author;
+        usernameBold.onclick = () => takeToProfile(postAuthorComment.author);
+
+        if(relevantUserInfo[postAuthorComment.author].isVerified) {
+            const verifiedCheck = document.createElement('img');
+            verifiedCheck.src = '/images/verifiedCheck.png';
+            verifiedCheck.style.pointerEvents = 'none';
+            verifiedCheck.style.height = '1.1em';
+            verifiedCheck.style.width = '1.1em';
+            verifiedCheck.style.objectFit = 'contain';
+            usernameBold.appendChild(verifiedCheck);
+        }
+
+        const authorSpan = document.createElement('span');
+        authorSpan.textContent = " · Author";
+        authorSpan.style.color = "gray";
+        authorSpan.style.fontSize = '0.9em';
+        authorSpan.style.marginRight = '0.7em';
+        usernameBold.appendChild(authorSpan);
+        
+        const commentSpan = document.createElement("span");
+        commentSpan.id = "contentPostAuthorComment"+commentIdx;
+        commentSpan.ondblclick = () => likeComment("PostAuthorComment", commentIdx);
+        commentSpan.innerHTML = parseMentionsToSpans(postAuthorComment.content);
+        
+        commentParagraph.appendChild(usernameBold);
+        commentParagraph.append(" ");
+        commentParagraph.appendChild(commentSpan);
+        textContentDiv.appendChild(commentParagraph);
+
+        const metaDiv = document.createElement("div");
+        metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+
+        const dateText = document.createElement("p");
+        dateText.id = "dateTextPostAuthorComment"+commentIdx;
+        dateText.textContent = postAuthorComment.date;
+        if(postAuthorComment.isEdited) {
+            dateText.textContent+= " · Edited";
+        }
+
+        const likesText = document.createElement("b");
+        likesText.id = "numLikesTextPostAuthorComment"+commentIdx;
+        likesText.style = "cursor: pointer;";
+        if(postAuthorComment.numLikes==1) {
+            likesText.textContent = "1 like";
+        }
+        else {
+            likesText.textContent = `${postAuthorComment.numLikes} likes`;
+        }
+        if(postAuthorComment.numLikes==0) {
+            likesText.classList.add('hidden');
+        }
+
+        const replyButton = document.createElement("b");
+        replyButton.style = "cursor: pointer;";
+        replyButton.textContent = "Reply";
+        replyButton.onclick = () => startReplyToComment("PostAuthorComment", commentIdx);
+
+        metaDiv.append(dateText, likesText, replyButton);
+
+        textContentDiv.appendChild(metaDiv);
+
+        const viewRepliesText = document.createElement("b");
+        viewRepliesText.id = "viewRepliesTextPostAuthorComment"+commentIdx;
+        viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        viewRepliesText.onclick = () => toggleRepliesText("PostAuthorComment", commentIdx);
+        viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${postAuthorComment.numReplies})</span>`;
+        if(postAuthorComment.numReplies==0) {
+            viewRepliesText.classList.add('hidden');
+        }
+
+        const hideRepliesText = document.createElement("b");
+        hideRepliesText.id = "hideRepliesTextPostAuthorComment"+commentIdx;
+        hideRepliesText.className = "hidden";
+        hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        hideRepliesText.onclick = () => toggleRepliesText("PostAuthorComment", commentIdx);
+        hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+
+        textContentDiv.append(viewRepliesText, hideRepliesText);
+
+        const blankHeartIcon = document.createElement("img");
+        blankHeartIcon.id = "blankHeartIconPostAuthorComment"+commentIdx;
+        blankHeartIcon.className = "hidden";
+        blankHeartIcon.src = "/images/blankHeart.png";
+        blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        blankHeartIcon.onclick = () => toggleLikeComment("PostAuthorComment", commentIdx);
+
+        const redHeartIcon = document.createElement("img");
+        redHeartIcon.id = "redHeartIconPostAuthorComment"+commentIdx;
+        redHeartIcon.className = "hidden";
+        redHeartIcon.src = "/images/redHeartIcon.webp";
+        redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        redHeartIcon.onclick = () => toggleLikeComment("PostAuthorComment", commentIdx);
+
+        if(postAuthorComment.isLiked) {
+            redHeartIcon.classList.remove('hidden');
+        }
+        else {
+            blankHeartIcon.classList.remove('hidden');
+        }
+
+        mainDiv.appendChild(textContentDiv);
+        mainDiv.appendChild(blankHeartIcon);
+        mainDiv.appendChild(redHeartIcon);
+        commentsDiv.appendChild(mainDiv);
+
+        for(let uniqueReply of postAuthorComment.uniqueReplies) {
+            const commentIdx = uniqueReply.index;
+            const mainDiv = document.createElement("div");
+            mainDiv.id = "regularComment"+commentIdx;
+            mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+            mainDiv.style.marginLeft = `${uniqueReply.level*5}em`;
+
+            const profileImg = document.createElement("img");
+            profileImg.src = relevantUserInfo[uniqueReply.author]['profilePhotoString'];
+            profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+            profileImg.onclick = () => takeToProfile(uniqueReply.author);
+            mainDiv.appendChild(profileImg);
+
+            const textContentDiv = document.createElement("div");
+            textContentDiv.id = "mainDivRegularComment"+commentIdx;
+            textContentDiv.style = "display: flex; flex-direction: column;";
+
+            const commentParagraph = document.createElement("p");
+            commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+
+            const usernameBold = document.createElement("b");
+            usernameBold.style = "cursor: pointer;";
+            usernameBold.textContent = uniqueReply.author;
+            usernameBold.onclick = () => takeToProfile(uniqueReply.author);
+
+            if(relevantUserInfo[uniqueReply.author].isVerified) {
+                const verifiedCheck = document.createElement('img');
+                verifiedCheck.src = '/images/verifiedCheck.png';
+                verifiedCheck.style.pointerEvents = 'none';
+                verifiedCheck.style.height = '1.1em';
+                verifiedCheck.style.width = '1.1em';
+                verifiedCheck.style.objectFit = 'contain';
+                usernameBold.appendChild(verifiedCheck);
+            }
+
+            if(postInfo['usernames'].includes(uniqueReply.author)) {
+                const authorSpan = document.createElement('span');
+                authorSpan.textContent = " · Author";
+                authorSpan.style.color = "gray";
+                authorSpan.style.fontSize = '0.9em';
+                authorSpan.style.marginRight = '0.7em';
+                usernameBold.appendChild(authorSpan);
+            }
+            
+            const commentSpan = document.createElement("span");
+            commentSpan.id = "contentRegularComment"+commentIdx;
+            commentSpan.ondblclick = () => likeComment("RegularComment", commentIdx);
+            commentSpan.innerHTML = parseMentionsToSpans(uniqueReply.content);
+            
+            commentParagraph.appendChild(usernameBold);
+            commentParagraph.append(" ");
+            commentParagraph.appendChild(commentSpan);
+            textContentDiv.appendChild(commentParagraph);
+
+            const metaDiv = document.createElement("div");
+            metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+
+            const dateText = document.createElement("p");
+            dateText.id = "dateTextRegularComment"+commentIdx;
+            dateText.textContent = uniqueReply.date;
+            if(uniqueReply.isEdited) {
+                dateText.textContent+= " · Edited";
+            }
+
+            const likesText = document.createElement("b");
+            likesText.id = "numLikesTextRegularComment"+commentIdx;
+            likesText.style = "cursor: pointer;";
+            if(uniqueReply.numLikes==1) {
+                likesText.textContent = "1 like";
+            }
+            else {
+                likesText.textContent = `${uniqueReply.numLikes} likes`;
+            }
+            if(uniqueReply.numLikes==0) {
+                likesText.classList.add('hidden');
+            }
+
+            const replyButton = document.createElement("b");
+            replyButton.style = "cursor: pointer;";
+            replyButton.textContent = "Reply";
+            replyButton.onclick = () => startReplyToComment("RegularComment", commentIdx);
+
+            metaDiv.append(dateText, likesText, replyButton);
+
+            if(uniqueReply.isLikedByAuthor && !postInfo['usernames'].includes(uniqueReply.author)) {
+                const authorDiv = document.createElement('div');
+                authorDiv.style.display = 'flex';
+                authorDiv.style.alignItems = 'center';
+                authorDiv.style.gap = '0.35em';
+
+                const redHeartIcon = document.createElement('img');
+                redHeartIcon.src = '/images/redHeartIcon.webp';
+                redHeartIcon.style.height = '1.2em';
+                redHeartIcon.style.width = '1.2em';
+                redHeartIcon.style.objectFit = 'contain';
+                redHeartIcon.style.pointerEvents = 'none';
+                authorDiv.appendChild(redHeartIcon);
+
+                const byAuthorText = document.createElement('small');
+                byAuthorText.textContent = 'by author';
+                authorDiv.appendChild(byAuthorText);
+
+                metaDiv.appendChild(authorDiv);
+            }
+
+            textContentDiv.appendChild(metaDiv);
+
+            const viewRepliesText = document.createElement("b");
+            viewRepliesText.id = "viewRepliesTextRegularComment"+commentIdx;
+            viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+            viewRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+            viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${uniqueReply.numReplies})</span>`;
+            if(uniqueReply.numReplies==0) {
+                viewRepliesText.classList.add('hidden');
+            }
+
+            const hideRepliesText = document.createElement("b");
+            hideRepliesText.id = "hideRepliesTextRegularComment"+commentIdx;
+            hideRepliesText.className = "hidden";
+            hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+            hideRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+            hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+
+            textContentDiv.append(viewRepliesText, hideRepliesText);
+
+            const blankHeartIcon = document.createElement("img");
+            blankHeartIcon.id = "blankHeartIconRegularComment"+commentIdx;
+            blankHeartIcon.className = "hidden";
+            blankHeartIcon.src = "/images/blankHeart.png";
+            blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+            blankHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
+
+            const redHeartIcon = document.createElement("img");
+            redHeartIcon.id = "redHeartIconRegularComment"+commentIdx;
+            redHeartIcon.className = "hidden";
+            redHeartIcon.src = "/images/redHeartIcon.webp";
+            redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+            redHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
+
+            if(uniqueReply.isLiked) {
+                redHeartIcon.classList.remove('hidden');
+            }
+            else {
+                blankHeartIcon.classList.remove('hidden');
+            }
+
+            mainDiv.appendChild(textContentDiv);
+            mainDiv.appendChild(blankHeartIcon);
+            mainDiv.appendChild(redHeartIcon);
+            commentsDiv.appendChild(mainDiv);
+        }
+    }
+}
+
+function createDOMElementsForRepliesMadeByPostAuthor() {
+    for(let i=0; i<repliesOfPost.length; i++) {
+        const currReply = repliesOfPost[i];
+        if(postInfo['usernames'].includes(currReply.username) && !setOfIdsOfUniqueRepliesAlreadyDone.has(currReply.replyid)) {
+            let parentComment = commentsOfPost.filter(x=>x.commentid===currReply.commentid);
+            if(parentComment.length==0) {
+                continue;
+            }
+            parentComment = parentComment[0];
+            const postAuthorRepliesOfParentComment = [];
+            let numRepliesOfParentComment = 0;
+            for(let j=0; j<repliesOfPost.length; j++) {
+                if(repliesOfPost[j].commentid!==parentComment.commentid) {
+                    continue;
+                }
+                const parentCommentReply = repliesOfPost[j];
+
+                if(postInfo['usernames'].includes(parentCommentReply.username)) {
+                    const numRepliesOfParentCommentReply = repliesOfPost.filter(x=>x.commentid===parentCommentReply.replyid).length;
+                    postAuthorRepliesOfParentComment.push({
+                        id: parentCommentReply.replyid,
+                        idOfParentComment: parentCommentReply.commentid,
+                        isLiked: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][1] : false,
+                        index: repliesMadeByPostAuthor.length,
+                        author: parentCommentReply.username,
+                        isVerified: relevantUserInfo[parentCommentReply.username].isVerified,
+                        content: parentCommentReply.comment,
+                        numLikes: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][0] : 0,
+                        date: getRelativeDateTimeText(parentComment.datetime),
+                        numReplies: numRepliesOfParentCommentReply,
+                        isLikedByAuthor: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][2] : false,
+                        level: 1,
+                        datetime: parentCommentReply.datetime,
+                        isEdited: parentCommentReply.isedited
+                    });
+                    repliesMadeByPostAuthor.push({
+                        id: parentCommentReply.replyid,
+                        idOfParentComment: parentCommentReply.commentid,
+                        isLiked: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][1] : false,
+                        index: repliesMadeByPostAuthor.length,
+                        author: parentCommentReply.username,
+                        isVerified: relevantUserInfo[parentCommentReply.username].isVerified,
+                        content: parentCommentReply.comment,
+                        numLikes: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][0] : 0,
+                        date: getRelativeDateTimeText(parentComment.datetime),
+                        numReplies: numRepliesOfParentCommentReply,
+                        isLikedByAuthor: parentCommentReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentCommentReply.replyid][2] : false,
+                        level: 1,
+                        datetime: parentCommentReply.datetime,
+                        isEdited: parentCommentReply.isedited
+                    });
+                    setOfIdsOfUniqueRepliesAlreadyDone.add(parentCommentReply.replyid);
+                }
+                else {
+                    numRepliesOfParentComment++;
+                }
+            }
+            parentCommentsOfRepliesMadeByPostAuthor.push({
+                id: parentComment.commentid,
+                idOfParentComment: null,
+                isLiked: parentComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentComment.commentid][1] : false,
+                index: parentCommentsOfRepliesThatMentionAuthUser.length,
+                author: parentComment.username,
+                isVerified: relevantUserInfo[parentComment.username].isVerified,
+                content: parentComment.comment,
+                numLikes: parentComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentComment.commentid][0] : 0,
+                date: getRelativeDateTimeText(parentComment.datetime),
+                numReplies: numRepliesOfParentComment,
+                isLikedByAuthor: parentComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentComment.commentid][2] : false,
+                level: 0,
+                datetime: parentComment.datetime,
+                isEdited: parentComment.isedited,
+                postAuthorReplies: postAuthorRepliesOfParentComment
+            });
+            setOfIdsOfCommentsAlreadyDone.add(parentComment.commentid);
+
+        }
+    }
+    repliesMadeByPostAuthor.sort((a,b) => new Date(b.datetime) - new Date(a.datetime));
+    const setOfPostAuthorReplyIDsWhoseDOMElementsHaveBeenCreated = new Set();
+
+    for(let postAuthorReply of repliesMadeByPostAuthor) {
+        if(setOfPostAuthorReplyIDsWhoseDOMElementsHaveBeenCreated.has(postAuthorReply.id)) {
+            continue;
+        }
+        let parentComment = parentCommentsOfRepliesMadeByPostAuthor.filter(x=>x.id===postAuthorReply.idOfParentComment);
+        parentComment = parentComment[0];
+        let commentIdx = parentComment.index;
+
+        const mainDiv = document.createElement("div");
+        mainDiv.id = "parentOfPostAuthorReply"+commentIdx;
+        mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+
+        const profileImg = document.createElement("img");
+        profileImg.src = relevantUserInfo[parentComment.author]['profilePhotoString'];
+        profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+        profileImg.onclick = () => takeToProfile(parentComment.author);
+        mainDiv.appendChild(profileImg);
+
+        const textContentDiv = document.createElement("div");
+        textContentDiv.id = "mainDivParentOfPostAuthorReply"+commentIdx;
+        textContentDiv.style = "display: flex; flex-direction: column;";
+
+        const commentParagraph = document.createElement("p");
+        commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+
+        const usernameBold = document.createElement("b");
+        usernameBold.style = "cursor: pointer;";
+        usernameBold.textContent = parentComment.author;
+        usernameBold.onclick = () => takeToProfile(parentComment.author);
+
+        if(relevantUserInfo[parentComment.author].isVerified) {
+            const verifiedCheck = document.createElement('img');
+            verifiedCheck.src = '/images/verifiedCheck.png';
+            verifiedCheck.style.pointerEvents = 'none';
+            verifiedCheck.style.height = '1.1em';
+            verifiedCheck.style.width = '1.1em';
+            verifiedCheck.style.objectFit = 'contain';
+            usernameBold.appendChild(verifiedCheck);
+        }
+        
+        const commentSpan = document.createElement("span");
+        commentSpan.id = "contentParentOfPostAuthorReply"+commentIdx;
+        commentSpan.ondblclick = () => likeComment("ParentOfPostAuthorReply", commentIdx);
+        commentSpan.innerHTML = parseMentionsToSpans(parentComment.content);
+        
+        commentParagraph.appendChild(usernameBold);
+        commentParagraph.append(" ");
+        commentParagraph.appendChild(commentSpan);
+        textContentDiv.appendChild(commentParagraph);
+
+        const metaDiv = document.createElement("div");
+        metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+
+        const dateText = document.createElement("p");
+        dateText.id = "dateTextParentOfPostAuthorReply"+commentIdx;
+        dateText.textContent = parentComment.date;
+        if(parentComment.isEdited) {
+            dateText.textContent+= " · Edited";
+        }
+
+        const likesText = document.createElement("b");
+        likesText.id = "numLikesTextParentOfPostAuthorReply"+commentIdx;
+        likesText.style = "cursor: pointer;";
+        if(parentComment.numLikes==1) {
+            likesText.textContent = "1 like";
+        }
+        else {
+            likesText.textContent = `${parentComment.numLikes} likes`;
+        }
+        if(parentComment.numLikes==0) {
+            likesText.classList.add('hidden');
+        }
+
+        const replyButton = document.createElement("b");
+        replyButton.style = "cursor: pointer;";
+        replyButton.textContent = "Reply";
+        replyButton.onclick = () => startReplyToComment("ParentOfPostAuthorReply", commentIdx);
+
+        metaDiv.appendChild(dateText);
+        metaDiv.appendChild(likesText);
+        metaDiv.appendChild(replyButton);
+
+        if(parentComment.isLikedByAuthor) {
+            const authorDiv = document.createElement('div');
+            authorDiv.style.display = 'flex';
+            authorDiv.style.alignItems = 'center';
+            authorDiv.style.gap = '0.35em';
+
+            const redHeartIcon = document.createElement('img');
+            redHeartIcon.src = '/images/redHeartIcon.webp';
+            redHeartIcon.style.height = '1.2em';
+            redHeartIcon.style.width = '1.2em';
+            redHeartIcon.style.objectFit = 'contain';
+            redHeartIcon.style.pointerEvents = 'none';
+            authorDiv.appendChild(redHeartIcon);
+
+            const byAuthorText = document.createElement('small');
+            byAuthorText.textContent = 'by author';
+            authorDiv.appendChild(byAuthorText);
+
+            metaDiv.appendChild(authorDiv);
+        }
+
+        textContentDiv.appendChild(metaDiv);
+
+        const viewRepliesText = document.createElement("b");
+        viewRepliesText.id = "viewRepliesTextParentOfPostAuthorReply"+commentIdx;
+        viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        viewRepliesText.onclick = () => toggleRepliesText("ParentOfPostAuthorReply", commentIdx);
+        viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${parentComment.numReplies})</span>`;
+        if(parentComment.numReplies==0) {
+            viewRepliesText.classList.add('hidden');
+        }
+
+        const hideRepliesText = document.createElement("b");
+        hideRepliesText.id = "hideRepliesTextParentOfPostAuthorReply"+commentIdx;
+        hideRepliesText.className = "hidden";
+        hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        hideRepliesText.onclick = () => toggleRepliesText("ParentOfPostAuthorReply", commentIdx);
+        hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+
+        textContentDiv.append(viewRepliesText, hideRepliesText);
+
+        const blankHeartIcon = document.createElement("img");
+        blankHeartIcon.id = "blankHeartIconParentOfPostAuthorReply"+commentIdx;
+        blankHeartIcon.className = "hidden";
+        blankHeartIcon.src = "/images/blankHeart.png";
+        blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        blankHeartIcon.onclick = () => toggleLikeComment("ParentOfPostAuthorReply", commentIdx);
+
+        const redHeartIcon = document.createElement("img");
+        redHeartIcon.id = "redHeartIconParentOfPostAuthorReply"+commentIdx;
+        redHeartIcon.className = "hidden";
+        redHeartIcon.src = "/images/redHeartIcon.webp";
+        redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        redHeartIcon.onclick = () => toggleLikeComment("ParentOfPostAuthorReply", commentIdx);
+
+        if(parentComment.isLiked) {
+            redHeartIcon.classList.remove('hidden');
+        }
+        else {
+            blankHeartIcon.classList.remove('hidden');
+        }
+
+        mainDiv.appendChild(textContentDiv);
+        mainDiv.appendChild(blankHeartIcon);
+        mainDiv.appendChild(redHeartIcon);
+        commentsDiv.appendChild(mainDiv);
+
+        for(let postAuthorReplyOfParentComment of parentComment.postAuthorReplies) {
+            commentIdx = postAuthorReplyOfParentComment.index;
+    
+            const mainDiv = document.createElement("div");
+            mainDiv.id = "postAuthorReply"+commentIdx;
+            mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+            mainDiv.style.marginLeft = `${postAuthorReplyOfParentComment.level*5}em`;
+    
+            const profileImg = document.createElement("img");
+            profileImg.src = relevantUserInfo[postAuthorReplyOfParentComment.author]['profilePhotoString'];
+            profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+            profileImg.onclick = () => takeToProfile(postAuthorReplyOfParentComment.author);
+            mainDiv.appendChild(profileImg);
+    
+            const textContentDiv = document.createElement("div");
+            textContentDiv.id = "mainDivPostAuthorReply"+commentIdx;
+            textContentDiv.style = "display: flex; flex-direction: column;";
+    
+            const commentParagraph = document.createElement("p");
+            commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+    
+            const usernameBold = document.createElement("b");
+            usernameBold.style = "cursor: pointer;";
+            usernameBold.textContent = postAuthorReplyOfParentComment.author;
+            usernameBold.onclick = () => takeToProfile(postAuthorReplyOfParentComment.author);
+    
+            if(relevantUserInfo[postAuthorReplyOfParentComment.author].isVerified) {
+                const verifiedCheck = document.createElement('img');
+                verifiedCheck.src = '/images/verifiedCheck.png';
+                verifiedCheck.style.pointerEvents = 'none';
+                verifiedCheck.style.height = '1.1em';
+                verifiedCheck.style.width = '1.1em';
+                verifiedCheck.style.objectFit = 'contain';
+                usernameBold.appendChild(verifiedCheck);
+            }
+
+            const authorSpan = document.createElement('span');
+            authorSpan.textContent = " · Author";
+            authorSpan.style.color = "gray";
+            authorSpan.style.fontSize = '0.9em';
+            authorSpan.style.marginRight = '0.7em';
+            usernameBold.appendChild(authorSpan);
+            
+            const commentSpan = document.createElement("span");
+            commentSpan.id = "contentPostAuthorReply"+commentIdx;
+            commentSpan.ondblclick = () => likeComment("PostAuthorReply", commentIdx);
+            commentSpan.innerHTML = parseMentionsToSpans(postAuthorReplyOfParentComment.content);
+            
+            commentParagraph.appendChild(usernameBold);
+            commentParagraph.append(" ");
+            commentParagraph.appendChild(commentSpan);
+            textContentDiv.appendChild(commentParagraph);
+    
+            const metaDiv = document.createElement("div");
+            metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+    
+            const dateText = document.createElement("p");
+            dateText.id = "dateTextPostAuthorReply"+commentIdx;
+            dateText.textContent = postAuthorReplyOfParentComment.date;
+            if(postAuthorReplyOfParentComment.isEdited) {
+                dateText.textContent+= " · Edited";
+            }
+    
+            const likesText = document.createElement("b");
+            likesText.id = "numLikesTextPostAuthorReply"+commentIdx;
+            likesText.style = "cursor: pointer;";
+            if(postAuthorReplyOfParentComment.numLikes==1) {
+                likesText.textContent = "1 like";
+            }
+            else {
+                likesText.textContent = `${postAuthorReplyOfParentComment.numLikes} likes`;
+            }
+            if(postAuthorReplyOfParentComment.numLikes==0) {
+                likesText.classList.add('hidden');
+            }
+    
+            const replyButton = document.createElement("b");
+            replyButton.style = "cursor: pointer;";
+            replyButton.textContent = "Reply";
+            replyButton.onclick = () => startReplyToComment("PostAuthorReply", commentIdx);
+
+            metaDiv.appendChild(dateText);
+            metaDiv.appendChild(likesText);
+            metaDiv.appendChild(replyButton);
+    
+            textContentDiv.appendChild(metaDiv);
+    
+            const viewRepliesText = document.createElement("b");
+            viewRepliesText.id = "viewRepliesTextPostAuthorReply"+commentIdx;
+            viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+            viewRepliesText.onclick = () => toggleRepliesText("PostAuthorReply", commentIdx);
+            viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${postAuthorReplyOfParentComment.numReplies})</span>`;
+            if(postAuthorReplyOfParentComment.numReplies==0) {
+                viewRepliesText.classList.add('hidden');
+            }
+    
+            const hideRepliesText = document.createElement("b");
+            hideRepliesText.id = "hideRepliesTextPostAuthorReply"+commentIdx;
+            hideRepliesText.className = "hidden";
+            hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+            hideRepliesText.onclick = () => toggleRepliesText("PostAuthorReply", commentIdx);
+            hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+    
+            textContentDiv.append(viewRepliesText, hideRepliesText);
+    
+            const blankHeartIcon = document.createElement("img");
+            blankHeartIcon.id = "blankHeartIconPostAuthorReply"+commentIdx;
+            blankHeartIcon.className = "hidden";
+            blankHeartIcon.src = "/images/blankHeart.png";
+            blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+            blankHeartIcon.onclick = () => toggleLikeComment("PostAuthorReply", commentIdx);
+    
+            const redHeartIcon = document.createElement("img");
+            redHeartIcon.id = "redHeartIconPostAuthorReply"+commentIdx;
+            redHeartIcon.className = "hidden";
+            redHeartIcon.src = "/images/redHeartIcon.webp";
+            redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+            redHeartIcon.onclick = () => toggleLikeComment("PostAuthorReply", commentIdx);
+    
+            if(postAuthorReplyOfParentComment.isLiked) {
+                redHeartIcon.classList.remove('hidden');
+            }
+            else {
+                blankHeartIcon.classList.remove('hidden');
+            }
+    
+            mainDiv.appendChild(textContentDiv);
+            mainDiv.appendChild(blankHeartIcon);
+            mainDiv.appendChild(redHeartIcon);
+            commentsDiv.appendChild(mainDiv);
+            setOfPostAuthorReplyIDsWhoseDOMElementsHaveBeenCreated.add(postAuthorReplyOfParentComment.id);
+        }
+    }
+}
+
+function createDOMElementsForRegularCommentsThatArentReplies() {
+    const regularCommentsThatArentReplies = [];
+    for(let i=0; i<commentsOfPost.length; i++) {
+        const currComment = commentsOfPost[i];
+
+        if(!(setOfIdsOfCommentsAlreadyDone.has(currComment.commentid))) {
+                const currCommentNumReplies = repliesOfPost.filter(x=>x.commentid===currComment.commentid).length;
+                regularCommentsThatArentReplies.push({
+                    id: currComment.commentid,
+                    idOfParentComment: null,
+                    isLiked: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][1] : false,
+                    index: regularComments.length,
+                    author: currComment.username,
+                    isVerified: relevantUserInfo[currComment.username].isVerified,
+                    content: currComment.comment,
+                    numLikes: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][0] : 0,
+                    date: getRelativeDateTimeText(currComment.datetime),
+                    numReplies: currCommentNumReplies,
+                    isLikedByAuthor: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][2] : false,
+                    level: 0,
+                    datetime: currComment.datetime,
+                    isEdited: currComment.isedited
+                });
+                regularComments.push({
+                    id: currComment.commentid,
+                    idOfParentComment: null,
+                    isLiked: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][1] : false,
+                    index: regularComments.length,
+                    author: currComment.username,
+                    isVerified: relevantUserInfo[currComment.username].isVerified,
+                    content: currComment.comment,
+                    numLikes: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][0] : 0,
+                    date: getRelativeDateTimeText(currComment.datetime),
+                    numReplies: currCommentNumReplies,
+                    isLikedByAuthor: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][2] : false,
+                    level: 0,
+                    datetime: currComment.datetime,
+                    isEdited: currComment.isedited
+                });
+                setOfIdsOfCommentsAlreadyDone.add(currComment.commentid);
+            }
+    }
+
+    const sortedRegularCommentsThatArentReplies = [...regularCommentsThatArentReplies].sort((a, b) => b.numLikes/(new Date(b.datetime).getTime()) - a.numLikes/(new Date(a.datetime).getTime()));
+
+    for(let targetedComment of sortedRegularCommentsThatArentReplies) {
+        const commentIdx = targetedComment.index;
+        const mainDiv = document.createElement("div");
+        mainDiv.id = "regularComment"+commentIdx;
+        mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+
+        const profileImg = document.createElement("img");
+        profileImg.src = relevantUserInfo[targetedComment.author]['profilePhotoString'];
+        profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+        profileImg.onclick = () => takeToProfile(targetedComment.author);
+        mainDiv.appendChild(profileImg);
+
+        const textContentDiv = document.createElement("div");
+        textContentDiv.id = "mainDivRegularComment"+commentIdx;
+        textContentDiv.style = "display: flex; flex-direction: column;";
+
+        const commentParagraph = document.createElement("p");
+        commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+
+        const usernameBold = document.createElement("b");
+        usernameBold.style = "cursor: pointer;";
+        usernameBold.textContent = targetedComment.author;
+        usernameBold.onclick = () => takeToProfile(targetedComment.author);
+
+        if(relevantUserInfo[targetedComment.author].isVerified) {
+            const verifiedCheck = document.createElement('img');
+            verifiedCheck.src = '/images/verifiedCheck.png';
+            verifiedCheck.style.pointerEvents = 'none';
+            verifiedCheck.style.height = '1.1em';
+            verifiedCheck.style.width = '1.1em';
+            verifiedCheck.style.objectFit = 'contain';
+            usernameBold.appendChild(verifiedCheck);
+        }
+        
+        const commentSpan = document.createElement("span");
+        commentSpan.id = "contentRegularComment"+commentIdx;
+        commentSpan.ondblclick = () => likeComment("RegularComment", commentIdx);
+        commentSpan.innerHTML = parseMentionsToSpans(targetedComment.content);
+        
+        commentParagraph.appendChild(usernameBold);
+        commentParagraph.append(" ");
+        commentParagraph.appendChild(commentSpan);
+        textContentDiv.appendChild(commentParagraph);
+
+        const metaDiv = document.createElement("div");
+        metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+
+        const dateText = document.createElement("p");
+        dateText.id = "dateTextRegularComment"+commentIdx;
+        dateText.textContent = targetedComment.date;
+        if(targetedComment.isEdited) {
+            dateText.textContent+= " · Edited";
+        }
+
+        const likesText = document.createElement("b");
+        likesText.id = "numLikesTextRegularComment"+commentIdx;
+        likesText.style = "cursor: pointer;";
+        if(targetedComment.numLikes==1) {
+            likesText.textContent = "1 like";
+        }
+        else {
+            likesText.textContent = `${targetedComment.numLikes} likes`;
+        }
+        if(targetedComment.numLikes==0) {
+            likesText.classList.add('hidden');
+        }
+
+        const replyButton = document.createElement("b");
+        replyButton.style = "cursor: pointer;";
+        replyButton.textContent = "Reply";
+        replyButton.onclick = () => startReplyToComment("RegularComment", commentIdx);
+
+        const optionsIcon = document.createElement("img");
+        optionsIcon.id = "optionsIconForRegularComment"+commentIdx;
+        optionsIcon.className = "hidden";
+        optionsIcon.src = "/images/optionsDots.png";
+        optionsIcon.style = "height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;";
+        optionsIcon.onclick = () => showOptionsPopupForComment("RegularComment", commentIdx);
+        metaDiv.append(dateText, likesText, replyButton, optionsIcon);
+
+        if(targetedComment.isLikedByAuthor && !postInfo['usernames'].includes(targetedComment.author)) {
+            const authorDiv = document.createElement('div');
+            authorDiv.style.display = 'flex';
+            authorDiv.style.alignItems = 'center';
+            authorDiv.style.gap = '0.35em';
+
+            const redHeartIcon = document.createElement('img');
+            redHeartIcon.src = '/images/redHeartIcon.webp';
+            redHeartIcon.style.height = '1.2em';
+            redHeartIcon.style.width = '1.2em';
+            redHeartIcon.style.objectFit = 'contain';
+            redHeartIcon.style.pointerEvents = 'none';
+            authorDiv.appendChild(redHeartIcon);
+
+            const byAuthorText = document.createElement('small');
+            byAuthorText.textContent = 'by author';
+            authorDiv.appendChild(byAuthorText);
+
+            metaDiv.appendChild(authorDiv);
+        }
+
+        textContentDiv.appendChild(metaDiv);
+
+        const viewRepliesText = document.createElement("b");
+        viewRepliesText.id = "viewRepliesTextRegularComment"+commentIdx;
+        viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        viewRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+        viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${targetedComment.numReplies})</span>`;
+        if(targetedComment.numReplies==0) {
+            viewRepliesText.classList.add('hidden');
+        }
+
+        const hideRepliesText = document.createElement("b");
+        hideRepliesText.id = "hideRepliesTextRegularComment"+commentIdx;
+        hideRepliesText.className = "hidden";
+        hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        hideRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+        hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+
+        textContentDiv.append(viewRepliesText, hideRepliesText);
+
+        const blankHeartIcon = document.createElement("img");
+        blankHeartIcon.id = "blankHeartIconRegularComment"+commentIdx;
+        blankHeartIcon.className = "hidden";
+        blankHeartIcon.src = "/images/blankHeart.png";
+        blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        blankHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
+
+        const redHeartIcon = document.createElement("img");
+        redHeartIcon.id = "redHeartIconRegularComment"+commentIdx;
+        redHeartIcon.className = "hidden";
+        redHeartIcon.src = "/images/redHeartIcon.webp";
+        redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        redHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
+
+        if(targetedComment.isLiked) {
+            redHeartIcon.classList.remove('hidden');
+        }
+        else {
+            blankHeartIcon.classList.remove('hidden');
+        }
+
+        mainDiv.appendChild(textContentDiv);
+        mainDiv.appendChild(blankHeartIcon);
+        mainDiv.appendChild(redHeartIcon);
+        commentsDiv.appendChild(mainDiv);
+    }
+}
+
 function getRelativeDateTimeText(datetimeString) {
     const inputDate = new Date(datetimeString);
     const now = new Date();
@@ -1167,6 +4597,10 @@ function takeUserToLogin() {
 
 function takeToProfile(username) {
     window.location.href = "http://localhost:8019/profilePage/"+username;
+}
+
+function takeToHashtagPage(hashtag) {
+    window.location.href = "http://localhost:8019/topicMatches/"+authenticatedUsername +"/"+hashtag;
 }
 
 function toggleLeftSidebarPopup() {
@@ -1559,14 +4993,14 @@ function createDOMElementsForNewAuthUserReply(newAuthUserReply, parentCommentTyp
     const mainDiv = document.createElement("div");
     mainDiv.id = "regularComment"+replyIndex;
     mainDiv.className = "repliesOf"+parentCommentType+parentCommentIdx;
-    mainDiv.style = "display: flex; align-items: start; width: 100%; position: relative; gap: 0.7em;";
+    mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
     mainDiv.style.marginLeft = `${newAuthUserReply.level*5}em`;
     mainDiv.onmouseenter = () => showOptionsIcon("RegularComment"+replyIndex);
     mainDiv.onmouseleave = () => hideOptionsIcon("RegularComment"+replyIndex);
 
     const profileImg = document.createElement("img");
     profileImg.src = relevantUserInfo[authenticatedUsername]['profilePhotoString'];
-    profileImg.style = "cursor: pointer; height: 2.5em; width: 2.5em; object-fit: contain;";
+    profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
     mainDiv.appendChild(profileImg);
 
     const textContentDiv = document.createElement("div");
@@ -1593,7 +5027,7 @@ function createDOMElementsForNewAuthUserReply(newAuthUserReply, parentCommentTyp
     const commentSpan = document.createElement("span");
     commentSpan.id = "contentRegularComment"+replyIndex;
     commentSpan.ondblclick = () => likeComment("RegularComment", replyIndex);
-    commentSpan.textContent = newAuthUserReply.content;
+    commentSpan.innerHTML = parseMentionsToSpans(newAuthUserReply.content);
     
     commentParagraph.appendChild(usernameBold);
     commentParagraph.append(" ");
@@ -1698,7 +5132,7 @@ function createDOMElementsForNewAuthUserComment(commentContent) {
     const commentIdx = commentsMadeByAuthUser.length-1;
     const mainDiv = document.createElement("div");
     mainDiv.id = "authUserComment"+commentIdx;
-    mainDiv.style = "display: flex; align-items: start; width: 100%; position: relative; gap: 0.7em;";
+    mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
     mainDiv.onmouseenter = () => showOptionsIcon("AuthUserComment"+commentIdx);
     mainDiv.onmouseleave = () => hideOptionsIcon("AuthUserComment"+commentIdx);
 
@@ -2170,94 +5604,96 @@ function startReplyToComment(commentType, commentIdx) {
     textareaToAddComment.placeholder = "Reply to " + targetedCommentToReplyTo.author + ": " + targetedCommentToReplyTo.content;
 }
 
-function createDOMElementsForReplies(commentType, commentIdx, repliesOfComment) {
-    const parentCommentElement = document.getElementById(commentType[0].toLowerCase() + commentType.slice(1) +commentIdx);
+function createDOMElementsForReplies(parentCommentType, parentCommentIdx, repliesOfComment) {
+    const parentCommentElement = document.getElementById(parentCommentType[0].toLowerCase() + parentCommentType.slice(1) + parentCommentIdx);
     let currElemToAddNewReplyNextTo = parentCommentElement;
     for(let reply of repliesOfComment) {
-        const mainDiv = document.createElement('div');
-        mainDiv.id = 'regularComment'+reply.index;
-        mainDiv.className = 'repliesOf'+commentType+commentIdx;
-        mainDiv.style.marginLeft = (5*reply.level).toString() + 'em';
-        mainDiv.style.display = 'flex';
-        mainDiv.style.alignItems = 'center';
-        mainDiv.style.width = '100%';
-        mainDiv.style.position = 'relative';
-        mainDiv.style.gap = '0.7em';
+        const commentIdx = reply.index;
+        const mainDiv = document.createElement("div");
+        mainDiv.id = "regularComment"+commentIdx;
+        mainDiv.className = "repliesOf"+parentCommentType+parentCommentIdx;
+        mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+        mainDiv.style.marginLeft = `${reply.level*5}em`;
+        if(reply.author===authenticatedUsername) {
+            mainDiv.onmouseenter = () => showOptionsIcon("RegularComment"+commentIdx);
+            mainDiv.onmouseleave = () => hideOptionsIcon("RegularComment"+commentIdx);
+        }
 
-        const profileImg = document.createElement('img');
+        const profileImg = document.createElement("img");
         profileImg.src = relevantUserInfo[reply.author]['profilePhotoString'];
-        profileImg.style.cursor = 'pointer';
-        profileImg.style.height = '2em';
-        profileImg.style.width = '2em';
-        profileImg.style.objectFit = 'contain';
+        profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
         profileImg.onclick = () => takeToProfile(reply.author);
         mainDiv.appendChild(profileImg);
 
-        const innerDiv = document.createElement('div');
-        innerDiv.id = 'mainDivRegularComment'+reply.index;
-        innerDiv.style.display = 'flex';
-        innerDiv.style.flexDirection = 'column';
+        const textContentDiv = document.createElement("div");
+        textContentDiv.id = "mainDivRegularComment"+commentIdx;
+        textContentDiv.style = "display: flex; flex-direction: column;";
 
-        const commentPara = document.createElement('p');
-        commentPara.style.fontSize = '0.8em';
-        commentPara.style.maxWidth = '80%';
-        commentPara.style.overflowWrap = 'break-word';
+        const commentParagraph = document.createElement("p");
+        commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
 
-        const username = document.createElement('b');
-        username.style.cursor = 'pointer';
-        username.textContent = reply.author;
-        username.onclick = () => takeToProfile(reply.author);
+        const usernameBold = document.createElement("b");
+        usernameBold.style = "cursor: pointer;";
+        usernameBold.textContent = reply.author;
+        usernameBold.onclick = () => takeToProfile(reply.author);
 
-        if(reply.isVerified) {
+        if(relevantUserInfo[reply.author].isVerified) {
             const verifiedCheck = document.createElement('img');
             verifiedCheck.src = '/images/verifiedCheck.png';
             verifiedCheck.style.pointerEvents = 'none';
             verifiedCheck.style.height = '1.1em';
             verifiedCheck.style.width = '1.1em';
             verifiedCheck.style.objectFit = 'contain';
-            username.appendChild(verifiedCheck);
+            usernameBold.appendChild(verifiedCheck);
         }
 
-        commentPara.appendChild(username);
+        //code to add Following span or Author span
+        
+        const commentSpan = document.createElement("span");
+        commentSpan.id = "contentRegularComment"+commentIdx;
+        commentSpan.ondblclick = () => likeComment("RegularComment", commentIdx);
+        commentSpan.innerHTML = parseMentionsToSpans(reply.content);
+        
+        commentParagraph.appendChild(usernameBold);
+        commentParagraph.append(" ");
+        commentParagraph.appendChild(commentSpan);
+        textContentDiv.appendChild(commentParagraph);
 
-        const commentText = document.createElement('span');
-        commentText.ondblclick = function() { likeComment('RegularComment', reply.index); };
-        commentText.textContent = " " + reply.content;
-        commentPara.appendChild(commentText);
+        const metaDiv = document.createElement("div");
+        metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
 
-        innerDiv.appendChild(commentPara);
+        const dateText = document.createElement("p");
+        dateText.id = "dateTextRegularComment"+commentIdx;
+        dateText.textContent = reply.date;
+        if(reply.isEdited) {
+            dateText.textContent+= " · Edited";
+        }
 
-        const metaDiv = document.createElement('div');
-        metaDiv.style.display = 'flex';
-        metaDiv.style.alignItems = 'center';
-        metaDiv.style.gap = '1.5em';
-        metaDiv.style.color = 'gray';
-        metaDiv.style.fontSize = '0.7em';
-        metaDiv.style.marginTop = '-1em';
-
-        const datePara = document.createElement('p');
-        datePara.textContent = reply.date;
-        metaDiv.appendChild(datePara);
-
-        const likesText = document.createElement('b');
-        likesText.id = 'numLikesTextRegularComment'+reply.index;
-        likesText.style.cursor = 'pointer';
+        const likesText = document.createElement("b");
+        likesText.id = "numLikesTextRegularComment"+commentIdx;
+        likesText.style = "cursor: pointer;";
+        if(reply.numLikes==1) {
+            likesText.textContent = "1 like";
+        }
+        else {
+            likesText.textContent = `${reply.numLikes} likes`;
+        }
         if(reply.numLikes==0) {
             likesText.classList.add('hidden');
         }
-        if(reply.numLikes==1) {
-            likesText.textContent = '1 like';
-        }
-        else {
-            likesText.textContent = reply.numLikes.toLocaleString() + ' likes';
-        }
-        metaDiv.appendChild(likesText);
 
-        const replyButton = document.createElement('b');
-        replyButton.style.cursor = 'pointer';
-        replyButton.onclick = function() { startReplyToComment('RegularComment', reply.index); };
-        replyButton.textContent = 'Reply';
-        metaDiv.appendChild(replyButton);
+        const replyButton = document.createElement("b");
+        replyButton.style = "cursor: pointer;";
+        replyButton.textContent = "Reply";
+        replyButton.onclick = () => startReplyToComment("RegularComment", commentIdx);
+
+        const optionsIcon = document.createElement("img");
+        optionsIcon.id = "optionsIconForRegularComment"+commentIdx;
+        optionsIcon.className = "hidden";
+        optionsIcon.src = "/images/optionsDots.png";
+        optionsIcon.style = "height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;";
+        optionsIcon.onclick = () => showOptionsPopupForComment("RegularComment", commentIdx);
+        metaDiv.append(dateText, likesText, replyButton, optionsIcon);
 
         if(reply.isLikedByAuthor && !postInfo['usernames'].includes(reply.author)) {
             const authorDiv = document.createElement('div');
@@ -2280,68 +5716,82 @@ function createDOMElementsForReplies(commentType, commentIdx, repliesOfComment) 
             metaDiv.appendChild(authorDiv);
         }
 
-        innerDiv.appendChild(metaDiv);
+        textContentDiv.appendChild(metaDiv);
 
-        const viewRepliesText = document.createElement('b');
-        viewRepliesText.id = 'viewRepliesTextRegularComment'+reply.index;
-        viewRepliesText.style.cursor = 'pointer';
-        viewRepliesText.style.color = 'gray';
-        viewRepliesText.style.fontSize = '0.74em';
-        viewRepliesText.style.marginTop = '1em';
-        viewRepliesText.onclick = function() { toggleRepliesText('RegularComment', reply.index); };
-        viewRepliesText.innerHTML = `—— <span style="margin-left: 0.9em;">View replies (${reply.numReplies})</span>`;
+        const viewRepliesText = document.createElement("b");
+        viewRepliesText.id = "viewRepliesTextRegularComment"+commentIdx;
+        viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        viewRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+        viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${reply.numReplies})</span>`;
         if(reply.numReplies==0) {
             viewRepliesText.classList.add('hidden');
         }
-        innerDiv.appendChild(viewRepliesText);
 
-        const hideRepliesText = document.createElement('b');
-        hideRepliesText.id = 'hideRepliesTextRegularComment'+reply.index;
-        hideRepliesText.className = 'hidden';
-        hideRepliesText.style.cursor = 'pointer';
-        hideRepliesText.style.color = 'gray';
-        hideRepliesText.style.fontSize = '0.74em';
-        hideRepliesText.style.marginTop = '1em';
-        hideRepliesText.onclick = function() { toggleRepliesText('RegularComment', reply.index); };
-        hideRepliesText.innerHTML = '—— <span style="margin-left: 0.9em;">Hide replies</span>';
-        innerDiv.appendChild(hideRepliesText);
+        const hideRepliesText = document.createElement("b");
+        hideRepliesText.id = "hideRepliesTextRegularComment"+commentIdx;
+        hideRepliesText.className = "hidden";
+        hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        hideRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+        hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
 
-        mainDiv.appendChild(innerDiv);
+        textContentDiv.append(viewRepliesText, hideRepliesText);
 
-        const blankHeartIcon = document.createElement('img');
-        blankHeartIcon.id = 'blankHeartIconRegularComment'+reply.index;
-        blankHeartIcon.src = '/images/blankHeart.png';
-        blankHeartIcon.className = 'hidden';
-        blankHeartIcon.onclick = function() { toggleLikeComment('RegularComment', reply.index); };
-        blankHeartIcon.style.height = '1em';
-        blankHeartIcon.style.width = '1em';
-        blankHeartIcon.style.cursor = 'pointer';
-        blankHeartIcon.style.objectFit = 'contain';
-        blankHeartIcon.style.position = 'absolute';
-        blankHeartIcon.style.left = '93%';
-        blankHeartIcon.style.top = '36%';
-        mainDiv.appendChild(blankHeartIcon);
+        const blankHeartIcon = document.createElement("img");
+        blankHeartIcon.id = "blankHeartIconRegularComment"+commentIdx;
+        blankHeartIcon.className = "hidden";
+        blankHeartIcon.src = "/images/blankHeart.png";
+        blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        blankHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
 
-        const redHeartIcon2 = document.createElement('img');
-        redHeartIcon2.id = 'redHeartIconRegularComment'+reply.index;
-        redHeartIcon2.src = '/images/redHeartIcon.webp';
-        redHeartIcon2.className = 'hidden';
-        redHeartIcon2.onclick = function() { toggleLikeComment('RegularComment', reply.index); };
-        redHeartIcon2.style.height = '1em';
-        redHeartIcon2.style.width = '1em';
-        redHeartIcon2.style.cursor = 'pointer';
-        redHeartIcon2.style.objectFit = 'contain';
-        redHeartIcon2.style.position = 'absolute';
-        redHeartIcon2.style.left = '93%';
-        redHeartIcon2.style.top = '36%';
-        mainDiv.appendChild(redHeartIcon2);
+        const redHeartIcon = document.createElement("img");
+        redHeartIcon.id = "redHeartIconRegularComment"+commentIdx;
+        redHeartIcon.className = "hidden";
+        redHeartIcon.src = "/images/redHeartIcon.webp";
+        redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        redHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
 
-        if(reply.id in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments && numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[reply.id][1]) {
-            redHeartIcon2.classList.remove('hidden');
+        if(reply.isLiked) {
+            redHeartIcon.classList.remove('hidden');
         }
         else {
             blankHeartIcon.classList.remove('hidden');
         }
+
+        mainDiv.appendChild(textContentDiv);
+
+        if(reply.author===authenticatedUsername) {
+            const editModeDiv = document.createElement("div");
+            editModeDiv.id = "editModeDivRegularComment"+commentIdx;
+            editModeDiv.className = "hidden";
+            editModeDiv.style = "display: flex; align-items: center; gap: 0.5em; width: 100%;";
+
+            const textarea = document.createElement("textarea");
+            textarea.id = "textareaForEditingRegularComment"+commentIdx;
+            textarea.placeholder = "";
+            textarea.style = "outline: none; width:77%; resize: none; font-family: Arial; padding: 0.5em 1em;";
+            textarea.oninput = () => onInputOfTextareaForEditingComment("RegularComment"+commentIdx);
+
+            const cancelButton = document.createElement("button");
+            cancelButton.textContent = "Cancel";
+            cancelButton.type = "button";
+            cancelButton.style = "border-radius:1em; color: white; padding: 0.5em 1em; cursor: pointer; background-color: black; font-size: 0.7em;";
+            cancelButton.onclick = () => cancelCommentEdit("RegularComment", commentIdx);
+
+            const confirmButton = document.createElement("button");
+            confirmButton.id = "confirmEditButtonRegularComment"+commentIdx;
+            confirmButton.className = "blueButton hidden";
+            confirmButton.textContent = "Ok";
+            confirmButton.type = "button";
+            confirmButton.style = "font-size: 0.7em;";
+            confirmButton.onclick = () => confirmCommentEdit("RegularComment", commentIdx);
+
+            editModeDiv.append(textarea, cancelButton, confirmButton);
+            mainDiv.appendChild(editModeDiv);
+        }
+        mainDiv.appendChild(blankHeartIcon);
+        mainDiv.appendChild(redHeartIcon);
+
+        commentsDiv.appendChild(mainDiv);
 
         currElemToAddNewReplyNextTo.insertAdjacentElement('afterend', mainDiv);
         currElemToAddNewReplyNextTo = mainDiv;
@@ -2426,8 +5876,8 @@ function toggleRepliesText(commentType, commentIdx) {
         else {
             for(let i=0; i<repliesOfPost.length; i++) {
                 const currReply = repliesOfPost[i];
-                const currReplyNumReplies = repliesOfPost.filter(x=>x.commentid === currReply.replyid).length;
-                if(!(currReply.replyId in setOfIdsOfUniqueRepliesAlreadyDone) && currReply.commentid ===targetedCommentId) {
+                if(currReply.commentid===targetedCommentId && !(setOfIdsOfUniqueRepliesAlreadyDone.has(currReply.replyid))) {
+                    const currReplyNumReplies = repliesOfPost.filter(x=>x.commentid === currReply.replyid).length;
                     repliesOfComment.push({
                         id: currReply.replyid,
                         idOfParentComment: currReply.commentid,
