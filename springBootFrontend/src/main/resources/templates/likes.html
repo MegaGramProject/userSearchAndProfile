@@ -16,43 +16,43 @@
 
         <div onclick="takeUserHome()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/homeIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/homeIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
             <p>Home</p>
         </div>
 
         <div onclick="takeUserToSearch()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/searchIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/searchIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
             <p>Search</p>
         </div>
 
         <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/exploreIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/exploreIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
             <p>Explore</p>
         </div>
 
         <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/reelsIcon2.png}" style="object-fit: contain; height: 2.1em; width: 2.1em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/reelsIcon2.png}" style="object-fit: contain; height: 2.1em; width: 2.1em;">
             <p>Reels</p>
         </div>
 
         <div onclick="takeUserToMessages()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/messagesIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/messagesIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
             <p>Messages</p>
         </div>
 
         <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/blankHeart.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/blankHeart.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
             <p>Notifications</p>
         </div>
 
         <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/createIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/createIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
             <p>Create</p>
         </div>
 
@@ -66,7 +66,7 @@
         <div style="position: relative; height: 90%;">
             <div class="hoverableElement" style="position: absolute; top: 90%; display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; height: 7.25em; border-radius: 0.85em; position: relative;">
-                <img th:src="@{/images/moreIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+                <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/moreIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
                 <p id="toggleLeftSidebarPopupMoreOrLessText" onclick="toggleLeftSidebarPopup()">More</p>
 
                 <div class="hidden" id="leftSidebarPopup" style="background-color: white; border-style: solid; position: absolute;
@@ -94,21 +94,21 @@
             <div style="display: flex; gap: 5em; justify-content: center; color: gray; font-size: 0.8em; padding-top: 1.6em;">
 
                 <div onclick="showLikedPosts()" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
-                    <img id="postsGridIcon2" th:src="@{/images/postsGridIcon2.png}" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
-                    <img id="postsGridIcon" th:src="@{/images/postsGridIcon.png}" class="hidden" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
+                    <img class="iconsToBeAdjustedForDarkMode" id="postsGridIcon2" th:src="@{/images/postsGridIcon2.png}" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
+                    <img class="iconsToBeAdjustedForDarkMode hidden" id="postsGridIcon" th:src="@{/images/postsGridIcon.png}" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
                     <b id="postsText" style="color: black; font-size: 1.15em;">POSTS</b>
                 </div>
 
                 <div onclick="showLikedReels()" style="display: flex; align-items: center; gap: 0.3em; cursor: pointer;">
-                    <img id="reelsIcon" th:src="@{/images/reelsIcon.png}" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
-                    <img id="reelsIcon2" th:src="@{/images/reelsIcon2.png}" class="hidden" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
+                    <img class="iconsToBeAdjustedForDarkMode" id="reelsIcon" th:src="@{/images/reelsIcon.png}" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
+                    <img class="iconsToBeAdjustedForDarkMode hidden" id="reelsIcon2" th:src="@{/images/reelsIcon2.png}" style="object-fit: contain; height: 1.6em; width: 1.8em; pointer-events: none;">
                     <b id="reelsText">REELS</b>
                 </div>
 
             </div>
 
             <div id="noLikedPosts" class="hidden" style="height: 35em; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                <img th:src="@{/images/cameraInCircleIcon.png}" style="pointer-events: none; height: 6.8em; width: 6.8em; object-fit: contain;">
+                <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/cameraInCircleIcon.png}" style="pointer-events: none; height: 6.8em; width: 6.8em; object-fit: contain;">
                 <h2>None Yet</h2>
             </div>
     
@@ -121,7 +121,7 @@
             </div>
 
             <div id="noLikedReels" class="hidden" style="height: 35em; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-                <img th:src="@{/images/reelsIcon3.png}" style="pointer-events: none; height: 6.2em; width: 6.2em; object-fit: contain;">
+                <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/reelsIcon3.png}" style="pointer-events: none; height: 6.2em; width: 6.2em; object-fit: contain;">
                 <h2>None Yet</h2>
             </div>
 

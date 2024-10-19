@@ -16,43 +16,43 @@
 
         <div onclick="takeUserHome()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/homeIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/homeIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
             <p>Home</p>
         </div>
 
         <div onclick="takeUserToSearch()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/searchIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/searchIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
             <p>Search</p>
         </div>
 
         <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/exploreIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/exploreIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
             <p>Explore</p>
         </div>
 
         <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/reelsIcon2.png}" style="object-fit: contain; height: 2.1em; width: 2.1em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/reelsIcon2.png}" style="object-fit: contain; height: 2.1em; width: 2.1em;">
             <p>Reels</p>
         </div>
 
         <div onclick="takeUserToMessages()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/messagesIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/messagesIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
             <p>Messages</p>
         </div>
 
         <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/blankHeart.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/blankHeart.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
             <p>Notifications</p>
         </div>
 
         <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/createIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/createIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
             <p>Create</p>
         </div>
 
@@ -90,7 +90,7 @@
 
         <br>
 
-        <div style="display: flex; align-items: center; justify-content: space-between; background-color: #f7f7f7; border-radius: 0.87em;
+        <div id="changeProfilePhotoDiv" style="display: flex; align-items: center; justify-content: space-between; background-color: #f7f7f7; border-radius: 0.87em;
         width: 80%; padding: 1em 1.8em; cursor: pointer;">
 
             <div style="display: flex; align-items: center; gap: 1em;">
@@ -183,7 +183,7 @@
     <img id="darkScreen" class="hidden" th:src="@{/images/blackScreen.png}" style="position: absolute; top: 0%; left: 0%; height: 170%; width: 100%; opacity: 0.7">
 
     <!--Popups-->
-    <div id="changeProfilePhotoPopup" class="hidden" style="position: absolute; top: 35%; left: 38%; border-radius: 1em; background-color: white; width: 33%; height: 29%; border-style: solid; z-index: 10;
+    <div id="changeProfilePhotoPopup" class="popup hidden" style="position: absolute; top: 35%; left: 38%; border-radius: 1em; background-color: white; width: 33%; height: 29%; border-style: solid; z-index: 10;
     display: flex; flex-direction: column; align-items: center; justify-content: center;">
         <div style="width: 100%; border-style: solid; border-color: lightgray; border-width:0.12em; text-align: center;
         border-top: none; border-left: none; border-right: none;">
@@ -205,7 +205,7 @@
         </div>
     </div>
 
-    <div id="deleteAccountConfirmationPopup" class="hidden" style="position: absolute; top: 45%; left: 38%; border-radius: 1em; background-color: white; width: 33%; height: 29%; border-style: solid; z-index: 10;
+    <div id="deleteAccountConfirmationPopup" class="popup hidden" style="position: absolute; top: 45%; left: 38%; border-radius: 1em; background-color: white; width: 33%; height: 29%; border-style: solid; z-index: 10;
     display: flex; flex-direction: column; align-items: center; justify-content: center;">
         <div style="width: 100%; border-style: solid; border-color: lightgray; border-width:0.12em; text-align: center;
         border-top: none; border-left: none; border-right: none;">
@@ -225,7 +225,7 @@
 
     </div>
 
-    <div id="finalDeleteAccountConfirmationPopup" class="hidden" style="position: absolute; top: 45%; left: 38%; border-radius: 1em; background-color: white; width: 33%; height: 34%; border-style: solid; z-index: 10;
+    <div id="finalDeleteAccountConfirmationPopup" class="popup hidden" style="position: absolute; top: 45%; left: 38%; border-radius: 1em; background-color: white; width: 33%; height: 34%; border-style: solid; z-index: 10;
     display: flex; flex-direction: column; align-items: center; justify-content: center;">
             <h2>Last Chance</h2>
             <p style="color: gray; font-size:0.8em; text-align: center; max-width: 66%;">To finalize the deletion of your account once and for all, enter your username for the last time</p>
@@ -236,7 +236,7 @@
             <button onclick="closeFinalConfirmationPopup()" id="noWaitCancelbutton" style="color: white; background-color: black; font-weight: bold; cursor: pointer; padding: 0.5em 1em; border-radius: 0.8em;">No wait! Cancel</button>
     </div>
 
-    <div id="confirmCodePopup" class="hidden" style="position: absolute; top: 85%; left: 38%; border-radius: 1em; background-color: white; width: 33%; height: 42%; border-style: solid; z-index: 10;
+    <div id="confirmCodePopup" class="poup hidden" style="position: absolute; top: 85%; left: 38%; border-radius: 1em; background-color: white; width: 33%; height: 42%; border-style: solid; z-index: 10;
     display: flex; flex-direction: column; align-items: center; justify-content: center;">
         <div style="width: 100%; text-align: center;">
             <p id="confirmCodeHeader" style="font-size: 1.4em;"></p>

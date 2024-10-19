@@ -19,7 +19,7 @@ let searchResults = [];
 let recentUserSearches = [];
 let recentTopicSearches = [];
 let usersFollowed = ['rishavry4', 'rishavry5', 'rishavry7', 'rishavry2'];
-let userBlockings = ['rishavry7'];
+let userBlockings = [];
 let currentlyHoveredSearchId = "";
 let currentlyHoveredSearchIdBeforeMouseEnter = "";
 

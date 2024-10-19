@@ -163,7 +163,7 @@ async function authenticateUserAndFetchData() {
     userBlockings = await response2.json();
     userBlockings = userBlockings['data']['getAllUserBlockings'];
     userBlockings = userBlockings.map(x=>{
-        if(x['blocker]===authenticatedUsername) {
+        if(x['blocker']===authenticatedUsername) {
             return x['blockee'];
         }
         return x['blocker'];
@@ -229,7 +229,7 @@ async function authenticateUserAndFetchData() {
     }
     followRequestsMadeByAuthUser = await response4b.json();
     followRequestsMadeByAuthUser = followRequestsMadeByAuthUser['data']['followRequestsMadeByUser'];
-    followRequestsMadeByAuthUser = ['rishavry2'];
+    followRequestsMadeByAuthUser = [];
 
     if(postInfo['usernames'].length==1) {
         postAuthorOrAuthorsText.textContent = postInfo['usernames'][0];
@@ -247,11 +247,10 @@ async function authenticateUserAndFetchData() {
 
     
     for(let profileAuthor of postInfo['usernames']) {
-        if(profileAuthor!==authenticatedUsername && relevantUserInfo[profileAuthor].isPrivate && !authUserFollowings.includes(authenticatedUsername)) {
+        if(profileAuthor!==authenticatedUsername && relevantUserInfo[profileAuthor].isPrivate && !(authUserFollowings.includes(profileAuthor))) {
             mainSection.classList.add('hidden');
             leftSidebar.classList.add('hidden');
             changeBackgroundText.classList.add('hidden');
-            accountNotFoundOrBlocksYou.classList.remove('hidden');
             return;
         }
     }
@@ -305,7 +304,7 @@ async function authenticateUserAndFetchData() {
         currSlideVid.classList.remove('hidden');
         seeTaggedAccountsIcon.style.top = '80%';
     }
-    if(postInfo.numSlides>0) {
+    if(postInfo.numSlides>1) {
         const currentSlideDot = document.createElement('img');
         currentSlideDot.src = '/images/solidWhiteDot.png';
         currentSlideDot.style.height = '1.2em';
@@ -498,6 +497,18 @@ async function authenticateUserAndFetchData() {
 
 function createDOMElementsForComments() {
     createDOMElementsForCaption();
+
+    const queryString = window.location.search;
+    const params = new URLSearchParams(queryString);
+    const commentId = params.get("commentId");
+    const replyId = params.get("replyId");
+    if(commentId!==null) {
+        createDOMElementsForCommentFromQueryParams(commentId);
+    }
+    else if(replyId!==null) {
+        createDOMElementsForReplyFromQueryParams(replyId);
+    }
+
     createDOMElementsForAuthUserComments();
     createDOMElementsForAuthUserReplies();
     createDOMElementsForCommentsMentioningAuthUser();
@@ -572,10 +583,778 @@ function createDOMElementsForCaption() {
     setOfIdsOfCommentsAlreadyDone.add(captionComment.commentid);
 }
 
+function createDOMElementsForCommentFromQueryParams(commentId) {
+    let currComment = commentsOfPost.filter(x=>x.commentid===commentId);
+    if(currComment.length==0){
+        return;
+    }
+    currComment = currComment[0];
+    let numRepliesOfCurrComment = 0;
+    const uniqueRepliesOfCurrComment = [];
+    for(let i=0; i<repliesOfPost.length; i++) {
+        const currReply = repliesOfPost[i];
+        if(currReply.commentid!==currComment.commentid) {
+            continue;
+        }
+        if(currReply.username===authenticatedUsername || authUserFollowings.includes(currReply.username) || currReply.comment.includes("@"+authenticatedUsername)
+        || postInfo['usernames'].includes(currReply.username)) {
+            const numRepliesOfCurrReply = repliesOfPost.filter(x=>x.commentid===currReply.replyid).length;
+            uniqueRepliesOfCurrComment.push({
+                id: currReply.replyid,
+                idOfParentComment: currReply.commentid,
+                isLiked: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][1] : false,
+                index: regularComments.length,
+                author: currReply.username,
+                isVerified: relevantUserInfo[currReply.username].isVerified,
+                content: currReply.comment,
+                numLikes: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][0] : 0,
+                date: getRelativeDateTimeText(currReply.datetime),
+                numReplies: numRepliesOfCurrReply,
+                isLikedByAuthor: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][2] : false,
+                level: 1,
+                datetime: currReply.datetime,
+                isEdited: currReply.isedited
+            });
+            regularComments.push({
+                id: currReply.replyid,
+                idOfParentComment: currReply.commentid,
+                isLiked: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][1] : false,
+                index: regularComments.length,
+                author: currReply.username,
+                isVerified: relevantUserInfo[currReply.username].isVerified,
+                content: currReply.comment,
+                numLikes: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][0] : 0,
+                date: getRelativeDateTimeText(currReply.datetime),
+                numReplies: numRepliesOfCurrReply,
+                isLikedByAuthor: currReply.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currReply.replyid][2] : false,
+                level: 1,
+                datetime: currReply.datetime,
+                isEdited: currReply.isedited
+            });
+            setOfIdsOfUniqueRepliesAlreadyDone.add(currReply.replyid)
+        }
+        else {
+            numRepliesOfCurrComment++;
+        }
+    }
+    regularComments.push({
+        id: currComment.commentid,
+        idOfParentComment: null,
+        isLiked: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][1] : false,
+        index: regularComments.length,
+        author: currComment.username,
+        isVerified: relevantUserInfo[currComment.username].isVerified,
+        content: currComment.comment,
+        numLikes: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][0] : 0,
+        date: getRelativeDateTimeText(currComment.datetime),
+        numReplies: numRepliesOfCurrComment,
+        isLikedByAuthor: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][2] : false,
+        level: 0,
+        datetime: currComment.datetime,
+        isEdited: currComment.isedited
+    });
+    setOfIdsOfCommentsAlreadyDone.add(currComment.commentid);
+
+    currComment = regularComments[regularComments.length-1];
+    const commentIdx = currComment.index;
+    const mainDiv = document.createElement("div");
+    mainDiv.id = "regularComment"+commentIdx;
+    mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+    mainDiv.style.backgroundColor = '#edf2ff';
+    if(currComment.author===authenticatedUsername) {
+        mainDiv.onmouseenter = () => showOptionsIcon("RegularComment"+commentIdx);
+        mainDiv.onmouseleave = () => hideOptionsIcon("RegularComment"+commentIdx);
+    }
+
+    const profileImg = document.createElement("img");
+    profileImg.src = relevantUserInfo[currComment.author]['profilePhotoString'];
+    profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+    profileImg.onclick = () => takeToProfile(currComment.author);
+    mainDiv.appendChild(profileImg);
+
+    const textContentDiv = document.createElement("div");
+    textContentDiv.id = "mainDivRegularComment"+commentIdx;
+    textContentDiv.style = "display: flex; flex-direction: column;";
+
+    const commentParagraph = document.createElement("p");
+    commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+
+    const usernameBold = document.createElement("b");
+    usernameBold.style = "cursor: pointer;";
+    usernameBold.textContent = currComment.author;
+    usernameBold.onclick = () => takeToProfile(currComment.author);
+
+    if(relevantUserInfo[currComment.author].isVerified) {
+        const verifiedCheck = document.createElement('img');
+        verifiedCheck.src = '/images/verifiedCheck.png';
+        verifiedCheck.style.pointerEvents = 'none';
+        verifiedCheck.style.height = '1.1em';
+        verifiedCheck.style.width = '1.1em';
+        verifiedCheck.style.objectFit = 'contain';
+        usernameBold.appendChild(verifiedCheck);
+    }
+
+    if(authUserFollowings.includes(currComment.author)) {
+        const followingSpan = document.createElement('span');
+        followingSpan.textContent = " · Following";
+        followingSpan.style.color = "gray";
+        followingSpan.style.fontSize = '0.9em';
+        followingSpan.style.marginRight = '0.7em';
+        usernameBold.appendChild(followingSpan);
+
+    }
+    else if(postInfo['usernames'].includes(currComment.author) && currComment.author!==authenticatedUsername) {
+        const authorSpan = document.createElement('span');
+        authorSpan.textContent = " · Author";
+        authorSpan.style.color = "gray";
+        authorSpan.style.fontSize = '0.9em';
+        authorSpan.style.marginRight = '0.7em';
+        usernameBold.appendChild(authorSpan);
+    }
+    
+    const commentSpan = document.createElement("span");
+    commentSpan.id = "contentRegularComment"+commentIdx;
+    commentSpan.ondblclick = () => likeComment("RegularComment", commentIdx);
+    commentSpan.innerHTML = parseMentionsToSpans(currComment.content);
+    
+    commentParagraph.appendChild(usernameBold);
+    commentParagraph.append(" ");
+    commentParagraph.appendChild(commentSpan);
+    textContentDiv.appendChild(commentParagraph);
+
+    const metaDiv = document.createElement("div");
+    metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+
+    const dateText = document.createElement("p");
+    dateText.id = "dateTextRegularComment"+commentIdx;
+    dateText.textContent = currComment.date;
+    if(currComment.isEdited) {
+        dateText.textContent+= " · Edited";
+    }
+
+    const likesText = document.createElement("b");
+    likesText.id = "numLikesTextRegularComment"+commentIdx;
+    likesText.style = "cursor: pointer;";
+    likesText.onclick = () => showCommentLikers(currComment.id);
+    if(currComment.numLikes==1) {
+        likesText.textContent = "1 like";
+    }
+    else {
+        likesText.textContent = `${currComment.numLikes} likes`;
+    }
+    if(currComment.numLikes==0) {
+        likesText.classList.add('hidden');
+    }
+
+    const replyButton = document.createElement("b");
+    replyButton.style = "cursor: pointer;";
+    replyButton.textContent = "Reply";
+    replyButton.onclick = () => startReplyToComment("RegularComment", commentIdx);
+
+    metaDiv.append(dateText, likesText, replyButton);
+
+    if(currComment.author===authenticatedUsername) {
+        const optionsIcon = document.createElement("img");
+        optionsIcon.id = "optionsIconForRegularComment"+commentIdx;
+        optionsIcon.className = "iconsToBeAdjustedForDarkMode hidden";
+        optionsIcon.src = "/images/optionsDots.png";
+        optionsIcon.style = "height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;";
+        optionsIcon.onclick = () => showOptionsPopupForComment("RegularComment", commentIdx);
+        metaDiv.appendChild(optionsIcon);
+    }
+
+    if(currComment.isLikedByAuthor && !postInfo['usernames'].includes(currComment.author)) {
+        const authorDiv = document.createElement('div');
+        authorDiv.style.display = 'flex';
+        authorDiv.style.alignItems = 'center';
+        authorDiv.style.gap = '0.35em';
+
+        const redHeartIcon = document.createElement('img');
+        redHeartIcon.src = '/images/redHeartIcon.webp';
+        redHeartIcon.style.height = '1.2em';
+        redHeartIcon.style.width = '1.2em';
+        redHeartIcon.style.objectFit = 'contain';
+        redHeartIcon.style.pointerEvents = 'none';
+        authorDiv.appendChild(redHeartIcon);
+
+        const byAuthorText = document.createElement('small');
+        byAuthorText.textContent = 'by author';
+        authorDiv.appendChild(byAuthorText);
+
+        metaDiv.appendChild(authorDiv);
+    }
+
+    textContentDiv.appendChild(metaDiv);
+
+    const viewRepliesText = document.createElement("b");
+    viewRepliesText.id = "viewRepliesTextRegularComment"+commentIdx;
+    viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+    viewRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+    viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${currComment.numReplies})</span>`;
+    if(currComment.numReplies==0) {
+        viewRepliesText.classList.add('hidden');
+    }
+
+    const hideRepliesText = document.createElement("b");
+    hideRepliesText.id = "hideRepliesTextRegularComment"+commentIdx;
+    hideRepliesText.className = "hidden";
+    hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+    hideRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+    hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+
+    textContentDiv.append(viewRepliesText, hideRepliesText);
+
+    const blankHeartIcon = document.createElement("img");
+    blankHeartIcon.id = "blankHeartIconRegularComment"+commentIdx;
+    blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
+    blankHeartIcon.src = "/images/blankHeart.png";
+    blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+    blankHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
+
+    const redHeartIcon = document.createElement("img");
+    redHeartIcon.id = "redHeartIconRegularComment"+commentIdx;
+    redHeartIcon.className = "hidden";
+    redHeartIcon.src = "/images/redHeartIcon.webp";
+    redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+    redHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
+
+    if(currComment.isLiked) {
+        redHeartIcon.classList.remove('hidden');
+    }
+    else {
+        blankHeartIcon.classList.remove('hidden');
+    }
+
+    mainDiv.appendChild(textContentDiv);
+
+    if(currComment.author===authenticatedUsername) {
+        const editModeDiv = document.createElement("div");
+        editModeDiv.id = "editModeDivRegularComment"+commentIdx;
+        editModeDiv.className = "hidden";
+        editModeDiv.style = "display: flex; align-items: center; gap: 0.5em; width: 100%;";
+
+        const textarea = document.createElement("textarea");
+        textarea.id = "textareaForEditingRegularComment"+commentIdx;
+        textarea.placeholder = "";
+        textarea.style = "outline: none; width:77%; resize: none; font-family: Arial; padding: 0.5em 1em;";
+        textarea.oninput = () => onInputOfTextareaForEditingComment("RegularComment"+commentIdx);
+
+        const cancelButton = document.createElement("button");
+        cancelButton.textContent = "Cancel";
+        cancelButton.type = "button";
+        cancelButton.style = "border-radius:1em; color: white; padding: 0.5em 1em; cursor: pointer; background-color: black; font-size: 0.7em;";
+        cancelButton.onclick = () => cancelCommentEdit("RegularComment", commentIdx);
+
+        const confirmButton = document.createElement("button");
+        confirmButton.id = "confirmEditButtonRegularComment"+commentIdx;
+        confirmButton.className = "blueButton hidden";
+        confirmButton.textContent = "Ok";
+        confirmButton.type = "button";
+        confirmButton.style = "font-size: 0.7em;";
+        confirmButton.onclick = () => confirmCommentEdit("RegularComment", commentIdx);
+
+        editModeDiv.append(textarea, cancelButton, confirmButton);
+        mainDiv.appendChild(editModeDiv);
+    }
+    mainDiv.appendChild(blankHeartIcon);
+    mainDiv.appendChild(redHeartIcon);
+
+    commentsDiv.appendChild(mainDiv);
+
+    const sortedUniqueRepliesOfCurrComment = [...uniqueRepliesOfCurrComment].sort((a,b) => new Date(b.datetime) - new Date(a.datetime));
+
+    for(let uniqueReply of sortedUniqueRepliesOfCurrComment) {
+        const commentIdx = uniqueReply.index;
+        const mainDiv = document.createElement("div");
+        mainDiv.id = "regularComment"+commentIdx;
+        mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+        mainDiv.style.marginLeft = `${uniqueReply.level*5}em`;
+        if(uniqueReply.author===authenticatedUsername) {
+            mainDiv.onmouseenter = () => showOptionsIcon("RegularComment"+commentIdx);
+            mainDiv.onmouseleave = () => hideOptionsIcon("RegularComment"+commentIdx);
+        }
+
+        const profileImg = document.createElement("img");
+        profileImg.src = relevantUserInfo[uniqueReply.author]['profilePhotoString'];
+        profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+        profileImg.onclick = () => takeToProfile(uniqueReply.author);
+        mainDiv.appendChild(profileImg);
+
+        const textContentDiv = document.createElement("div");
+        textContentDiv.id = "mainDivRegularComment"+commentIdx;
+        textContentDiv.style = "display: flex; flex-direction: column;";
+
+        const commentParagraph = document.createElement("p");
+        commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+
+        const usernameBold = document.createElement("b");
+        usernameBold.style = "cursor: pointer;";
+        usernameBold.textContent = uniqueReply.author;
+        usernameBold.onclick = () => takeToProfile(uniqueReply.author);
+
+        if(relevantUserInfo[uniqueReply.author].isVerified) {
+            const verifiedCheck = document.createElement('img');
+            verifiedCheck.src = '/images/verifiedCheck.png';
+            verifiedCheck.style.pointerEvents = 'none';
+            verifiedCheck.style.height = '1.1em';
+            verifiedCheck.style.width = '1.1em';
+            verifiedCheck.style.objectFit = 'contain';
+            usernameBold.appendChild(verifiedCheck);
+        }
+
+        if(authUserFollowings.includes(uniqueReply.author)) {
+            const followingSpan = document.createElement('span');
+            followingSpan.textContent = " · Following";
+            followingSpan.style.color = "gray";
+            followingSpan.style.fontSize = '0.9em';
+            followingSpan.style.marginRight = '0.7em';
+            usernameBold.appendChild(followingSpan);
+
+        }
+        else if(postInfo['usernames'].includes(uniqueReply.author) && uniqueReply.author!==authenticatedUsername) {
+            const authorSpan = document.createElement('span');
+            authorSpan.textContent = " · Author";
+            authorSpan.style.color = "gray";
+            authorSpan.style.fontSize = '0.9em';
+            authorSpan.style.marginRight = '0.7em';
+            usernameBold.appendChild(authorSpan);
+        }
+        
+        const commentSpan = document.createElement("span");
+        commentSpan.id = "contentRegularComment"+commentIdx;
+        commentSpan.ondblclick = () => likeComment("RegularComment", commentIdx);
+        commentSpan.innerHTML = parseMentionsToSpans(uniqueReply.content);
+        
+        commentParagraph.appendChild(usernameBold);
+        commentParagraph.append(" ");
+        commentParagraph.appendChild(commentSpan);
+        textContentDiv.appendChild(commentParagraph);
+
+        const metaDiv = document.createElement("div");
+        metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+
+        const dateText = document.createElement("p");
+        dateText.id = "dateTextRegularComment"+commentIdx;
+        dateText.textContent = uniqueReply.date;
+        if(uniqueReply.isEdited) {
+            dateText.textContent+= " · Edited";
+        }
+
+        const likesText = document.createElement("b");
+        likesText.id = "numLikesTextRegularComment"+commentIdx;
+        likesText.style = "cursor: pointer;";
+        likesText.onclick = () => showCommentLikers(uniqueReply.id);
+        if(uniqueReply.numLikes==1) {
+            likesText.textContent = "1 like";
+        }
+        else {
+            likesText.textContent = `${uniqueReply.numLikes} likes`;
+        }
+        if(uniqueReply.numLikes==0) {
+            likesText.classList.add('hidden');
+        }
+
+        const replyButton = document.createElement("b");
+        replyButton.style = "cursor: pointer;";
+        replyButton.textContent = "Reply";
+        replyButton.onclick = () => startReplyToComment("RegularComment", commentIdx);
+
+        const optionsIcon = document.createElement("img");
+        optionsIcon.id = "optionsIconForRegularComment"+commentIdx;
+        optionsIcon.className = "iconsToBeAdjustedForDarkMode hidden";
+        optionsIcon.src = "/images/optionsDots.png";
+        optionsIcon.style = "height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;";
+        optionsIcon.onclick = () => showOptionsPopupForComment("RegularComment", commentIdx);
+        metaDiv.append(dateText, likesText, replyButton, optionsIcon);
+
+        if(uniqueReply.isLikedByAuthor && !postInfo['usernames'].includes(uniqueReply.author)) {
+            const authorDiv = document.createElement('div');
+            authorDiv.style.display = 'flex';
+            authorDiv.style.alignItems = 'center';
+            authorDiv.style.gap = '0.35em';
+
+            const redHeartIcon = document.createElement('img');
+            redHeartIcon.src = '/images/redHeartIcon.webp';
+            redHeartIcon.style.height = '1.2em';
+            redHeartIcon.style.width = '1.2em';
+            redHeartIcon.style.objectFit = 'contain';
+            redHeartIcon.style.pointerEvents = 'none';
+            authorDiv.appendChild(redHeartIcon);
+
+            const byAuthorText = document.createElement('small');
+            byAuthorText.textContent = 'by author';
+            authorDiv.appendChild(byAuthorText);
+
+            metaDiv.appendChild(authorDiv);
+        }
+
+        textContentDiv.appendChild(metaDiv);
+
+        const viewRepliesText = document.createElement("b");
+        viewRepliesText.id = "viewRepliesTextRegularComment"+commentIdx;
+        viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        viewRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+        viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${uniqueReply.numReplies})</span>`;
+        if(uniqueReply.numReplies==0) {
+            viewRepliesText.classList.add('hidden');
+        }
+
+        const hideRepliesText = document.createElement("b");
+        hideRepliesText.id = "hideRepliesTextRegularComment"+commentIdx;
+        hideRepliesText.className = "hidden";
+        hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        hideRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+        hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+
+        textContentDiv.append(viewRepliesText, hideRepliesText);
+
+        const blankHeartIcon = document.createElement("img");
+        blankHeartIcon.id = "blankHeartIconRegularComment"+commentIdx;
+        blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
+        blankHeartIcon.src = "/images/blankHeart.png";
+        blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        blankHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
+
+        const redHeartIcon = document.createElement("img");
+        redHeartIcon.id = "redHeartIconRegularComment"+commentIdx;
+        redHeartIcon.className = "hidden";
+        redHeartIcon.src = "/images/redHeartIcon.webp";
+        redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        redHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
+
+        if(uniqueReply.isLiked) {
+            redHeartIcon.classList.remove('hidden');
+        }
+        else {
+            blankHeartIcon.classList.remove('hidden');
+        }
+
+        mainDiv.appendChild(textContentDiv);
+
+        if(uniqueReply.author===authenticatedUsername) {
+            const editModeDiv = document.createElement("div");
+            editModeDiv.id = "editModeDivRegularComment"+commentIdx;
+            editModeDiv.className = "hidden";
+            editModeDiv.style = "display: flex; align-items: center; gap: 0.5em; width: 100%;";
+
+            const textarea = document.createElement("textarea");
+            textarea.id = "textareaForEditingRegularComment"+commentIdx;
+            textarea.placeholder = "";
+            textarea.style = "outline: none; width:77%; resize: none; font-family: Arial; padding: 0.5em 1em;";
+            textarea.oninput = () => onInputOfTextareaForEditingComment("RegularComment"+commentIdx);
+
+            const cancelButton = document.createElement("button");
+            cancelButton.textContent = "Cancel";
+            cancelButton.type = "button";
+            cancelButton.style = "border-radius:1em; color: white; padding: 0.5em 1em; cursor: pointer; background-color: black; font-size: 0.7em;";
+            cancelButton.onclick = () => cancelCommentEdit("RegularComment", commentIdx);
+
+            const confirmButton = document.createElement("button");
+            confirmButton.id = "confirmEditButtonRegularComment"+commentIdx;
+            confirmButton.className = "blueButton hidden";
+            confirmButton.textContent = "Ok";
+            confirmButton.type = "button";
+            confirmButton.style = "font-size: 0.7em;";
+            confirmButton.onclick = () => confirmCommentEdit("RegularComment", commentIdx);
+
+            editModeDiv.append(textarea, cancelButton, confirmButton);
+            mainDiv.appendChild(editModeDiv);
+        }
+        mainDiv.appendChild(blankHeartIcon);
+        mainDiv.appendChild(redHeartIcon);
+
+        commentsDiv.appendChild(mainDiv);
+    }
+
+    
+}
+
+function createDOMElementsForReplyFromQueryParams(replyId) {
+    const commentFamilyOfReply = []; //will include the reply, the parent-comment of reply, parent-comment of that, and so on until a comment not in reply to anything has been reached.
+
+    let currReplyFamilyMember = repliesOfPost.filter(x=>x.replyid===replyId);
+    if(currReplyFamilyMember.length==0) {
+        return;
+    }
+
+    while(currReplyFamilyMember.length>0) {
+        commentFamilyOfReply.push(currReplyFamilyMember[0]);
+        currReplyFamilyMember = repliesOfPost.filter(x=>x.replyid===currReplyFamilyMember[0].commentid);
+    }
+
+    let oldestCommentInReplyFamily = commentsOfPost.filter(x=>x.commentid===commentFamilyOfReply[commentFamilyOfReply.length-1].commentid);
+    oldestCommentInReplyFamily = oldestCommentInReplyFamily[0];
+    commentFamilyOfReply.push(oldestCommentInReplyFamily);
+
+    commentFamilyOfReply.reverse();
+
+    for(let i=0; i<commentFamilyOfReply.length; i++) {
+        const currComment = commentFamilyOfReply[i];
+        let numRepliesOfCurrComment;
+        if(i==0) {
+            numRepliesOfCurrComment = repliesOfPost.filter(x=>x.commentid===currComment.commentid).length;
+            numRepliesOfCurrComment--;
+            regularComments.push({
+                id: currComment.commentid,
+                idOfParentComment: null,
+                isLiked: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][1] : false,
+                index: regularComments.length, //essentially 0
+                author: currComment.username,
+                isVerified: relevantUserInfo[authenticatedUsername].isVerified,
+                content: currComment.comment,
+                numLikes: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][0] : 0,
+                date: getRelativeDateTimeText(currComment.datetime),
+                numReplies: numRepliesOfCurrComment,
+                isLikedByAuthor: currComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.commentid][2] : false,
+                level: 0,
+                datetime: currComment.datetime,
+                isEdited: currComment.isedited
+            });
+            commentFamilyOfReply[0] = regularComments[0];
+            setOfIdsOfCommentsAlreadyDone.add(currComment.commentid);
+        }
+        else {
+            numRepliesOfCurrComment = repliesOfPost.filter(x=>x.commentid===currComment.replyid).length;
+            if(i<commentFamilyOfReply.length-1) {
+                numRepliesOfCurrComment--;
+            }
+            regularComments.push({
+                id: currComment.replyid,
+                idOfParentComment: currComment.commentid,
+                isLiked: currComment.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.replyid][1] : false,
+                index: regularComments.length, //essentially i
+                author: currComment.username,
+                isVerified: relevantUserInfo[authenticatedUsername].isVerified,
+                content: currComment.comment,
+                numLikes: currComment.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.replyid][0] : 0,
+                date: getRelativeDateTimeText(currComment.datetime),
+                numReplies: numRepliesOfCurrComment,
+                isLikedByAuthor: currComment.replyid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[currComment.replyid][2] : false,
+                level: i,
+                datetime: currComment.datetime,
+                isEdited: currComment.isedited
+            });
+            commentFamilyOfReply[i] = regularComments[i];
+            setOfIdsOfUniqueRepliesAlreadyDone.add(currComment.replyid);
+        }
+    }
+
+    for(let i=0; i<commentFamilyOfReply.length; i++) {
+        const member = commentFamilyOfReply[i];
+        const commentIdx = member.index;
+        const mainDiv = document.createElement("div");
+        mainDiv.id = "regularComment"+commentIdx;
+        mainDiv.style = "display: flex; align-items: center; width: 100%; position: relative; gap: 0.7em;";
+        mainDiv.style.marginLeft = `${member.level*5}em`;
+        if(i==commentFamilyOfReply.length-1) {
+            mainDiv.style.backgroundColor = '#edf2ff';
+        }
+        if(member.author===authenticatedUsername) {
+            mainDiv.onmouseenter = () => showOptionsIcon("RegularComment"+commentIdx);
+            mainDiv.onmouseleave = () => hideOptionsIcon("RegularComment"+commentIdx);
+        }
+
+        const profileImg = document.createElement("img");
+        profileImg.src = relevantUserInfo[member.author]['profilePhotoString'];
+        profileImg.style = "cursor: pointer; height: 2em; width: 2em; object-fit: contain;";
+        profileImg.onclick = () => takeToProfile(member.author);
+        mainDiv.appendChild(profileImg);
+
+        const textContentDiv = document.createElement("div");
+        textContentDiv.id = "mainDivRegularComment"+commentIdx;
+        textContentDiv.style = "display: flex; flex-direction: column;";
+
+        const commentParagraph = document.createElement("p");
+        commentParagraph.style = "font-size: 0.8em; max-width: 80%; overflow-wrap: break-word;";
+
+        const usernameBold = document.createElement("b");
+        usernameBold.style = "cursor: pointer;";
+        usernameBold.textContent = member.author;
+        usernameBold.onclick = () => takeToProfile(member.author);
+
+        if(relevantUserInfo[member.author].isVerified) {
+            const verifiedCheck = document.createElement('img');
+            verifiedCheck.src = '/images/verifiedCheck.png';
+            verifiedCheck.style.pointerEvents = 'none';
+            verifiedCheck.style.height = '1.1em';
+            verifiedCheck.style.width = '1.1em';
+            verifiedCheck.style.objectFit = 'contain';
+            usernameBold.appendChild(verifiedCheck);
+        }
+
+        if(authUserFollowings.includes(member.author)) {
+            const followingSpan = document.createElement('span');
+            followingSpan.textContent = " · Following";
+            followingSpan.style.color = "gray";
+            followingSpan.style.fontSize = '0.9em';
+            followingSpan.style.marginRight = '0.7em';
+            usernameBold.appendChild(followingSpan);
+
+        }
+        else if(postInfo['usernames'].includes(member.author) && member.author!==authenticatedUsername) {
+            const authorSpan = document.createElement('span');
+            authorSpan.textContent = " · Author";
+            authorSpan.style.color = "gray";
+            authorSpan.style.fontSize = '0.9em';
+            authorSpan.style.marginRight = '0.7em';
+            usernameBold.appendChild(authorSpan);
+        }
+        
+        const commentSpan = document.createElement("span");
+        commentSpan.id = "contentRegularComment"+commentIdx;
+        commentSpan.ondblclick = () => likeComment("RegularComment", commentIdx);
+        commentSpan.innerHTML = parseMentionsToSpans(member.content);
+        
+        commentParagraph.appendChild(usernameBold);
+        commentParagraph.append(" ");
+        commentParagraph.appendChild(commentSpan);
+        textContentDiv.appendChild(commentParagraph);
+
+        const metaDiv = document.createElement("div");
+        metaDiv.style = "display: flex; align-items: center; gap: 1.5em; color: gray; font-size: 0.7em; margin-top: -1em;";
+
+        const dateText = document.createElement("p");
+        dateText.id = "dateTextRegularComment"+commentIdx;
+        dateText.textContent = member.date;
+        if(member.isEdited) {
+            dateText.textContent+= " · Edited";
+        }
+
+        const likesText = document.createElement("b");
+        likesText.id = "numLikesTextRegularComment"+commentIdx;
+        likesText.style = "cursor: pointer;";
+        likesText.onclick = () => showCommentLikers(member.id);
+        if(member.numLikes==1) {
+            likesText.textContent = "1 like";
+        }
+        else {
+            likesText.textContent = `${member.numLikes} likes`;
+        }
+        if(member.numLikes==0) {
+            likesText.classList.add('hidden');
+        }
+
+        const replyButton = document.createElement("b");
+        replyButton.style = "cursor: pointer;";
+        replyButton.textContent = "Reply";
+        replyButton.onclick = () => startReplyToComment("RegularComment", commentIdx);
+
+        metaDiv.append(dateText, likesText, replyButton);
+
+        if(member.author===authenticatedUsername) {
+            const optionsIcon = document.createElement("img");
+            optionsIcon.id = "optionsIconForRegularComment"+commentIdx;
+            optionsIcon.className = "iconsToBeAdjustedForDarkMode hidden";
+            optionsIcon.src = "/images/optionsDots.png";
+            optionsIcon.style = "height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;";
+            optionsIcon.onclick = () => showOptionsPopupForComment("RegularComment", commentIdx);
+            metaDiv.appendChild(optionsIcon);
+        }
+
+        if(member.isLikedByAuthor && !postInfo['usernames'].includes(member.author)) {
+            const authorDiv = document.createElement('div');
+            authorDiv.style.display = 'flex';
+            authorDiv.style.alignItems = 'center';
+            authorDiv.style.gap = '0.35em';
+
+            const redHeartIcon = document.createElement('img');
+            redHeartIcon.src = '/images/redHeartIcon.webp';
+            redHeartIcon.style.height = '1.2em';
+            redHeartIcon.style.width = '1.2em';
+            redHeartIcon.style.objectFit = 'contain';
+            redHeartIcon.style.pointerEvents = 'none';
+            authorDiv.appendChild(redHeartIcon);
+
+            const byAuthorText = document.createElement('small');
+            byAuthorText.textContent = 'by author';
+            authorDiv.appendChild(byAuthorText);
+
+            metaDiv.appendChild(authorDiv);
+        }
+
+        textContentDiv.appendChild(metaDiv);
+
+        const viewRepliesText = document.createElement("b");
+        viewRepliesText.id = "viewRepliesTextRegularComment"+commentIdx;
+        viewRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        viewRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+        viewRepliesText.innerHTML = `—— <span style='margin-left: 0.9em;'>View replies (${member.numReplies})</span>`;
+        if(member.numReplies==0) {
+            viewRepliesText.classList.add('hidden');
+        }
+
+        const hideRepliesText = document.createElement("b");
+        hideRepliesText.id = "hideRepliesTextRegularComment"+commentIdx;
+        hideRepliesText.className = "hidden";
+        hideRepliesText.style = "cursor: pointer; color: gray; font-size: 0.74em; margin-top: 1em;";
+        hideRepliesText.onclick = () => toggleRepliesText("RegularComment", commentIdx);
+        hideRepliesText.innerHTML = "—— <span style='margin-left: 0.9em;'>Hide replies</span>";
+
+        textContentDiv.append(viewRepliesText, hideRepliesText);
+
+        const blankHeartIcon = document.createElement("img");
+        blankHeartIcon.id = "blankHeartIconRegularComment"+commentIdx;
+        blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
+        blankHeartIcon.src = "/images/blankHeart.png";
+        blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        blankHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
+
+        const redHeartIcon = document.createElement("img");
+        redHeartIcon.id = "redHeartIconRegularComment"+commentIdx;
+        redHeartIcon.className = "hidden";
+        redHeartIcon.src = "/images/redHeartIcon.webp";
+        redHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
+        redHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
+
+        if(member.isLiked) {
+            redHeartIcon.classList.remove('hidden');
+        }
+        else {
+            blankHeartIcon.classList.remove('hidden');
+        }
+
+        mainDiv.appendChild(textContentDiv);
+        if(member.author===authenticatedUsername) {
+            const editModeDiv = document.createElement("div");
+            editModeDiv.id = "editModeDivRegularComment"+commentIdx;
+            editModeDiv.className = "hidden";
+            editModeDiv.style = "display: flex; align-items: center; gap: 0.5em; width: 100%;";
+
+            const textarea = document.createElement("textarea");
+            textarea.id = "textareaForEditingRegularComment"+commentIdx;
+            textarea.placeholder = "";
+            textarea.style = "outline: none; width:77%; resize: none; font-family: Arial; padding: 0.5em 1em;";
+            textarea.oninput = () => onInputOfTextareaForEditingComment("RegularComment"+commentIdx);
+
+            const cancelButton = document.createElement("button");
+            cancelButton.textContent = "Cancel";
+            cancelButton.type = "button";
+            cancelButton.style = "border-radius:1em; color: white; padding: 0.5em 1em; cursor: pointer; background-color: black; font-size: 0.7em;";
+            cancelButton.onclick = () => cancelCommentEdit("RegularComment", commentIdx);
+
+            const confirmButton = document.createElement("button");
+            confirmButton.id = "confirmEditButtonRegularComment"+commentIdx;
+            confirmButton.className = "blueButton hidden";
+            confirmButton.textContent = "Ok";
+            confirmButton.type = "button";
+            confirmButton.style = "font-size: 0.7em;";
+            confirmButton.onclick = () => confirmCommentEdit("RegularComment", commentIdx);
+
+            editModeDiv.append(textarea, cancelButton, confirmButton);
+            mainDiv.appendChild(editModeDiv);
+        }
+        mainDiv.appendChild(blankHeartIcon);
+        mainDiv.appendChild(redHeartIcon);
+
+        commentsDiv.appendChild(mainDiv);
+    }
+
+}
+
 function createDOMElementsForAuthUserComments() {
     for(let i=0; i<commentsOfPost.length; i++) {
         const currComment = commentsOfPost[i];
-        if(currComment.username===authenticatedUsername && !currComment.iscaption) {
+        if(currComment.username===authenticatedUsername && !currComment.iscaption && !(setOfIdsOfCommentsAlreadyDone.has(currComment.commentid))) {
             const uniqueRepliesOfCurrComment = []; //list of replies of authUserComment that are made by authUser, mention authUser, made by authUserFollowing, or by made by a postAuthor
             let numRepliesOfCurrComment = 0; //num replies of currComment that aren't in the list uniqueRepliesOfCurrComment
 
@@ -727,7 +1506,7 @@ function createDOMElementsForAuthUserComments() {
 
         const optionsIcon = document.createElement("img");
         optionsIcon.id = "optionsIconForAuthUserComment"+commentIdx;
-        optionsIcon.className = "hidden";
+        optionsIcon.className = "iconsToBeAdjustedForDarkMode hidden";
         optionsIcon.src = "/images/optionsDots.png";
         optionsIcon.style = "height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;";
         optionsIcon.onclick = () => showOptionsPopupForComment("AuthUserComment", commentIdx);
@@ -803,7 +1582,7 @@ function createDOMElementsForAuthUserComments() {
 
         const blankHeartIcon = document.createElement("img");
         blankHeartIcon.id = "blankHeartIconAuthUserComment"+commentIdx;
-        blankHeartIcon.className = "hidden";
+        blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
         blankHeartIcon.src = "/images/blankHeart.png";
         blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
         blankHeartIcon.onclick = () => toggleLikeComment("AuthUserComment", commentIdx);
@@ -927,7 +1706,7 @@ function createDOMElementsForAuthUserComments() {
 
             const optionsIcon = document.createElement("img");
             optionsIcon.id = "optionsIconForRegularComment"+commentIdx;
-            optionsIcon.className = "hidden";
+            optionsIcon.className = "iconsToBeAdjustedForDarkMode hidden";
             optionsIcon.src = "/images/optionsDots.png";
             optionsIcon.style = "height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;";
             optionsIcon.onclick = () => showOptionsPopupForComment("RegularComment", commentIdx);
@@ -976,7 +1755,7 @@ function createDOMElementsForAuthUserComments() {
 
             const blankHeartIcon = document.createElement("img");
             blankHeartIcon.id = "blankHeartIconRegularComment"+commentIdx;
-            blankHeartIcon.className = "hidden";
+            blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
             blankHeartIcon.src = "/images/blankHeart.png";
             blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
             blankHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
@@ -1296,7 +2075,7 @@ function createDOMElementsForAuthUserReplies() {
 
             const blankHeartIcon = document.createElement("img");
             blankHeartIcon.id = "blankHeartIconParentOfAuthUserReply"+parentCommentIdx;
-            blankHeartIcon.className = "hidden";
+            blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
             blankHeartIcon.src = "/images/blankHeart.png";
             blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
             blankHeartIcon.onclick = () => toggleLikeComment("ParentOfAuthUserReply", parentCommentIdx);
@@ -1396,7 +2175,7 @@ function createDOMElementsForAuthUserReplies() {
             
                 const optionsIcon = document.createElement("img");
                 optionsIcon.id = "optionsIconForAuthUserReply"+replyIndex;
-                optionsIcon.className = "hidden";
+                optionsIcon.className = "iconsToBeAdjustedForDarkMode hidden";
                 optionsIcon.src = "/images/optionsDots.png";
                 optionsIcon.style = "height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;";
                 optionsIcon.onclick = () => showOptionsPopupForComment("AuthUserReply", replyIndex);
@@ -1565,7 +2344,7 @@ function createDOMElementsForAuthUserReplies() {
 
                 const optionsIcon = document.createElement("img");
                 optionsIcon.id = "optionsIconForRegularComment"+commentIdx;
-                optionsIcon.className = "hidden";
+                optionsIcon.className = "iconsToBeAdjustedForDarkMode hidden";
                 optionsIcon.src = "/images/optionsDots.png";
                 optionsIcon.style = "height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;";
                 optionsIcon.onclick = () => showOptionsPopupForComment("RegularComment", commentIdx);
@@ -1614,7 +2393,7 @@ function createDOMElementsForAuthUserReplies() {
 
                 const blankHeartIcon = document.createElement("img");
                 blankHeartIcon.id = "blankHeartIconRegularComment"+commentIdx;
-                blankHeartIcon.className = "hidden";
+                blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
                 blankHeartIcon.src = "/images/blankHeart.png";
                 blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
                 blankHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
@@ -1875,7 +2654,7 @@ function createDOMElementsForCommentsMentioningAuthUser() {
 
         const blankHeartIcon = document.createElement("img");
         blankHeartIcon.id = "blankHeartIconAuthUserMentionComment"+commentIdx;
-        blankHeartIcon.className = "hidden";
+        blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
         blankHeartIcon.src = "/images/blankHeart.png";
         blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
         blankHeartIcon.onclick = () => toggleLikeComment("AuthUserMentionComment", commentIdx);
@@ -1993,7 +2772,7 @@ function createDOMElementsForCommentsMentioningAuthUser() {
 
             const optionsIcon = document.createElement("img");
             optionsIcon.id = "optionsIconForRegularComment"+commentIdx;
-            optionsIcon.className = "hidden";
+            optionsIcon.className = "iconsToBeAdjustedForDarkMode hidden";
             optionsIcon.src = "/images/optionsDots.png";
             optionsIcon.style = "height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;";
             optionsIcon.onclick = () => showOptionsPopupForComment("RegularComment", commentIdx);
@@ -2042,7 +2821,7 @@ function createDOMElementsForCommentsMentioningAuthUser() {
 
             const blankHeartIcon = document.createElement("img");
             blankHeartIcon.id = "blankHeartIconRegularComment"+commentIdx;
-            blankHeartIcon.className = "hidden";
+            blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
             blankHeartIcon.src = "/images/blankHeart.png";
             blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
             blankHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
@@ -2333,7 +3112,7 @@ function createDOMElementsForRepliesMentioningAuthUser() {
 
         const blankHeartIcon = document.createElement("img");
         blankHeartIcon.id = "blankHeartIconParentOfAuthUserMentionReply"+commentIdx;
-        blankHeartIcon.className = "hidden";
+        blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
         blankHeartIcon.src = "/images/blankHeart.png";
         blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
         blankHeartIcon.onclick = () => toggleLikeComment("ParentOfAuthUserMentionReply", commentIdx);
@@ -2497,7 +3276,7 @@ function createDOMElementsForRepliesMentioningAuthUser() {
     
             const blankHeartIcon = document.createElement("img");
             blankHeartIcon.id = "blankHeartIconAuthUserMentionReply"+commentIdx;
-            blankHeartIcon.className = "hidden";
+            blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
             blankHeartIcon.src = "/images/blankHeart.png";
             blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
             blankHeartIcon.onclick = () => toggleLikeComment("AuthUserMentionReply", commentIdx);
@@ -2663,7 +3442,7 @@ function createDOMElementsForRepliesMentioningAuthUser() {
     
             const blankHeartIcon = document.createElement("img");
             blankHeartIcon.id = "blankHeartIconRegularComment"+commentIdx;
-            blankHeartIcon.className = "hidden";
+            blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
             blankHeartIcon.src = "/images/blankHeart.png";
             blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
             blankHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
@@ -2888,7 +3667,7 @@ function createDOMElementsForCommentsMadeByAuthUserFollowing() {
 
         const blankHeartIcon = document.createElement("img");
         blankHeartIcon.id = "blankHeartIconAuthUserFollowingComment"+commentIdx;
-        blankHeartIcon.className = "hidden";
+        blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
         blankHeartIcon.src = "/images/blankHeart.png";
         blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
         blankHeartIcon.onclick = () => toggleLikeComment("AuthUserFollowingComment", commentIdx);
@@ -3049,7 +3828,7 @@ function createDOMElementsForCommentsMadeByAuthUserFollowing() {
 
             const blankHeartIcon = document.createElement("img");
             blankHeartIcon.id = "blankHeartIconRegularComment"+commentIdx;
-            blankHeartIcon.className = "hidden";
+            blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
             blankHeartIcon.src = "/images/blankHeart.png";
             blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
             blankHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
@@ -3174,7 +3953,7 @@ function createDOMElementsForRepliesMadeByAuthUserFollowing() {
                 id: parentComment.commentid,
                 idOfParentComment: null,
                 isLiked: parentComment.commentid in numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments ? numLikesAndIsLikedByUserAndIsLikedByPostAuthorForPostComments[parentComment.commentid][1] : false,
-                index: parentCommentsOfRepliesThatMentionAuthUser.length,
+                index: parentCommentsOfRepliesMadeByAuthUserFollowing.length,
                 author: parentComment.username,
                 isVerified: relevantUserInfo[parentComment.username].isVerified,
                 content: parentComment.comment,
@@ -3194,14 +3973,13 @@ function createDOMElementsForRepliesMadeByAuthUserFollowing() {
     }
     const sortedRepliesMadeByAuthUserFollowing = [...repliesMadeByAuthUserFollowing].sort((a,b) => new Date(b.datetime) - new Date(a.datetime));
     const setOfAuthUserFollowingReplyIDsWhoseDOMElementsHaveBeenCreated = new Set();
-
     for(let authUserFollowingReply of sortedRepliesMadeByAuthUserFollowing) {
         if(setOfAuthUserFollowingReplyIDsWhoseDOMElementsHaveBeenCreated.has(authUserFollowingReply.id)) {
             continue;
         }
         let parentComment = parentCommentsOfRepliesMadeByAuthUserFollowing.filter(x=>x.id===authUserFollowingReply.idOfParentComment);
         parentComment = parentComment[0];
-        let commentIdx = parentComment.index;
+        const commentIdx = parentComment.index;
 
         const mainDiv = document.createElement("div");
         mainDiv.id = "parentOfAuthUserFollowingReply"+commentIdx;
@@ -3330,7 +4108,7 @@ function createDOMElementsForRepliesMadeByAuthUserFollowing() {
 
         const blankHeartIcon = document.createElement("img");
         blankHeartIcon.id = "blankHeartIconParentOfAuthUserFollowingReply"+commentIdx;
-        blankHeartIcon.className = "hidden";
+        blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
         blankHeartIcon.src = "/images/blankHeart.png";
         blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
         blankHeartIcon.onclick = () => toggleLikeComment("ParentOfAuthUserFollowingReply", commentIdx);
@@ -3355,7 +4133,7 @@ function createDOMElementsForRepliesMadeByAuthUserFollowing() {
         commentsDiv.appendChild(mainDiv);
 
         for(let authUserFollowingReplyOfParentComment of parentComment.authUserFollowingReplies) {
-            commentIdx = authUserFollowingReplyOfParentComment.index;
+            const commentIdx = authUserFollowingReplyOfParentComment.index;
     
             const mainDiv = document.createElement("div");
             mainDiv.id = "authUserFollowingReply"+commentIdx;
@@ -3483,7 +4261,7 @@ function createDOMElementsForRepliesMadeByAuthUserFollowing() {
     
             const blankHeartIcon = document.createElement("img");
             blankHeartIcon.id = "blankHeartIconAuthUserFollowingReply"+commentIdx;
-            blankHeartIcon.className = "hidden";
+            blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
             blankHeartIcon.src = "/images/blankHeart.png";
             blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
             blankHeartIcon.onclick = () => toggleLikeComment("AuthUserFollowingReply", commentIdx);
@@ -3640,7 +4418,7 @@ function createDOMElementsForRepliesMadeByAuthUserFollowing() {
     
             const blankHeartIcon = document.createElement("img");
             blankHeartIcon.id = "blankHeartIconRegularComment"+commentIdx;
-            blankHeartIcon.className = "hidden";
+            blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
             blankHeartIcon.src = "/images/blankHeart.png";
             blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
             blankHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
@@ -3844,7 +4622,7 @@ function createDOMElementsForCommentsMadeByPostAuthor() {
 
         const blankHeartIcon = document.createElement("img");
         blankHeartIcon.id = "blankHeartIconPostAuthorComment"+commentIdx;
-        blankHeartIcon.className = "hidden";
+        blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
         blankHeartIcon.src = "/images/blankHeart.png";
         blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
         blankHeartIcon.onclick = () => toggleLikeComment("PostAuthorComment", commentIdx);
@@ -3996,7 +4774,7 @@ function createDOMElementsForCommentsMadeByPostAuthor() {
 
             const blankHeartIcon = document.createElement("img");
             blankHeartIcon.id = "blankHeartIconRegularComment"+commentIdx;
-            blankHeartIcon.className = "hidden";
+            blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
             blankHeartIcon.src = "/images/blankHeart.png";
             blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
             blankHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
@@ -4230,7 +5008,7 @@ function createDOMElementsForRepliesMadeByPostAuthor() {
 
         const blankHeartIcon = document.createElement("img");
         blankHeartIcon.id = "blankHeartIconParentOfPostAuthorReply"+commentIdx;
-        blankHeartIcon.className = "hidden";
+        blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
         blankHeartIcon.src = "/images/blankHeart.png";
         blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
         blankHeartIcon.onclick = () => toggleLikeComment("ParentOfPostAuthorReply", commentIdx);
@@ -4362,7 +5140,7 @@ function createDOMElementsForRepliesMadeByPostAuthor() {
     
             const blankHeartIcon = document.createElement("img");
             blankHeartIcon.id = "blankHeartIconPostAuthorReply"+commentIdx;
-            blankHeartIcon.className = "hidden";
+            blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
             blankHeartIcon.src = "/images/blankHeart.png";
             blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
             blankHeartIcon.onclick = () => toggleLikeComment("PostAuthorReply", commentIdx);
@@ -4510,7 +5288,7 @@ function createDOMElementsForRegularCommentsThatArentReplies() {
 
         const optionsIcon = document.createElement("img");
         optionsIcon.id = "optionsIconForRegularComment"+commentIdx;
-        optionsIcon.className = "hidden";
+        optionsIcon.className = "iconsToBeAdjustedForDarkMode hidden";
         optionsIcon.src = "/images/optionsDots.png";
         optionsIcon.style = "height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;";
         optionsIcon.onclick = () => showOptionsPopupForComment("RegularComment", commentIdx);
@@ -4559,7 +5337,7 @@ function createDOMElementsForRegularCommentsThatArentReplies() {
 
         const blankHeartIcon = document.createElement("img");
         blankHeartIcon.id = "blankHeartIconRegularComment"+commentIdx;
-        blankHeartIcon.className = "hidden";
+        blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
         blankHeartIcon.src = "/images/blankHeart.png";
         blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
         blankHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
@@ -4937,7 +5715,38 @@ async function postComment() {
         if(!response.ok) {
             throw new Error('Network response not ok');
         }
-        createDOMElementsForNewAuthUserComment(textareaToAddComment.value)
+        createDOMElementsForNewAuthUserComment(textareaToAddComment.value);
+
+        for(let postAuthor of postInfo['usernames']) {
+            const response1 = await fetch('http://localhost:8022/addNotification', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    recipient: postAuthor,
+                    subject: authenticatedUsername,
+                    action: `comment@${postId}@${newCommentId}@${textareaToAddComment.value}`,
+                    origin_datetime: new Date()
+                })
+            });
+            if(!response1.ok) {
+                throw new Error('Network response not ok');
+            }
+        }
+        for(let userMentionedInComment of extractUsernames(textareaToAddComment.value)) {
+            const response = await fetch('http://localhost:8022/addNotification', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    recipient: userMentionedInComment,
+                    subject: authenticatedUsername,
+                    action: `comment-mention@${postId}@${newCommentId}@${textareaToAddComment.value}`,
+                    origin_datetime: new Date()
+                })
+            });
+            if(!response.ok) {
+                throw new Error('Network response not ok');
+            }
+        }
     }
     else {
         let parentComment;
@@ -5013,11 +5822,54 @@ async function postComment() {
             throw new Error('Network response not ok');
         }
         createDOMElementsForNewAuthUserReply(newAuthUserReply, parentCommentType, parentCommentIdx, parentComment);
+
+        const response1 = await fetch('http://localhost:8022/addNotification', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                recipient: parentComment.author,
+                subject: authenticatedUsername,
+                action: `reply@${postId}@${newCommentId}@${textareaToAddComment.value}`,
+                origin_datetime: new Date()
+            })
+        });
+        if(!response1.ok) {
+            throw new Error('Network response not ok');
+        }
         commentToReplyTo = [];
+
+        for(let userMentionedInComment of extractUsernames(textareaToAddComment.value)) {
+            const response = await fetch('http://localhost:8022/addNotification', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    recipient: userMentionedInComment,
+                    subject: authenticatedUsername,
+                    action: `reply-mention@${postId}@${newCommentId}@${textareaToAddComment.value}`,
+                    origin_datetime: new Date()
+                })
+            });
+            if(!response.ok) {
+                throw new Error('Network response not ok');
+            }
+        }
     }
+
     textareaToAddComment.value = "";
     textareaToAddComment.placeholder = "Add a comment...";
     postCommentButton.classList.add('hidden');
+}
+
+function extractUsernames(text) {
+    const regex = /@([a-z0-9._]{1,30})\b/g;
+    let matches = [];
+    let match;
+
+    while ((match = regex.exec(text)) !== null) {
+        matches.push(match[1]);
+    }
+
+    return matches;
 }
 
 function createDOMElementsForNewAuthUserReply(newAuthUserReply, parentCommentType, parentCommentIdx, parentComment) {
@@ -5098,7 +5950,7 @@ function createDOMElementsForNewAuthUserReply(newAuthUserReply, parentCommentTyp
 
     const optionsIcon = document.createElement("img");
     optionsIcon.id = "optionsIconForRegularComment"+replyIndex;
-    optionsIcon.className = "hidden";
+    optionsIcon.className = "iconsToBeAdjustedForDarkMode hidden";
     optionsIcon.src = "/images/optionsDots.png";
     optionsIcon.style = "height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;";
     optionsIcon.onclick = () => showOptionsPopupForComment("RegularComment", replyIndex);
@@ -5236,7 +6088,7 @@ function createDOMElementsForNewAuthUserComment(commentContent) {
 
     const optionsIcon = document.createElement("img");
     optionsIcon.id = "optionsIconForAuthUserComment"+commentIdx;
-    optionsIcon.className = "hidden";
+    optionsIcon.className = "iconsToBeAdjustedForDarkMode hidden";
     optionsIcon.src = "/images/optionsDots.png";
     optionsIcon.style = "height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;";
     optionsIcon.onclick = () => showOptionsPopupForComment("AuthUserComment", commentIdx);
@@ -5364,6 +6216,25 @@ async function toggleLikePost() {
             postNumLikesText.textContent = postInfo.numLikes.toLocaleString() + " likes";
         }
         postInfo['isLikedByUser'] = true;
+
+        if(postInfo['usernames'].includes(authenticatedUsername)) {
+            return;
+        }
+        for(let postAuthor of postInfo['usernames']) {
+            const response1 = await fetch('http://localhost:8022/addNotification', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    recipient: postAuthor,
+                    subject: authenticatedUsername,
+                    action: `like@${postId}`,
+                    origin_datetime: new Date()
+                })
+            });
+            if(!response1.ok) {
+                throw new Error('Network response not ok');
+            }
+        }
     }
     else {
         const response = await fetch('http://localhost:8004/removeLike/'+postId, {
@@ -5411,6 +6282,25 @@ async function likePost() {
             postNumLikesText.textContent = postInfo.numLikes.toLocaleString() + " likes";
         }
         postInfo['isLikedByUser'] = true;
+
+        if(postInfo['usernames'].includes(authenticatedUsername)) {
+            return;
+        }
+        for(let postAuthor of postInfo['usernames']) {
+            const response1 = await fetch('http://localhost:8022/addNotification', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    recipient: postAuthor,
+                    subject: authenticatedUsername,
+                    action: `like@${postId}`,
+                    origin_datetime: new Date()
+                })
+            });
+            if(!response1.ok) {
+                throw new Error('Network response not ok');
+            }
+        }
     }
 }
 
@@ -5517,6 +6407,37 @@ async function toggleLikeComment(commentType, commentIdx) {
         }
         targetedBlankHeartIcon.classList.add('hidden');
         targetedRedHeartIcon.classList.remove('hidden');
+
+        if(targetedComment.idOfParentComment==null) {
+            const response1 = await fetch('http://localhost:8022/addNotification', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                recipient: targetedComment.author,
+                subject: authenticatedUsername,
+                action: `comment-like@${postId}@${targetedComment.id}@${targetedComment.content}`,
+                origin_datetime: new Date()
+            })
+            });
+            if(!response1.ok) {
+                throw new Error('Network response not ok');
+            }
+        }
+        else {
+            const response1 = await fetch('http://localhost:8022/addNotification', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                recipient: targetedComment.author,
+                subject: authenticatedUsername,
+                action: `reply-like@${postId}@${targetedComment.id}@${targetedComment.content}`,
+                origin_datetime: new Date()
+            })
+            });
+            if(!response1.ok) {
+                throw new Error('Network response not ok');
+            }
+        }
     }
     targetedComment.isLiked = !targetedComment.isLiked;
 }
@@ -5595,6 +6516,38 @@ async function likeComment(commentType, commentIdx) {
         targetedBlankHeartIcon.classList.add('hidden');
         targetedRedHeartIcon.classList.remove('hidden');
         targetedComment.isLiked = true;
+
+        if(targetedComment.idOfParentComment==null) {
+            const response1 = await fetch('http://localhost:8022/addNotification', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                recipient: targetedComment.author,
+                subject: authenticatedUsername,
+                action: `comment-like@${postId}@${targetedComment.id}@${targetedComment.content}`,
+                origin_datetime: new Date()
+            })
+            });
+            if(!response1.ok) {
+                throw new Error('Network response not ok');
+            }
+        }
+        else {
+            const response1 = await fetch('http://localhost:8022/addNotification', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                recipient: targetedComment.author,
+                subject: authenticatedUsername,
+                action: `reply-like@${postId}@${targetedComment.id}@${targetedComment.content}`,
+                origin_datetime: new Date()
+            })
+            });
+            if(!response1.ok) {
+                throw new Error('Network response not ok');
+            }
+        }
+
     }
 }
 
@@ -5734,7 +6687,7 @@ function createDOMElementsForReplies(parentCommentType, parentCommentIdx, replie
 
         const optionsIcon = document.createElement("img");
         optionsIcon.id = "optionsIconForRegularComment"+commentIdx;
-        optionsIcon.className = "hidden";
+        optionsIcon.className = "iconsToBeAdjustedForDarkMode hidden";
         optionsIcon.src = "/images/optionsDots.png";
         optionsIcon.style = "height: 1.6em; width: 1.6em; object-fit: contain; cursor: pointer;";
         optionsIcon.onclick = () => showOptionsPopupForComment("RegularComment", commentIdx);
@@ -5783,7 +6736,7 @@ function createDOMElementsForReplies(parentCommentType, parentCommentIdx, replie
 
         const blankHeartIcon = document.createElement("img");
         blankHeartIcon.id = "blankHeartIconRegularComment"+commentIdx;
-        blankHeartIcon.className = "hidden";
+        blankHeartIcon.className = "iconsToBeAdjustedForDarkMode hidden";
         blankHeartIcon.src = "/images/blankHeart.png";
         blankHeartIcon.style = "height: 1em; width: 1em; cursor: pointer; object-fit: contain; position: absolute; left: 93%; top: 36%;";
         blankHeartIcon.onclick = () => toggleLikeComment("RegularComment", commentIdx);
@@ -6541,6 +7494,19 @@ async function followPostAuthor() {
     if(!response.ok) {
         throw new Error('Network response not ok');
     }
+    const response1 = await fetch('http://localhost:8022/addNotification', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            recipient: postInfo['usernames'][0],
+            subject: authenticatedUsername,
+            action: 'subject-started-following',
+            origin_datetime: new Date()
+        })
+    });
+    if(!response1.ok) {
+        throw new Error('Network response not ok');
+    }
 }
 
 async function unfollowPostAuthor() {
@@ -6564,7 +7530,6 @@ async function followUser(username) {
     const targetedFollowButton = document.getElementById('followLikerButton'+username);
 
     if(relevantUserInfo[username].isPrivate) {
-        /*
         const response = await fetch('http://localhost:8021/graphql/', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -6584,13 +7549,11 @@ async function followUser(username) {
         if(!response.ok) {
             throw new Error('Network response not ok');
         }
-        */
         targetedFollowButton.classList.add('hidden');
         const targetedRequestedButton = document.getElementById('requestedLikerButton'+username);
         targetedRequestedButton.classList.remove('hidden');
     }
     else {
-        /*
         const response = await fetch('http://localhost:8013/graphql', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
@@ -6605,10 +7568,24 @@ async function followUser(username) {
         if(!response.ok) {
             throw new Error('Network response not ok');
         }
-        */
+        
         targetedFollowButton.classList.add('hidden');
         const targetedFollowingButton = document.getElementById('followingLikerButton'+username);
         targetedFollowingButton.classList.remove('hidden');
+
+        const response1 = await fetch('http://localhost:8022/addNotification', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                recipient: username,
+                subject: authenticatedUsername,
+                action: 'subject-started-following',
+                origin_datetime: new Date()
+            })
+        });
+        if(!response1.ok) {
+            throw new Error('Network response not ok');
+        }
     }
 }
 
@@ -6616,7 +7593,6 @@ async function unfollowUser(username) {
     const targetedFollowButton = document.getElementById('followLikerButton'+username);
     const targetedFollowingButton = document.getElementById('followingLikerButton'+username);
 
-    /*
     const response = await fetch('http://localhost:8013/graphql', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -6631,7 +7607,6 @@ async function unfollowUser(username) {
     if(!response.ok) {
         throw new Error('Network response not ok');
     }
-    */
 
     targetedFollowingButton.classList.add('hidden');
     targetedFollowButton.classList.remove('hidden');
@@ -6641,7 +7616,6 @@ async function cancelFollowRequest(username) {
     const targetedRequestedButton = document.getElementById('requestedLikerButton'+username);
     const targetedFollowButton = document.getElementById('followLikerButton'+username);
 
-    /*
     const response = await fetch('http://localhost:8021/graphql/', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -6658,7 +7632,6 @@ async function cancelFollowRequest(username) {
     if(!response.ok) {
         throw new Error('Network response not ok');
     }
-    */
 
     targetedRequestedButton.classList.add('hidden');
     targetedFollowButton.classList.remove('hidden');

@@ -25,7 +25,7 @@ let relevantProfileUserInfo = {};
 let currentlyShownSection = 'POSTS';
 let listOfSavedPosts = [];
 let listOfSavedReels = [];
-let listOfSavedSounds = [];
+let listOfSavedSounds = ['a'];
 let userBlockings = [];
 
 async function authenticateUserAndFetchData() {

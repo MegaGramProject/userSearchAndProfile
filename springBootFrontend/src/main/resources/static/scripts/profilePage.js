@@ -92,6 +92,7 @@ let haveTaggedPostDOMElementsBeenCreated = false;
 let haveSuggestedAccountsDOMElementsBeenCreated = false;
 let listOfSuggestedAccountUsernames = [];
 let followRequestsMadeByAuthUser = []; //list of usernames that authUser requested to follow
+let userBlockings = [];
 
 
 async function authenticateUserAndFetchData() {
@@ -260,8 +261,9 @@ async function authenticateUserAndFetchData() {
     if(!response2.ok) {
         throw new Error('Network response not ok');
     }
-    let userBlockings = await response2.json();
+    userBlockings = await response2.json();
     userBlockings = userBlockings['data']['getAllUserBlockings'];
+
     for(let i=0; i<userBlockings.length; i++) {
         if(userBlockings[i]['blockee']===profileUsername && profileUsername!==authenticatedUsername) {
             isUserBlocked = true;
@@ -286,7 +288,6 @@ async function authenticateUserAndFetchData() {
             }
         }
     }
-
 
     profileUsernameAtTop.classList.remove('hidden');
     if(relevantProfileUserInfo['isVerified']) {
@@ -583,6 +584,10 @@ function takeUserToMessages() {
     window.location.href = "http://localhost:8011/directMessaging/" + authenticatedUsername;
 }
 
+function takeUserToViewPost(postId) {
+    window.location.href = `http://localhost:8019/viewPost/${authenticatedUsername}/${postId}`;
+}
+
 function toggleLeftSidebarPopup() {
     displayLeftSidebarPopup = !displayLeftSidebarPopup;
     if(displayLeftSidebarPopup) {
@@ -597,7 +602,7 @@ function toggleLeftSidebarPopup() {
 }
 
 function createDOMElementsForProfileUserPosts() {
-    let counter = 0;
+    let counter=0;
     let index=0;
     let newRowDiv = document.createElement('div');
     newRowDiv.style.display = 'flex';
@@ -607,6 +612,11 @@ function createDOMElementsForProfileUserPosts() {
     newRowDiv.style.gap = '0.4em';
 
     for(let post of profileUserPosts) {
+        for(let username of post.usernames) {
+            if (userBlockingUsernames.includes(username)) {
+                continue;
+            }
+        }
         counter++;
         index++;
         if(counter>3) {
@@ -623,6 +633,7 @@ function createDOMElementsForProfileUserPosts() {
         const postDiv = document.createElement('div');
         postDiv.style.position = 'relative';
         postDiv.style.width = '37%';
+        postDiv.onclick = () => takeUserToViewPost(post.postId);
 
         const imgOfFirstSlideOfPost = document.createElement('img');
         imgOfFirstSlideOfPost.id = 'post'+index;
@@ -1302,6 +1313,7 @@ async function createDOMElementsForTaggedPosts() {
         const postDiv = document.createElement('div');
         postDiv.style.position = 'relative';
         postDiv.style.width = '37%';
+        postDiv.onclick = () => takeUserToViewPost(taggedPost.postId);
 
         const imgOfFirstSlideOfPost = document.createElement('img');
         imgOfFirstSlideOfPost.id = 'taggedPost'+index;

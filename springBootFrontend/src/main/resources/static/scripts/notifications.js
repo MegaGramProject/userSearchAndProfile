@@ -37,6 +37,7 @@ let isTabVisible = true;
 let hasThereBeenNewNotificationsWhileTabWasHidden = false;
 let hasThereBeenNewFollowRequestsWhileTabWasHidden = false;
 let hasUpdatedDOMElementsForFollowRequests = false;
+const postMappings = {}; //key postId@slideNumber, value: small img-preview of the slide at that post
 
 async function authenticateUserAndFetchData() {
     let username = document.getElementById('authenticatedUsername').textContent;
@@ -510,7 +511,7 @@ async function updateDOMElementsForNotifications() {
             profileImage.style.objectFit = 'contain';
             profileImage.style.cursor = 'pointer';
             profileImage.onclick = () => takeToProfile(notification.subject);
-            profileImage.src = '/images/profilePhoto.png';
+            profileImage.src = relevantUserInfo[notification.subject]['profilePhotoString'];
 
             const contentDiv = document.createElement('div');
             contentDiv.style.display = 'flex';
@@ -639,7 +640,7 @@ async function updateDOMElementsForNotifications() {
             profileImg.style.width = '3em';
             profileImg.style.objectFit = 'contain';
             profileImg.style.cursor = 'pointer';
-            profileImg.src = '/images/profilePhoto.png';
+            profileImg.src = relevantUserInfo[notification.subject]['profilePhotoString'];
             profileImg.onclick = function() { takeToProfile(notification.subject); };
 
             const textDiv = document.createElement('div');
@@ -649,7 +650,15 @@ async function updateDOMElementsForNotifications() {
 
             const messageP = document.createElement('p');
             messageP.style.maxWidth = '50em';
-            if(notification.action.startsWith('tag')) {
+
+            let postId = "";
+            let commentId = "";
+            let replyId = "";
+            let slideNumber = 0;
+            if(notification.action.startsWith('tag@')) {
+                const notificationActionSimplifiedSplit = notification.action.split("@");
+                postId = notificationActionSimplifiedSplit[1];
+                slideNumber = notificationActionSimplifiedSplit[2];
                 if(relevantUserInfo[notification.subject]['isVerified']) {
                     messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> tagged you in a post. <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
@@ -657,7 +666,8 @@ async function updateDOMElementsForNotifications() {
                     messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> tagged you in a post. <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
             }
-            else if(notification.action.startsWith('like')) {
+            else if(notification.action.startsWith('like@')) {
+                postId = notification.action.substring(5);
                 if(relevantUserInfo[notification.subject]['isVerified']) {
                     messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> liked your post. <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
@@ -665,9 +675,15 @@ async function updateDOMElementsForNotifications() {
                     messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> liked your post. <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
             }
-            else if(notification.action.startsWith('comment ')) {
-                //const comment = formatComment(notification.action.substring(45));
-                const comment = formatComment(notification.action.substring(15));
+            else if(notification.action.startsWith('comment@')) {
+                const notificationActionSimplifiedSplit = notification.action.split("@");
+                postId = notificationActionSimplifiedSplit[1];
+                commentId = notificationActionSimplifiedSplit[2];
+                let comment = notificationActionSimplifiedSplit[3];
+                for(let i=4; i<notificationActionSimplifiedSplit.length; i++) {
+                    comment+="@"+notificationActionSimplifiedSplit[i];
+                }
+                comment = formatComment(comment);
                 if(relevantUserInfo[notification.subject]['isVerified']) {
                     messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> commented on your post: ${comment} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
@@ -675,9 +691,15 @@ async function updateDOMElementsForNotifications() {
                     messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> commented on your post: ${comment} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
             }
-            else if(notification.action.startsWith('comment-like')) {
-                //const comment = formatComment(notification.action.substring(50));
-                const comment = formatComment(notification.action.substring(20));
+            else if(notification.action.startsWith('comment-like@')) {
+                const notificationActionSimplifiedSplit = notification.action.split("@");
+                postId = notificationActionSimplifiedSplit[1];
+                commentId = notificationActionSimplifiedSplit[2];
+                let comment = notificationActionSimplifiedSplit[3];
+                for(let i=4; i<notificationActionSimplifiedSplit.length; i++) {
+                    comment+="@"+notificationActionSimplifiedSplit[i];
+                }
+                comment = formatComment(comment);
                 if(relevantUserInfo[notification.subject]['isVerified']) {
                     messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> liked your comment: ${comment} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
@@ -685,24 +707,68 @@ async function updateDOMElementsForNotifications() {
                     messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> liked your comment: ${comment} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
             }
-            else if(notification.action.startsWith('reply')) {
-                //const comment = formatComment(notification.action.substring(43));
-                const comment = formatComment(notification.action.substring(13));
+            else if(notification.action.startsWith('reply@')) {
+                const notificationActionSimplifiedSplit = notification.action.split("@");
+                postId = notificationActionSimplifiedSplit[1];
+                replyId = notificationActionSimplifiedSplit[2];
+                let reply = notificationActionSimplifiedSplit[3];
+                for(let i=4; i<notificationActionSimplifiedSplit.length; i++) {
+                    reply+="@"+notificationActionSimplifiedSplit[i];
+                }
+                reply = formatComment(reply);
                 if(relevantUserInfo[notification.subject]['isVerified']) {
-                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> replied to your comment with this: ${comment} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> replied to your comment with this: ${reply} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
                 else {
-                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> replied to your comment with this: ${comment} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> replied to your comment with this: ${reply} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
             }
-            else {
-                //const comment = formatComment(notification.action.substring(45));
-                const comment = formatComment(notification.action.substring(15));
+            else if(notification.action.startsWith('reply-like@')) {
+                const notificationActionSimplifiedSplit = notification.action.split("@");
+                postId = notificationActionSimplifiedSplit[1];
+                replyId = notificationActionSimplifiedSplit[2];
+                let reply = notificationActionSimplifiedSplit[3];
+                for(let i=4; i<notificationActionSimplifiedSplit.length; i++) {
+                    reply+="@"+notificationActionSimplifiedSplit[i];
+                }
+                reply = formatComment(reply);
                 if(relevantUserInfo[notification.subject]['isVerified']) {
-                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> mentioned in you in comment: ${comment} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> liked your reply: ${reply} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
                 else {
-                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> mentioned in you in comment: ${comment} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> liked your reply: ${reply} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
+                }
+            }
+            else if(notification.action.startsWith('comment-mention@')){
+                const notificationActionSimplifiedSplit = notification.action.split("@");
+                postId = notificationActionSimplifiedSplit[1];
+                commentId = notificationActionSimplifiedSplit[2];
+                let comment = notificationActionSimplifiedSplit[3];
+                for(let i=4; i<notificationActionSimplifiedSplit.length; i++) {
+                    comment+="@"+notificationActionSimplifiedSplit[i];
+                }
+                comment = formatComment(comment);
+                if(relevantUserInfo[notification.subject]['isVerified']) {
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> mentioned you in a comment: ${comment} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
+                }
+                else {
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> mentioned you in a comment: ${comment} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
+                }
+            }
+            else if(notification.action.startsWith('reply-mention@')){
+                const notificationActionSimplifiedSplit = notification.action.split("@");
+                postId = notificationActionSimplifiedSplit[1];
+                replyId = notificationActionSimplifiedSplit[2];
+                let reply = notificationActionSimplifiedSplit[3];
+                for(let i=4; i<notificationActionSimplifiedSplit.length; i++) {
+                    reply+="@"+notificationActionSimplifiedSplit[i];
+                }
+                reply = formatComment(reply);
+                if(relevantUserInfo[notification.subject]['isVerified']) {
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> mentioned you in a reply: ${reply} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
+                }
+                else {
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> mentioned you in a reply: ${reply} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
             }
 
@@ -723,7 +789,59 @@ async function updateDOMElementsForNotifications() {
             sampleImg.style.height = '4em';
             sampleImg.style.width = '4em';
             sampleImg.style.cursor = 'pointer';
-            sampleImg.src = '/images/sampleImg.webp';
+            if(postId+slideNumber in postMappings) {
+                sampleImg.src = postMappings[postId+slideNumber];
+            }
+            else {
+                const response = await fetch(`http://localhost:8003/getSingleSlideOfPost/${postId}/${slideNumber}`);
+                if(!response.ok) {
+                    throw new Error('Network response not ok');
+                }
+                const singleSlideInfo = await response.json();
+                if(singleSlideInfo.videoId) {
+                    const response = await fetch(`http://localhost:8004/getVideo/${singleSlideInfo.videoId}`);
+                    if(!response.ok) {
+                        throw new Error('Network response not ok');
+                    }
+                    const videoBlob = await response.blob();
+                    const videoURL = URL.createObjectURL(videoBlob);
+
+                    const videoElement = document.createElement('video');
+                    videoElement.src = videoURL;
+                    videoElement.muted = true;
+                    videoElement.addEventListener('loadeddata', () => {
+                        videoElement.currentTime = 5;
+                    });
+                    videoElement.addEventListener('seeked', () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = videoElement.videoWidth;
+                        canvas.height = videoElement.videoHeight;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+                        const imageDataUrl = canvas.toDataURL('image/png');
+
+                        sampleImg.src = imageDataUrl;
+                        postMappings[postId+slideNumber] = imageDataUrl;
+                    });
+                }
+                else {
+                    sampleImg.src = 'data:image/png;base64,'+ singleSlideInfo.imgData;
+                    postMappings[postId+slideNumber] = 'data:image/png;base64,'+ singleSlideInfo.imgData;
+                }
+            }
+            sampleImg.onclick = function() {
+                if(commentId.length==0 && replyId.length==0) {
+                    window.location.href = `http://localhost:8019/viewPost/${authenticatedUsername}/${postId}`;
+                }
+                else if(commentId.length>0) {
+                    window.location.href = `http://localhost:8019/viewPost/${authenticatedUsername}/${postId}?commentId=${commentId}`;
+                }
+                else if(replyId.length>0) {
+                    window.location.href = `http://localhost:8019/viewPost/${authenticatedUsername}/${postId}?replyId=${replyId}`;
+                }
+            }
 
             const deleteIcon = document.createElement('img');
             deleteIcon.id = 'notification'+currCounterValue+'DeleteIcon';
@@ -1314,7 +1432,7 @@ async function createDOMElementsForNotifications() {
             profileImage.style.objectFit = 'contain';
             profileImage.style.cursor = 'pointer';
             profileImage.onclick = () => takeToProfile(notification.subject);
-            profileImage.src = '/images/profilePhoto.png';
+            profileImage.src = relevantUserInfo[notification.subject]['profilePhotoString'];
 
             const contentDiv = document.createElement('div');
             contentDiv.style.display = 'flex';
@@ -1443,7 +1561,7 @@ async function createDOMElementsForNotifications() {
             profileImg.style.width = '3em';
             profileImg.style.objectFit = 'contain';
             profileImg.style.cursor = 'pointer';
-            profileImg.src = '/images/profilePhoto.png';
+            profileImg.src = relevantUserInfo[notification.subject]['profilePhotoString'];
             profileImg.onclick = function() { takeToProfile(notification.subject); };
 
             const textDiv = document.createElement('div');
@@ -1453,7 +1571,15 @@ async function createDOMElementsForNotifications() {
 
             const messageP = document.createElement('p');
             messageP.style.maxWidth = '50em';
+
+            let postId = "";
+            let commentId = "";
+            let replyId = "";
+            let slideNumber = 0;
             if(notification.action.startsWith('tag')) {
+                const notificationActionSimplifiedSplit = notification.action.split("@");
+                postId = notificationActionSimplifiedSplit[1];
+                slideNumber = notificationActionSimplifiedSplit[2];
                 if(relevantUserInfo[notification.subject]['isVerified']) {
                     messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> tagged you in a post. <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
@@ -1461,7 +1587,8 @@ async function createDOMElementsForNotifications() {
                     messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> tagged you in a post. <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
             }
-            else if(notification.action.startsWith('like')) {
+            else if(notification.action.startsWith('like@')) {
+                postId = notification.action.substring(5);
                 if(relevantUserInfo[notification.subject]['isVerified']) {
                     messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> liked your post. <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
@@ -1469,9 +1596,15 @@ async function createDOMElementsForNotifications() {
                     messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> liked your post. <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
             }
-            else if(notification.action.startsWith('comment ')) {
-                //const comment = formatComment(notification.action.substring(45));
-                const comment = formatComment(notification.action.substring(15));
+            else if(notification.action.startsWith('comment@')) {
+                const notificationActionSimplifiedSplit = notification.action.split("@");
+                postId = notificationActionSimplifiedSplit[1];
+                commentId = notificationActionSimplifiedSplit[2];
+                let comment = notificationActionSimplifiedSplit[3];
+                for(let i=4; i<notificationActionSimplifiedSplit.length; i++) {
+                    comment+="@"+notificationActionSimplifiedSplit[i];
+                }
+                comment = formatComment(comment);
                 if(relevantUserInfo[notification.subject]['isVerified']) {
                     messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> commented on your post: ${comment} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
@@ -1479,9 +1612,15 @@ async function createDOMElementsForNotifications() {
                     messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> commented on your post: ${comment} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
             }
-            else if(notification.action.startsWith('comment-like')) {
-                //const comment = formatComment(notification.action.substring(50));
-                const comment = formatComment(notification.action.substring(20));
+            else if(notification.action.startsWith('comment-like@')) {
+                const notificationActionSimplifiedSplit = notification.action.split("@");
+                postId = notificationActionSimplifiedSplit[1];
+                commentId = notificationActionSimplifiedSplit[2];
+                let comment = notificationActionSimplifiedSplit[3];
+                for(let i=4; i<notificationActionSimplifiedSplit.length; i++) {
+                    comment+="@"+notificationActionSimplifiedSplit[i];
+                }
+                comment = formatComment(comment);
                 if(relevantUserInfo[notification.subject]['isVerified']) {
                     messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> liked your comment: ${comment} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
@@ -1489,24 +1628,68 @@ async function createDOMElementsForNotifications() {
                     messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> liked your comment: ${comment} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
             }
-            else if(notification.action.startsWith('reply')) {
-                //const comment = formatComment(notification.action.substring(43));
-                const comment = formatComment(notification.action.substring(13));
+            else if(notification.action.startsWith('reply@')) {
+                const notificationActionSimplifiedSplit = notification.action.split("@");
+                postId = notificationActionSimplifiedSplit[1];
+                replyId = notificationActionSimplifiedSplit[2];
+                let reply = notificationActionSimplifiedSplit[3];
+                for(let i=4; i<notificationActionSimplifiedSplit.length; i++) {
+                    reply+="@"+notificationActionSimplifiedSplit[i];
+                }
+                reply = formatComment(reply);
                 if(relevantUserInfo[notification.subject]['isVerified']) {
-                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> replied to your comment with this: ${comment} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> replied to your comment with this: ${reply} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
                 else {
-                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> replied to your comment with this: ${comment} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> replied to your comment with this: ${reply} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
             }
-            else {
-                //const comment = formatComment(notification.action.substring(45));
-                const comment = formatComment(notification.action.substring(15));
+            else if(notification.action.startsWith('reply-like@')) {
+                const notificationActionSimplifiedSplit = notification.action.split("@");
+                postId = notificationActionSimplifiedSplit[1];
+                replyId = notificationActionSimplifiedSplit[2];
+                let reply = notificationActionSimplifiedSplit[3];
+                for(let i=4; i<notificationActionSimplifiedSplit.length; i++) {
+                    reply+="@"+notificationActionSimplifiedSplit[i];
+                }
+                reply = formatComment(reply);
                 if(relevantUserInfo[notification.subject]['isVerified']) {
-                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> mentioned in you in comment: ${comment} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> liked your reply: ${reply} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
                 else {
-                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> mentioned in you in comment: ${comment} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> liked your reply: ${reply} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
+                }
+            }
+            else if(notification.action.startsWith('comment-mention@')){
+                const notificationActionSimplifiedSplit = notification.action.split("@");
+                postId = notificationActionSimplifiedSplit[1];
+                commentId = notificationActionSimplifiedSplit[2];
+                let comment = notificationActionSimplifiedSplit[3];
+                for(let i=4; i<notificationActionSimplifiedSplit.length; i++) {
+                    comment+="@"+notificationActionSimplifiedSplit[i];
+                }
+                comment = formatComment(comment);
+                if(relevantUserInfo[notification.subject]['isVerified']) {
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> mentioned you in a comment: ${comment} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
+                }
+                else {
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> mentioned you in a comment: ${comment} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
+                }
+            }
+            else if(notification.action.startsWith('reply-mention@')){
+                const notificationActionSimplifiedSplit = notification.action.split("@");
+                postId = notificationActionSimplifiedSplit[1];
+                replyId = notificationActionSimplifiedSplit[2];
+                let reply = notificationActionSimplifiedSplit[3];
+                for(let i=4; i<notificationActionSimplifiedSplit.length; i++) {
+                    reply+="@"+notificationActionSimplifiedSplit[i];
+                }
+                reply = formatComment(reply);
+                if(relevantUserInfo[notification.subject]['isVerified']) {
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject} <img src="/images/verifiedCheck2.png" style="height: 1.55em; width: 1.55em; pointer-events: none; object-fit: contain;"></b> mentioned you in a reply: ${reply} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
+                }
+                else {
+                    messageP.innerHTML = `<b onclick="takeToProfile(\'${notification.subject}\')" style="cursor: pointer;">${notification.subject}</b> mentioned you in a reply: ${reply} <span style="color: gray;">${getPreciseRelativeTime(notification.origin_datetime)}</span>`;
                 }
             }
 
@@ -1527,7 +1710,59 @@ async function createDOMElementsForNotifications() {
             sampleImg.style.height = '4em';
             sampleImg.style.width = '4em';
             sampleImg.style.cursor = 'pointer';
-            sampleImg.src = '/images/sampleImg.webp';
+            if(postId+slideNumber in postMappings) {
+                sampleImg.src = postMappings[postId+slideNumber];
+            }
+            else {
+                const response = await fetch(`http://localhost:8003/getSingleSlideOfPost/${postId}/${slideNumber}`);
+                if(!response.ok) {
+                    throw new Error('Network response not ok');
+                }
+                const singleSlideInfo = await response.json();
+                if(singleSlideInfo.videoId) {
+                    const response = await fetch(`http://localhost:8004/getVideo/${singleSlideInfo.videoId}`);
+                    if(!response.ok) {
+                        throw new Error('Network response not ok');
+                    }
+                    const videoBlob = await response.blob();
+                    const videoURL = URL.createObjectURL(videoBlob);
+
+                    const videoElement = document.createElement('video');
+                    videoElement.src = videoURL;
+                    videoElement.muted = true;
+                    videoElement.addEventListener('loadeddata', () => {
+                        videoElement.currentTime = 5;
+                    });
+                    videoElement.addEventListener('seeked', () => {
+                        const canvas = document.createElement('canvas');
+                        canvas.width = videoElement.videoWidth;
+                        canvas.height = videoElement.videoHeight;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+
+                        const imageDataUrl = canvas.toDataURL('image/png');
+
+                        sampleImg.src = imageDataUrl;
+                        postMappings[postId+slideNumber] = imageDataUrl;
+                    });
+                }
+                else {
+                    sampleImg.src = 'data:image/png;base64,'+ singleSlideInfo.imgData;
+                    postMappings[postId+slideNumber] = 'data:image/png;base64,'+ singleSlideInfo.imgData;
+                }
+            }
+            sampleImg.onclick = function() {
+                if(commentId.length==0 && replyId.length==0) {
+                    window.location.href = `http://localhost:8019/viewPost/${authenticatedUsername}/${postId}`;
+                }
+                else if(commentId.length>0) {
+                    window.location.href = `http://localhost:8019/viewPost/${authenticatedUsername}/${postId}?commentId=${commentId}`;
+                }
+                else if(replyId.length>0) {
+                    window.location.href = `http://localhost:8019/viewPost/${authenticatedUsername}/${postId}?replyId=${replyId}`;
+                }
+            }
 
             const deleteIcon = document.createElement('img');
             deleteIcon.id = 'notification'+currCounterValue+'DeleteIcon';

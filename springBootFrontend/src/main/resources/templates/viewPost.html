@@ -18,43 +18,43 @@
 
         <div onclick="takeUserHome()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/homeIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/homeIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
             <p>Home</p>
         </div>
 
         <div onclick="takeUserToSearch()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/searchIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/searchIcon2.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
             <p>Search</p>
         </div>
 
         <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/exploreIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/exploreIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
             <p>Explore</p>
         </div>
 
         <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/reelsIcon2.png}" style="object-fit: contain; height: 2.1em; width: 2.1em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/reelsIcon2.png}" style="object-fit: contain; height: 2.1em; width: 2.1em;">
             <p>Reels</p>
         </div>
 
         <div onclick="takeUserToMessages()" class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/messagesIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/messagesIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
             <p>Messages</p>
         </div>
 
         <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/blankHeart.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/blankHeart.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
             <p>Notifications</p>
         </div>
 
         <div class="hoverableElement" style="display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; border-radius: 0.85em;">
-            <img th:src="@{/images/createIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+            <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/createIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
             <p>Create</p>
         </div>
 
@@ -68,7 +68,7 @@
         <div style="position: relative; height: 90%;">
             <div class="hoverableElement" style="position: absolute; top: 90%; display: flex; align-items: center; padding: 0.5em 0.35em;
         gap: 0.5em; cursor: pointer; width: 95%; height: 7.25em; border-radius: 0.85em; position: relative;">
-                <img th:src="@{/images/moreIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
+                <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/moreIcon.png}" style="object-fit: contain; height: 1.9em; width: 1.9em;">
                 <p id="toggleLeftSidebarPopupMoreOrLessText" onclick="toggleLeftSidebarPopup()">More</p>
 
                 <div class="hidden" id="leftSidebarPopup" style="background-color: white; border-style: solid; position: absolute;
@@ -114,8 +114,8 @@
                     <div id="postBackgroundMusicDiv" class="hidden" style="display: flex; align-items: center; gap: 0.7em; margin-top: -1em;">
                         <p id="backgroundSongName" style="font-size: 0.8em; max-width: 13em; overflow-wrap: break-word;"><img th:src="@{/images/soundsIcon2.png}" style="pointer-events: none; object-fit: contain; height: 1em; width :1em; margin-right: 0.6em;">
                         </p>
-                        <img id="playBackgroundSoundIcon" onclick="playBackgroundSound()" th:src="@{/images/playIcon.png}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain;">
-                        <img id="pauseBackgroundSoundIcon" onclick="pauseBackgroundSound()" th:src="@{/images/pauseIcon.png}" class="hidden" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain;">
+                        <img class="iconsToBeAdjustedForDarkMode" id="playBackgroundSoundIcon" onclick="playBackgroundSound()" th:src="@{/images/playIcon.png}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain;">
+                        <img class="iconsToBeAdjustedForDarkMode hidden" id="pauseBackgroundSoundIcon" onclick="pauseBackgroundSound()" th:src="@{/images/pauseIcon.png}" style="height: 1em; width: 1em; cursor: pointer; object-fit: contain;">
                     </div>
                 </div>
                 <b id="followPostAuthorText" onclick="followPostAuthor()" class="hidden" style="position: absolute; left: 84%; top: 48%; cursor: pointer; color: #2789f2">Follow</b>
@@ -128,12 +128,12 @@
             </div>
 
             <div style="display: flex; align-items: center; width: 93%; height: 5%; padding: 0.5em 1em; position: relative;">
-                <img id="postIsNotLikedIcon" onclick="toggleLikePost()" th:src="@{/images/blankHeartWithSolidOutline.png}" class="hidden" style="height: 100%; width: 2.5em; object-fit: contain; cursor: pointer;">
-                <img id="postIsLikedIcon" onclick="toggleLikePost()" th:src="@{/images/redHeartIcon.webp}" class="hidden" style="height: 80%; width: 2.5em; object-fit: contain; cursor: pointer;">
-                <img th:src="@{/images/commentIcon.png}" onclick="setFocusToCommentTextarea()" style="height: 88%; width: 2.5em; object-fit: contain; cursor: pointer;">
-                <img th:src="@{/images/sendPostIcon.png}" style="height: 70%; width: 2.5em; object-fit: contain; cursor: pointer;">
-                <img id="postIsNotSavedIcon" onclick="toggleSavePost()" th:src="@{/images/savePostIconWithSolidOutline.png}" class="hidden" style="position: absolute; left: 90%; top: 10%; height: 70%; width: 2.2em; object-fit: contain; cursor: pointer;">
-                <img id="postIsSavedIcon" onclick="toggleSavePost()" th:src="@{/images/filledBlackSavedIcon.png}" class="hidden" style="position: absolute; left: 90%; top: 10%; height: 70%; width: 2.2em; object-fit: contain; cursor: pointer;">
+                <img class="iconsToBeAdjustedForDarkMode hidden" id="postIsNotLikedIcon" onclick="toggleLikePost()" th:src="@{/images/blankHeartWithSolidOutline.png}" style="height: 100%; width: 2.5em; object-fit: contain; cursor: pointer;">
+                <img class="hidden" id="postIsLikedIcon" onclick="toggleLikePost()" th:src="@{/images/redHeartIcon.webp}" style="height: 80%; width: 2.5em; object-fit: contain; cursor: pointer;">
+                <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/commentIcon.png}" onclick="setFocusToCommentTextarea()" style="height: 88%; width: 2.5em; object-fit: contain; cursor: pointer;">
+                <img class="iconsToBeAdjustedForDarkMode" th:src="@{/images/sendPostIcon.png}" style="height: 70%; width: 2.5em; object-fit: contain; cursor: pointer;">
+                <img class="iconsToBeAdjustedForDarkMode hidden" id="postIsNotSavedIcon" onclick="toggleSavePost()" th:src="@{/images/savePostIconWithSolidOutline.png}" style="position: absolute; left: 90%; top: 10%; height: 70%; width: 2.2em; object-fit: contain; cursor: pointer;">
+                <img class="iconsToBeAdjustedForDarkMode hidden" id="postIsSavedIcon" onclick="toggleSavePost()" th:src="@{/images/filledBlackSavedIcon.png}" style="position: absolute; left: 90%; top: 10%; height: 70%; width: 2.2em; object-fit: contain; cursor: pointer;">
             </div>
 
             <div style="padding: 0.5em 1em; display: flex; flex-direction: column; margin-top: -0.5em;">
@@ -151,7 +151,7 @@
     </div>
 
     <!--Comment Options Popup-->
-    <div id="commentOptionsPopup" class="hidden" style="position: absolute; top: 38%; left: 40%; width: 25%; height: 25%; background-color: white; border-radius: 0.85em;
+    <div id="commentOptionsPopup" class="popup hidden" style="position: absolute; top: 38%; left: 40%; width: 25%; height: 25%; background-color: white; border-radius: 0.85em;
     z-index: 10; display: flex; flex-direction: column; align-items: center;">
         <br>
         <p>Comment Actions</p>
@@ -164,7 +164,7 @@
     </div>
 
     <!--Likes Options Popup for Comments/Post-->
-    <div id="likesPopup" class="hidden" style="position: absolute; top: 25%; left: 40%; width: 25%; height: 45%; background-color: white; border-radius: 0.85em;
+    <div id="likesPopup" class="popup hidden" style="position: absolute; top: 25%; left: 40%; width: 25%; height: 45%; background-color: white; border-radius: 0.85em;
     z-index: 10; display: flex; flex-direction: column; align-items: center; overflow-y: scroll;">
 
         <div id="topSectionOfLikesPopup" style="display: flex; align-items: center; justify-content: center; border-style: solid; border-color: lightgray;
@@ -183,7 +183,7 @@
     </div>
 
 
-    <img id="darkScreenCoveringEntirePage" th:src="@{/images/blackScreen.png}" class="" style="position: absolute; top: 0%; left: 0%; height: 100%; width: 100%; opacity: 0.75">
+    <img id="darkScreenCoveringEntirePage" th:src="@{/images/blackScreen.png}" class="hidden" style="position: absolute; top: 0%; left: 0%; height: 100%; width: 100%; opacity: 0.75">
     <img id="darkScreenCoveringRightSideOfPage" th:src="@{/images/blackScreen.png}" class="hidden" style="position: absolute; top: 0%; left: 14.2%; height: 100%; width: 86%; opacity: 0.75">
     <b id="changeBackgroundText" onclick="changeBackground()" style="position: absolute; top: 3%; left: 88%; font-size: 0.7em; cursor: pointer; background-color: black;
     color: white; cursor: pointer; padding: 0.5em 1em; user-select: none;">Change Background</b>

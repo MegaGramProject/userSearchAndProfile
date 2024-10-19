@@ -30,3 +30,31 @@ body {
 .blueButton:hover {
     opacity: 0.45;
 }
+
+@media (prefers-color-scheme: dark) {
+    body {
+        background-color: #232324 !important;
+        color: white !important;
+    }
+
+    
+    .iconsToBeAdjustedForDarkMode {
+        filter: brightness(5) contrast(0) !important;
+    }
+
+    #leftSidebar {
+        background-color: #232324 !important;
+        color: white !important;
+    }
+
+    #leftSidebarPopup {
+        background-color: #232324 !important;
+        color: white !important;
+    }
+
+    .popup {
+        background-color: #232324 !important;
+        color: white !important;
+    }
+
+}
